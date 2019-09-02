@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 )
 
 const reqURL = "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key="
@@ -26,22 +27,23 @@ type yandexFile struct {
 
 func main() {
 
-	fileURL := "https://yadi.sk/i/pBfU5WBqFWO0FA"
+	//fileURL := "https://yadi.sk/i/pBfU5WBqFWO0FA" // docx
+	fileURL := "https://yadi.sk/d/0JhGPmrfvgSHEw" // jpg
 
 	fileName, err := getFileFromURL(fileURL)
 	if err != nil {
-		log.Fatalf("Error while download file from URL:\n%s \n%v", fileURL, err)
+		log.Fatalf("Error while download file from URL:\n%s \n%v\n", fileURL, err)
 	}
 
-	fmt.Println(fileName)
+	fmt.Println("File", fileName, "saved successfully.")
 }
 
-func getFileFromURL(url string) (string, error) {
+func getFileFromURL(URL string) (fileName string, err error) {
 
 	// get file metadata
-	resp, err := http.Get(reqURL + url)
+	resp, err := http.Get(reqURL + URL)
 	if err != nil {
-		return "", errors.New("error getting file metadata")
+		return
 	}
 	defer resp.Body.Close()
 
@@ -51,7 +53,7 @@ func getFileFromURL(url string) (string, error) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return "", errors.New("error reading file metadata body")
+		return
 	}
 
 	// unmarshal metadata - get direct link
@@ -59,26 +61,37 @@ func getFileFromURL(url string) (string, error) {
 
 	err = json.Unmarshal([]byte(body), yf)
 	if err != nil {
-		return "", errors.New("error unmarshal json metadata")
+		return
 	}
 
 	// get file body
 	respFile, err := http.Get(yf.Href)
 	if err != nil {
-		return "", errors.New("error getting file")
+		return
 	}
 	defer respFile.Body.Close()
 
 	bodyFile, err := ioutil.ReadAll(respFile.Body)
 	if err != nil {
-		return "", errors.New("error reading file body")
+		return
 	}
+
+	// parse name from url
+	u, err := url.Parse(yf.Href)
+	if err != nil {
+		return
+	}
+	m, err := url.ParseQuery(u.RawQuery)
+	if err != nil {
+		return
+	}
+	fileName = m["filename"][0]
 
 	// save file
-	err = ioutil.WriteFile("111.odt", bodyFile, 0644)
+	err = ioutil.WriteFile(fileName, bodyFile, 0644)
 	if err != nil {
-		return "", errors.New("error writing file on disk")
+		return
 	}
 
-	return "", nil
+	return
 }
