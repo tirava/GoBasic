@@ -7,12 +7,22 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 )
+
+const reqURL = "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key="
+
+// YandexFile is the base struct for downloading files by public URL.
+type yandexFile struct {
+	Href      string
+	Method    string
+	Templated bool
+}
 
 func main() {
 
@@ -27,11 +37,11 @@ func main() {
 }
 
 func getFileFromURL(url string) (string, error) {
-	const reqURL = "https://cloud-api.yandex.net/v1/disk/public/resources/download?public_key="
 
+	// get file metadata
 	resp, err := http.Get(reqURL + url)
 	if err != nil {
-		return "", errors.New("error getting file")
+		return "", errors.New("error getting file metadata")
 	}
 	defer resp.Body.Close()
 
@@ -41,8 +51,34 @@ func getFileFromURL(url string) (string, error) {
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		return "", errors.New("error reading file metadata body")
+	}
+
+	// unmarshal metadata - get direct link
+	yf := &yandexFile{}
+
+	err = json.Unmarshal([]byte(body), yf)
+	if err != nil {
+		return "", errors.New("error unmarshal json metadata")
+	}
+
+	// get file body
+	respFile, err := http.Get(yf.Href)
+	if err != nil {
+		return "", errors.New("error getting file")
+	}
+	defer respFile.Body.Close()
+
+	bodyFile, err := ioutil.ReadAll(respFile.Body)
+	if err != nil {
 		return "", errors.New("error reading file body")
 	}
 
-	return string(body), nil
+	// save file
+	err = ioutil.WriteFile("111.odt", bodyFile, 0644)
+	if err != nil {
+		return "", errors.New("error writing file on disk")
+	}
+
+	return "", nil
 }
