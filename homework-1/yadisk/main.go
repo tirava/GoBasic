@@ -89,9 +89,9 @@ func getFileFromURL(URL string) (fileName string, err error) {
 
 	// save file
 	err = ioutil.WriteFile(fileName, bodyFile, 0644)
-	if err != nil {
-		return
-	}
+	//if err != nil {
+	//	return
+	//}
 
 	return
 }
