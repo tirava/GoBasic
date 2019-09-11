@@ -1,6 +1,6 @@
 /*
  * HomeWork-1: Yandex file
- * Created on 13.09.19 23:15
+ * Created on 12.09.19 19:15
  * Copyright (c) 2019 - Eugene Klimov
  */
 
@@ -27,15 +27,27 @@ type yandexFile struct {
 
 func main() {
 
+	// get user's url or use examples
 	//fileURL := "https://yadi.sk/i/pBfU5WBqFWO0FA" // docx
-	fileURL := "https://yadi.sk/d/0JhGPmrfvgSHEw" // jpg
+	//fileURL := "https://yadi.sk/d/0JhGPmrfvgSHEw" // jpg
 
-	fileName, err := getFileFromURL(fileURL)
-	if err != nil {
-		log.Fatalf("Error while download file from URL:\n%s \n%v\n", fileURL, err)
+	fileURL := ""
+	for {
+		fmt.Printf("Enter Yandex share URL (Ctrl-C for exit): ")
+		_, err := fmt.Scanln(&fileURL)
+		if err != nil {
+			log.Println("error parse URL", err)
+			continue
+		}
+
+		fileName, err := getFileFromURL(fileURL)
+		if err != nil {
+			log.Printf("Error while download file from URL:\n%s \n%v\n", fileURL, err)
+			continue
+		}
+
+		fmt.Println("File", fileName, "saved successfully.")
 	}
-
-	fmt.Println("File", fileName, "saved successfully.")
 }
 
 func getFileFromURL(URL string) (fileName string, err error) {
@@ -89,10 +101,6 @@ func getFileFromURL(URL string) (fileName string, err error) {
 
 	// save file
 	err = ioutil.WriteFile(fileName, bodyFile, 0644)
-	//if err != nil {
-	//	return
-	//}----------------------------------------------------------------????????????????????
-// запросить ссылку
 
 	return
 }
