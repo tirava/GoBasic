@@ -1,6 +1,6 @@
 /*
  * HomeWork-1: Search string
- * Created on 12.09.19 22:41
+ * Created on 11.09.19 22:41
  * Copyright (c) 2019 - Eugene Klimov
  */
 
@@ -34,7 +34,7 @@ func main() {
 	//search := "2033"
 	search := "bug"
 
-	fmt.Println(searchStringURL(search, urls))
+	fmt.Printf("found string '%s' in sites: %v\n", search, searchStringURL(search, urls))
 }
 
 func searchStringURL(search string, urls []string) (res []string) {
