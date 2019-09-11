@@ -11,13 +11,15 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
 	"sync"
 )
 
 const addr = "localhost:8080"
 
-var urls = [...]string {
+var urls = [...]string{
 	"https://www.litmir.me/br/?b=110008&p=1",
 	"https://librebook.me/belyi_bim_chernoe_uho",
 	"http://qqq.ww", // error here
@@ -79,6 +81,16 @@ func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handler)
 
+	shutdown := make(chan os.Signal)
+	signal.Notify(shutdown, os.Interrupt, os.Kill)
+
+	go func() {
+		<-shutdown
+		// any work here
+		fmt.Printf("\nShutdown server at: %s\n", addr)
+		os.Exit(0)
+	}()
+
 	fmt.Println("Starting server at:", addr)
 	log.Fatalln(http.ListenAndServe(addr, mux))
 
@@ -86,4 +98,3 @@ func main() {
 
 // curl --header "Content-Type: application/json" --request POST --data '{"search":"bug"}' http://localhost:8080
 // "Бим", "Книга", "книга", "1973", "2033"
- 
