@@ -17,12 +17,25 @@ import (
 
 const addr = "localhost:8080"
 
+var urls = [...]string {
+	"https://www.litmir.me/br/?b=110008&p=1",
+	"https://librebook.me/belyi_bim_chernoe_uho",
+	"http://qqq.ww", // error here
+	"https://knizhnik.org/dmitrij-gluhovskij/metro-2033/1",
+	"https://www.gazeta.ru",
+	"https://www.yandex.ru",
+	"https://www.3dnews.ru",
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
+
 	if r.Method != "POST" {
-		w.Write([]byte("Hello and GoodBye!"))
+		w.Write([]byte("Hello and GoodBye! - Need POST method."))
 		return
 	}
-	fmt.Fprint(w, "search response:", r.Body)
+
+	fmt.Fprintln(w, "search response:", r.Body)
+
 }
 
 func searchStringURL(search string, urls []string) (res []string) {
@@ -63,27 +76,6 @@ func searchStringURL(search string, urls []string) (res []string) {
 
 func main() {
 
-	/*var urls = []string{
-		"https://www.litmir.me/br/?b=110008&p=1",
-		"https://librebook.me/belyi_bim_chernoe_uho",
-		"http://qqq.ww", // error here
-		"https://knizhnik.org/dmitrij-gluhovskij/metro-2033/1",
-		"https://www.gazeta.ru",
-		"https://www.yandex.ru",
-		"https://www.3dnews.ru",
-	}*/
-
-	//search := "Бим"
-	//search := "Книга"
-	//search := "книга"
-	//search := "1973"
-	//search := "2033"
-	//search := "bug"
-
-	//fmt.Println(searchStringURL(search, urls))
-
-	//data := []byte(`{"search":"bug"}`)
-
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handler)
 
@@ -91,3 +83,7 @@ func main() {
 	log.Fatalln(http.ListenAndServe(addr, mux))
 
 }
+
+// curl --header "Content-Type: application/json" --request POST --data '{"search":"bug"}' http://localhost:8080
+// "Бим", "Книга", "книга", "1973", "2033"
+ 
