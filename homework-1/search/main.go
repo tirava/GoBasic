@@ -11,45 +11,30 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 )
 
+const sitesFile = "sites.txt"
+
 func main() {
 
 	// get URLs from file
-	//urls := make([]siteMirror, 0)
-	//
-	//file, err := os.Open(fileName)
-	//check(err, "fatal", "Can't open file with sites!")
-	//defer file.Close()
-	//
-	//// read sites by line
-	//f := bufio.NewReader(file)
-	//for {
-	//	line, err := f.ReadString('\n')
-	//	if err == io.EOF {
-	//		break
-	//	}
-	//	if len(line) < 3 { // no fake symbols
-	//		continue
-	//	}
-	//	sitesNames = append(sitesNames, siteMirror{strings.TrimRight(line, "\n"), 0})
-	// may be readall and split \n?
-	//	}
+	file, err := os.Open(sitesFile)
+	if err != nil {
+		log.Fatalln("Can't open file with sites:", sitesFile, err)
+	}
+	defer file.Close()
 
-	urls := []string{
-		"https://www.litmir.me/br/?b=110008&p=1",
-		"https://librebook.me/belyi_bim_chernoe_uho",
-		"http://qqq.ww", // error here
-		"https://knizhnik.org/dmitrij-gluhovskij/metro-2033/1",
-		"https://www.gazeta.ru",
-		"https://www.yandex.ru",
-		"https://www.3dnews.ru",
+	b, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatalln("Error reading file body:", file, err)
 	}
 
-	//examples: "Бим", "Книга", "1973", "2033", "bug"
+	urls := strings.Split(string(b), "\n")
 
+	//examples: "Бим", "Книга", "1973", "2033", "bug"
 	search := ""
 	for {
 		fmt.Printf("Enter search URL (Ctrl-C for exit): ")
@@ -74,6 +59,9 @@ func searchStringURL(search string, urls []string) (res []string) {
 	mux := &sync.Mutex{}
 
 	for _, url := range urls {
+		if len(url) < 3 { // no fake strings
+			continue
+		}
 
 		wg.Add(1)
 		go func(url string) {
