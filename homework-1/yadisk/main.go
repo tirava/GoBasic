@@ -42,7 +42,7 @@ func main() {
 
 		fileName, err := getFileFromURL(fileURL)
 		if err != nil {
-			log.Printf("Error while download file from URL:\n%s \n%v\n", fileURL, err)
+			log.Printf("Error while downloading file from URL:\n%s \n%v\n", fileURL, err)
 			continue
 		}
 

@@ -17,6 +17,27 @@ import (
 
 func main() {
 
+	// get URLs from file
+	//urls := make([]siteMirror, 0)
+	//
+	//file, err := os.Open(fileName)
+	//check(err, "fatal", "Can't open file with sites!")
+	//defer file.Close()
+	//
+	//// read sites by line
+	//f := bufio.NewReader(file)
+	//for {
+	//	line, err := f.ReadString('\n')
+	//	if err == io.EOF {
+	//		break
+	//	}
+	//	if len(line) < 3 { // no fake symbols
+	//		continue
+	//	}
+	//	sitesNames = append(sitesNames, siteMirror{strings.TrimRight(line, "\n"), 0})
+	// may be readall and split \n?
+	//	}
+
 	urls := []string{
 		"https://www.litmir.me/br/?b=110008&p=1",
 		"https://librebook.me/belyi_bim_chernoe_uho",
@@ -27,14 +48,24 @@ func main() {
 		"https://www.3dnews.ru",
 	}
 
-	//search := "Бим"
-	//search := "Книга"
-	//search := "книга"
-	//search := "1973"
-	//search := "2033"
-	search := "bug"
+	//examples: "Бим", "Книга", "1973", "2033", "bug"
 
-	fmt.Printf("found string '%s' in sites: %v\n", search, searchStringURL(search, urls))
+	search := ""
+	for {
+		fmt.Printf("Enter search URL (Ctrl-C for exit): ")
+		_, err := fmt.Scanln(&search)
+		if err != nil {
+			log.Println("error parse search string", err)
+			continue
+		}
+
+		fmt.Printf("Found string '%s' in sites:\n", search)
+		found := searchStringURL(search, urls)
+
+		for _, f := range found {
+			fmt.Println(f)
+		}
+	}
 }
 
 func searchStringURL(search string, urls []string) (res []string) {
