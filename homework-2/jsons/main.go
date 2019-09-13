@@ -16,6 +16,7 @@ import (
 	"os/signal"
 	"strings"
 	"sync"
+	"syscall"
 )
 
 const (
@@ -41,7 +42,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	s := &search{}
 	err := json.NewDecoder(r.Body).Decode(s)
 	if err != nil {
-		w.Write([]byte("Can't parse POST data.\n"))
+		//w.Write([]byte("Can't parse POST data.\n"))
+		fmt.Fprintln(w, "Can't parse POST data:", err)
 		return
 	}
 
@@ -50,7 +52,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	b, err := json.MarshalIndent(s, "", "    ") // for best view in curl
 	//b, err := json.Marshal(s)
 	if err != nil {
-		w.Write([]byte("Can't encode result data.\n"))
+		//w.Write([]byte("Can't encode result data.\n"))
+		fmt.Fprintln(w, "Can't encode result data:", err)
 		return
 	}
 
@@ -121,7 +124,7 @@ func main() {
 	mux.HandleFunc("/", handler)
 
 	shutdown := make(chan os.Signal)
-	signal.Notify(shutdown, os.Interrupt, os.Kill)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
 	// safe shutdown
 	go func() {
@@ -138,4 +141,5 @@ func main() {
 }
 
 // curl --header "Content-Type: application/json" --request POST --data '{"search":"bug"}' http://localhost:8080
+//curl --header "Content-Type: application/json" --request POST --data "{\"search\":\"bug\"}" http://localhost:8080
 // "Бим", "Книга", "книга", "1973", "2033"
