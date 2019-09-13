@@ -17,17 +17,12 @@ import (
 	"sync"
 )
 
-const addr = "localhost:8080"
+const (
+	addr      = "localhost:8080"
+	sitesFile = "sites.txt"
+)
 
-var urls = [...]string{
-	"https://www.litmir.me/br/?b=110008&p=1",
-	"https://librebook.me/belyi_bim_chernoe_uho",
-	"http://qqq.ww", // error here
-	"https://knizhnik.org/dmitrij-gluhovskij/metro-2033/1",
-	"https://www.gazeta.ru",
-	"https://www.yandex.ru",
-	"https://www.3dnews.ru",
-}
+var urls []string // http server reads only
 
 func handler(w http.ResponseWriter, r *http.Request) {
 
@@ -46,6 +41,9 @@ func searchStringURL(search string, urls []string) (res []string) {
 	mux := &sync.Mutex{}
 
 	for _, url := range urls {
+		if len(url) < 3 { // no fake strings
+			continue
+		}
 
 		wg.Add(1)
 		go func(url string) {
@@ -78,12 +76,28 @@ func searchStringURL(search string, urls []string) (res []string) {
 
 func main() {
 
+	// get URLs from file
+	file, err := os.Open(sitesFile)
+	if err != nil {
+		log.Fatalln("Can't open file with sites:", sitesFile, err)
+	}
+	defer file.Close()
+
+	b, err := ioutil.ReadAll(file)
+	if err != nil {
+		log.Fatalln("Error reading site file body:", file, err)
+	}
+
+	urls = strings.Split(string(b), "\n")
+
+	// prepare server
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handler)
 
 	shutdown := make(chan os.Signal)
 	signal.Notify(shutdown, os.Interrupt, os.Kill)
 
+	// safe shutdown
 	go func() {
 		<-shutdown
 		// any work here
@@ -91,6 +105,7 @@ func main() {
 		os.Exit(0)
 	}()
 
+	// start
 	fmt.Println("Starting server at:", addr)
 	log.Fatalln(http.ListenAndServe(addr, mux))
 
