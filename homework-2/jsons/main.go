@@ -7,6 +7,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -22,17 +23,42 @@ const (
 	sitesFile = "sites.txt"
 )
 
-var urls []string // http server reads only
+type search struct {
+	Search string   `json:"search"`
+	Sites  []string `json:"sites"`
+}
+
+var urls []string // contains sites urls after read from file
 
 func handler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
-		w.Write([]byte("Hello and GoodBye! - Need POST method."))
+		w.Write([]byte("Hello and GoodBye! - Need POST method.\n"))
 		return
 	}
 
-	fmt.Fprintln(w, "search response:", r.Body)
+	// decode POST data
+	s := &search{}
+	err := json.NewDecoder(r.Body).Decode(s)
+	if err != nil {
+		w.Write([]byte("Can't parse POST data.\n"))
+		return
+	}
 
+	// get search results and code to json
+	s.Sites = searchStringURL(s.Search, urls)
+	b, err := json.MarshalIndent(s, "", "    ") // for best view in curl
+	//b, err := json.Marshal(s)
+	if err != nil {
+		w.Write([]byte("Can't encode result data.\n"))
+		return
+	}
+
+	// set proper headers
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	w.Write(b)
 }
 
 func searchStringURL(search string, urls []string) (res []string) {
