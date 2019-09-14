@@ -9,6 +9,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"golang.org/x/sync/errgroup"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -20,7 +21,7 @@ import (
 )
 
 const (
-	addr      = "localhost:8080"
+	servAddr  = "localhost:8080"
 	sitesFile = "sites.txt"
 )
 
@@ -29,11 +30,12 @@ type search struct {
 	Sites  []string `json:"sites"`
 }
 
-var urls []string // contains sites urls after read from file
+var urls []string // contains sites urls after read from file, need context but not now
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func handlerPOST(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		w.Write([]byte("Hello and GoodBye! - Need POST method.\n"))
 		return
 	}
@@ -42,31 +44,34 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	s := &search{}
 	err := json.NewDecoder(r.Body).Decode(s)
 	if err != nil {
-		//w.Write([]byte("Can't parse POST data.\n"))
-		fmt.Fprintln(w, "Can't parse POST data:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		log.Println("Can't parse POST data:", err)
 		return
 	}
 
 	// get search results and code to json
-	s.Sites = searchStringURL(s.Search, urls)
-	b, err := json.MarshalIndent(s, "", "    ") // for best view in curl
-	//b, err := json.Marshal(s)
+	s.Sites, err = searchStringURL(s.Search, urls)
 	if err != nil {
-		//w.Write([]byte("Can't encode result data.\n"))
-		fmt.Fprintln(w, "Can't encode result data:", err)
+		log.Println("Error while search:", err)
+	}
+
+	b, err := json.MarshalIndent(s, "", "    ") // for best view in curl
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		log.Println("Can't encode result data:", err)
 		return
 	}
 
 	// set proper headers
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 
 	w.Write(b)
 }
 
-func searchStringURL(search string, urls []string) (res []string) {
+func searchStringURL(search string, urls []string) (res []string, err error) {
 
-	wg := &sync.WaitGroup{}
+	var g errgroup.Group
 	mux := &sync.Mutex{}
 
 	for _, url := range urls {
@@ -74,21 +79,18 @@ func searchStringURL(search string, urls []string) (res []string) {
 			continue
 		}
 
-		wg.Add(1)
-		go func(url string) {
-			defer wg.Done()
+		url := url
+		g.Go(func() error {
 
 			resp, err := http.Get(url)
 			if err != nil {
-				log.Printf("Error getting url: %v", err)
-				return
+				return err
 			}
 			defer resp.Body.Close()
 
 			body, err := ioutil.ReadAll(resp.Body)
 			if err != nil {
-				log.Printf("Error reading body: %v", err)
-				return
+				return err
 			}
 
 			if strings.Contains(string(body), search) {
@@ -96,11 +98,11 @@ func searchStringURL(search string, urls []string) (res []string) {
 				res = append(res, url)
 				mux.Unlock()
 			}
-		}(url)
+			return nil
+		})
 	}
 
-	wg.Wait()
-	return
+	return res, g.Wait()
 }
 
 func main() {
@@ -121,23 +123,22 @@ func main() {
 
 	// prepare server
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handler)
+	mux.HandleFunc("/", handlerPOST) // no need big routers for one scenario
 
 	shutdown := make(chan os.Signal)
-	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM) // os.Kill wrong for linters
 
 	// safe shutdown
 	go func() {
 		<-shutdown
-		// any work here
-		fmt.Printf("\nShutdown server at: %s\n", addr)
+		// any safe work here
+		fmt.Printf("\nShutdown server at: %s\n", servAddr)
 		os.Exit(0)
 	}()
 
 	// start
-	fmt.Println("Starting server at:", addr)
-	log.Fatalln(http.ListenAndServe(addr, mux))
-
+	fmt.Println("Starting server at:", servAddr)
+	log.Fatalln(http.ListenAndServe(servAddr, mux))
 }
 
 // curl --header "Content-Type: application/json" --request POST --data '{"search":"bug"}' http://localhost:8080

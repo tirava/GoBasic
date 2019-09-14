@@ -17,30 +17,32 @@ import (
 	"time"
 )
 
-const addr = "127.0.0.1:8080"
+const (
+	addr        = "localhost:8080"
+	cookieName  = "KlimGo"
+	cookieValue = "GeekBrains"
+)
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 
-	io.WriteString(w, "/write/... - write cookie\n/read/...  - read cookie\n/delete/... - delete cookie")
+	io.WriteString(w, "/write/...  - write cookie\n/read/...   - read cookie\n/delete/... - delete cookie")
 }
 
 func writeCookie(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "KlimGo",
-		Value:   "GeekBrains",
+		Name:    cookieName,
+		Value:   cookieValue,
 		Expires: time.Now().AddDate(0, 0, 1),
-		Path:    "/read/",
+		Path:    "/",
 	})
-
-	//http.Redirect(w, r, "/", http.StatusFound)
 
 	io.WriteString(w, "cookie written!")
 }
 
 func readCookie(w http.ResponseWriter, r *http.Request) {
 
-	c, err := r.Cookie("KlimGo")
+	c, err := r.Cookie(cookieName)
 	if err != nil {
 		fmt.Fprintln(w, "error reading cookie:", err)
 		return
@@ -52,8 +54,8 @@ func readCookie(w http.ResponseWriter, r *http.Request) {
 func deleteCookie(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &http.Cookie{
-		Name:   "KlimGo",
-		Path:   "/read/",
+		Name:   cookieName,
+		Path:   "/",
 		MaxAge: -1,
 	})
 
