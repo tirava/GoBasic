@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"golang.org/x/sync/errgroup"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -25,37 +26,41 @@ const (
 	sitesFile = "sites.txt"
 )
 
-type search struct {
+type google struct {
 	Search string   `json:"search"`
 	Sites  []string `json:"sites"`
+	//CaseSensitive bool `json:"case_sens"`
+	urls []string
+	//result []string
+	//mux *sync.Locker
 }
 
-var urls []string // contains sites urls after read from file, need context but not now
+//var urls []string // contains sites urls after read from file, need context but not now
 
-func handlerPOST(w http.ResponseWriter, r *http.Request) {
+func (g *google) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("Hello and GoodBye! - Need POST method.\n"))
+		io.WriteString(w, "Hello and GoodBye! - Need POST method.\n")
 		return
 	}
 
 	// decode POST data
-	s := &search{}
-	err := json.NewDecoder(r.Body).Decode(s)
+	err := json.NewDecoder(r.Body).Decode(g)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		log.Println("Can't parse POST data:", err)
 		return
 	}
 
-	// get search results and code to json
-	s.Sites, err = searchStringURL(s.Search, urls)
+	// get search results
+	g.Sites, err = g.searchStringURL(g.Search, g.urls)
 	if err != nil {
 		log.Println("Error while search:", err)
 	}
 
-	b, err := json.MarshalIndent(s, "", "    ") // for best view in curl
+	// encode to json
+	b, err := json.MarshalIndent(g, "", "    ") // for best view in curl
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		log.Println("Can't encode result data:", err)
@@ -69,18 +74,18 @@ func handlerPOST(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func searchStringURL(search string, urls []string) (res []string, err error) {
+func (g *google) searchStringURL(search string, sites []string) (res []string, err error) {
 
-	var g errgroup.Group
+	var eg errgroup.Group
 	mux := &sync.Mutex{}
 
-	for _, url := range urls {
+	for _, url := range sites {
 		if len(url) < 3 { // no fake strings
 			continue
 		}
 
 		url := url
-		g.Go(func() error {
+		eg.Go(func() error {
 
 			resp, err := http.Get(url)
 			if err != nil {
@@ -102,7 +107,7 @@ func searchStringURL(search string, urls []string) (res []string, err error) {
 		})
 	}
 
-	return res, g.Wait()
+	return res, eg.Wait()
 }
 
 func main() {
@@ -119,11 +124,8 @@ func main() {
 		log.Fatalln("Error reading site file body:", file, err)
 	}
 
-	urls = strings.Split(string(b), "\n")
-
-	// prepare server
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", handlerPOST) // no need big routers for one scenario
+	g := &google{}
+	g.urls = strings.Split(string(b), "\n")
 
 	shutdown := make(chan os.Signal)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM) // os.Kill wrong for linters
@@ -136,11 +138,13 @@ func main() {
 		os.Exit(0)
 	}()
 
-	// start
+	// prepare server, no need smart router for simple scenario
+	http.Handle("/", g)
+
 	fmt.Println("Starting server at:", servAddr)
-	log.Fatalln(http.ListenAndServe(servAddr, mux))
+	log.Fatalln(http.ListenAndServe(servAddr, nil))
 }
 
 // curl --header "Content-Type: application/json" --request POST --data '{"search":"bug"}' http://localhost:8080
-//curl --header "Content-Type: application/json" --request POST --data "{\"search\":\"bug\"}" http://localhost:8080
+// curl --header "Content-Type: application/json" --request POST --data "{\"search\":\"bug\"}" http://localhost:8080
 // "Бим", "Книга", "книга", "1973", "2033"
