@@ -31,11 +31,8 @@ type google struct {
 	Sites  []string `json:"sites"`
 	//CaseSensitive bool `json:"case_sens"`
 	urls []string
-	//result []string
-	//mux *sync.Locker
+	mux  sync.Mutex
 }
-
-//var urls []string // contains sites urls after read from file, need context but not now
 
 func (g *google) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
@@ -54,7 +51,7 @@ func (g *google) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get search results
-	g.Sites, err = g.searchStringURL(g.Search, g.urls)
+	err = g.searchStringURL() //(g.Search, g.urls)
 	if err != nil {
 		log.Println("Error while search:", err)
 	}
@@ -74,12 +71,12 @@ func (g *google) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
-func (g *google) searchStringURL(search string, sites []string) (res []string, err error) {
+func (g *google) searchStringURL() error {
 
 	var eg errgroup.Group
-	mux := &sync.Mutex{}
+	g.Sites = []string{} // reset results
 
-	for _, url := range sites {
+	for _, url := range g.urls {
 		if len(url) < 3 { // no fake strings
 			continue
 		}
@@ -98,39 +95,50 @@ func (g *google) searchStringURL(search string, sites []string) (res []string, e
 				return err
 			}
 
-			if strings.Contains(string(body), search) {
-				mux.Lock()
-				res = append(res, url)
-				mux.Unlock()
+			if strings.Contains(string(body), g.Search) {
+				g.mux.Lock()
+				g.Sites = append(g.Sites, url)
+				g.mux.Unlock()
 			}
 			return nil
 		})
 	}
 
-	return res, eg.Wait()
+	return eg.Wait()
 }
 
-func main() {
+func (g *google) getURLs() error {
 
-	// get URLs from file
 	file, err := os.Open(sitesFile)
 	if err != nil {
-		log.Fatalln("Can't open file with sites:", sitesFile, err)
+		return err
 	}
 	defer file.Close()
 
 	b, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Fatalln("Error reading site file body:", file, err)
+		return err
 	}
 
-	g := &google{}
 	g.urls = strings.Split(string(b), "\n")
 
+	return nil
+}
+
+func main() {
+
+	googleHandler := &google{}
+
+	// get URLs from file
+	err := googleHandler.getURLs()
+	if err != nil {
+		log.Fatalln("Error reading sites from file:", err)
+	}
+
+	// safe shutdown
 	shutdown := make(chan os.Signal)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM) // os.Kill wrong for linters
 
-	// safe shutdown
 	go func() {
 		<-shutdown
 		// any safe work here
@@ -139,7 +147,7 @@ func main() {
 	}()
 
 	// prepare server, no need smart router for simple scenario
-	http.Handle("/", g)
+	http.Handle("/", googleHandler)
 
 	fmt.Println("Starting server at:", servAddr)
 	log.Fatalln(http.ListenAndServe(servAddr, nil))
