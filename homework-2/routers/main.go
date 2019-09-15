@@ -1,5 +1,5 @@
 /*
- * HomeWork-2: Routers
+ * HomeWork-2: Routers and simple cookie control
  * Created on 15.09.2019 22:02
  * Copyright (c) 2019 - Eugene Klimov
  */
@@ -64,13 +64,6 @@ func deleteCookie(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	// prepare server
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", handleRoot)
-	mux.HandleFunc("/write/", writeCookie)
-	mux.HandleFunc("/read/", readCookie)
-	mux.HandleFunc("/delete/", deleteCookie)
-
 	shutdown := make(chan os.Signal)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
@@ -82,7 +75,12 @@ func main() {
 		os.Exit(0)
 	}()
 
-	// start
+	// prepare server, no need smart router for simple scenario
+	http.HandleFunc("/", handleRoot)
+	http.HandleFunc("/write/", writeCookie)
+	http.HandleFunc("/read/", readCookie)
+	http.HandleFunc("/delete/", deleteCookie)
+
 	fmt.Println("Starting server at:", addr)
-	log.Fatalln(http.ListenAndServe(addr, mux))
+	log.Fatalln(http.ListenAndServe(addr, nil))
 }
