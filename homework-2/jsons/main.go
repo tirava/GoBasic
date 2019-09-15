@@ -51,9 +51,9 @@ func (g *google) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get search results
-	err = g.searchStringURL() //(g.Search, g.urls)
+	err = g.searchStringURL()
 	if err != nil {
-		log.Println("Error while search:", err)
+		log.Println("Error while search:", err) // no need return bec. it may be for one site
 	}
 
 	// encode to json

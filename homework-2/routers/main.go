@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	addr        = "localhost:8080"
+	servAddr    = "localhost:8080"
 	cookieName  = "KlimGo"
 	cookieValue = "GeekBrains"
 )
@@ -64,14 +64,14 @@ func deleteCookie(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	// safe shutdown
 	shutdown := make(chan os.Signal)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 
-	// safe shutdown
 	go func() {
 		<-shutdown
 		// any work here
-		fmt.Printf("\nShutdown server at: %s\n", addr)
+		fmt.Printf("\nShutdown server at: %s\n", servAddr)
 		os.Exit(0)
 	}()
 
@@ -81,6 +81,6 @@ func main() {
 	http.HandleFunc("/read/", readCookie)
 	http.HandleFunc("/delete/", deleteCookie)
 
-	fmt.Println("Starting server at:", addr)
-	log.Fatalln(http.ListenAndServe(addr, nil))
+	fmt.Println("Starting server at:", servAddr)
+	log.Fatalln(http.ListenAndServe(servAddr, nil))
 }
