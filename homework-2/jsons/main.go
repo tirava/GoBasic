@@ -27,11 +27,11 @@ const (
 )
 
 type google struct {
-	Search string   `json:"search"`
-	Sites  []string `json:"sites"`
-	//CaseSensitive bool `json:"case_sens"`
-	urls []string
-	mux  sync.Mutex
+	Search        string   `json:"search"`
+	Sites         []string `json:"sites"`
+	CaseSensitive bool     `json:"case_sens"`
+	urls          []string
+	mux           sync.Mutex
 }
 
 func (g *google) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -77,6 +77,7 @@ func (g *google) searchStringURL() error {
 	g.Sites = []string{} // reset results
 
 	for _, url := range g.urls {
+
 		if len(url) < 3 { // no fake strings
 			continue
 		}
@@ -95,7 +96,13 @@ func (g *google) searchStringURL() error {
 				return err
 			}
 
-			if strings.Contains(string(body), g.Search) {
+			s := string(body)
+			if !g.CaseSensitive {
+				s = strings.ToLower(s)
+				g.Search = strings.ToLower(g.Search)
+			}
+
+			if strings.Contains(s, g.Search) {
 				g.mux.Lock()
 				g.Sites = append(g.Sites, url)
 				g.mux.Unlock()
