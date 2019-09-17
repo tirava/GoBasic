@@ -10,7 +10,7 @@
   <body>
     <h1>Блог Евгения Климова</h1>
     {{range .}}
-      <a href="/{{.File}}"><h2>{{.Title}} ({{.Date}})</h2></a>
+      <a href="/{{.Title}}"><h2>{{.Title}} ({{.Date}})</h2></a>
       <p>{{.Summary}}</p>
     {{end}}
   </body>
