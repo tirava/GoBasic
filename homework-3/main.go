@@ -35,7 +35,7 @@ type Post struct {
 	Title   string
 	Date    string
 	Summary string
-	Body    string
+	Body    template.HTML
 	File    string
 }
 
@@ -63,19 +63,12 @@ func postPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	post := lines2Posts(rf, r.URL.Path[1:])
-	t := template.Must(template.New(postTemplate).Funcs(template.FuncMap{
-		"markDown": markDowner,
-	}).ParseFiles(path.Join(templatePath, postTemplate)))
+	t := template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
 	err = t.Execute(w, post)
 	if err != nil {
 		// todo buffer & return w code
 		log.Println(err)
 	}
-}
-
-func markDowner(args ...interface{}) template.HTML {
-	s := blackfriday.Run([]byte(fmt.Sprintf("%s", args...)))
-	return template.HTML(s)
 }
 
 func getPosts() ([]Post, error) {
@@ -96,12 +89,16 @@ func getPosts() ([]Post, error) {
 	return posts, nil
 }
 
-func lines2Posts(readFile []byte, file string) (post Post) {
+func lines2Posts(readFile []byte, file string) Post {
 	lines := strings.Split(string(readFile), "\n")
 	title, date, summary := lines[0], lines[1], lines[2]
-	body := strings.Join(lines[3:], "\n")
-	post = Post{title, date, summary, body, file}
-	return
+	body := template.HTML(strings.Join(lines[3:], "\n"))
+	post := Post{
+		title, date, summary,
+		template.HTML(blackfriday.Run([]byte(body))),
+		file,
+	}
+	return post
 }
 
 func main() {
