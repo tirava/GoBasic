@@ -41,13 +41,13 @@ var Posts map[string]Post
 
 func init() {
 	Posts = map[string]Post{
-		"first post": {
+		"111": {
 			"111",
 			"222",
 			"333",
 			"444",
 		},
-		"second post": {
+		"555": {
 			"555",
 			"666",
 			"777",
@@ -57,12 +57,6 @@ func init() {
 }
 
 func mainPage(w http.ResponseWriter, _ *http.Request) {
-	//posts := getPosts()
-	//if err != nil {
-	//	log.Println("error getting posts:", err)
-	//	w.WriteHeader(http.StatusInternalServerError)
-	//	return
-	//}
 	t := template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
 	err := t.Execute(w, Posts)
 	if err != nil {
@@ -73,15 +67,11 @@ func mainPage(w http.ResponseWriter, _ *http.Request) {
 }
 
 func postPage(w http.ResponseWriter, r *http.Request) {
-	//f := path.Join(postsPath, r.URL.Path[1:]) + postsExt
-	//rf, err := ioutil.ReadFile(f)
-	//if err != nil {
-	//	log.Println("error reading file:", err)
-	//	w.WriteHeader(http.StatusNotFound)
-	//	return
-	//}
-	//post := lines2Posts(rf)
-	// todo check if r.URL.Path[1:] exists?
+	if _, ok := Posts[r.URL.Path[1:]]; !ok {
+		log.Printf("post not found: %s", r.URL.Path[1:])
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 	t := template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
 	err := t.Execute(w, Posts[r.URL.Path[1:]])
 	if err != nil {
@@ -89,38 +79,6 @@ func postPage(w http.ResponseWriter, r *http.Request) {
 		log.Println("error executing template in postPage:", err)
 	}
 }
-
-//func getPosts() []Post {
-//	var posts []Post
-//	//files, err := filepath.Glob(path.Join(postsPath, "*") + postsExt)
-//	//if err != nil {
-//	//	return nil, err
-//	//}
-//
-//	for _, post := range Posts {
-//		//file := strings.ReplaceAll(f, postsPath+string(os.PathSeparator), "") // remove path
-//		//file = strings.ReplaceAll(file, postsExt, "")                         // remove ext
-//		//rf, err := ioutil.ReadFile(f)
-//		//if err != nil {
-//		//	continue // skip bad file
-//		//}
-//		//posts = append(posts, lines2Posts(post))
-//		posts = append(posts, post)
-//	}
-//	return posts
-//}
-
-//func lines2Posts(readFile Post) Post {
-//	lines := strings.Split(string(readFile), "\n")
-//	title, date, summary := lines[0], lines[1], lines[2]
-//	body := template.HTML(strings.Join(lines[3:], "\n"))
-//	post := Post{
-//		title, date, summary,
-//		template.HTML(blackfriday.Run([]byte(body))),
-//		//title, // todo - use short name
-//	}
-//	return post
-//}
 
 func main() {
 
