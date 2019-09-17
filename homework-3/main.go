@@ -8,6 +8,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-chi/chi"
 	"gopkg.in/russross/blackfriday.v2"
 	"html/template"
 	"io/ioutil"
@@ -38,22 +39,22 @@ type Post struct {
 	File    string
 }
 
-func mainPage(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path[1:] == "" { // root handler
-		posts, err := getPosts()
-		if err != nil {
-			log.Println("error getting posts:", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		t := template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
-		//
-		err = t.Execute(w, posts)
-		if err != nil {
-			// todo buffer
-		}
+func mainPage(w http.ResponseWriter, _ *http.Request) {
+	posts, err := getPosts()
+	if err != nil {
+		log.Println("error getting posts:", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	t := template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
+	err = t.Execute(w, posts)
+	if err != nil {
+		// todo buffer & return w code
+	}
+	return
+}
+
+func postPage(w http.ResponseWriter, r *http.Request) {
 	f := path.Join(postsPath, r.URL.Path[1:]) + postsExt
 	rf, err := ioutil.ReadFile(f)
 	if err != nil {
@@ -117,8 +118,10 @@ func main() {
 	}()
 
 	// prepare server, no need smart router for simple scenario
-	http.HandleFunc("/", mainPage)
+	mux := chi.NewRouter()
+	mux.Get("/*", postPage)
+	mux.Get("/", mainPage)
 
 	fmt.Println("Starting server at:", servAddr)
-	log.Fatalln(http.ListenAndServe(servAddr, nil))
+	log.Fatalln(http.ListenAndServe(servAddr, mux))
 }
