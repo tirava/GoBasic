@@ -61,18 +61,10 @@ func mainPage(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
-	//---------------
-	lines := strings.Split(string(rf), "\n")
-	title, date, summary := lines[0], lines[1], lines[2]
-	body := strings.Join(lines[3:], "\n")
-	//---------------
-	post := Post{title, date, summary, body, r.URL.Path[1:]}
-	//---------------
-
+	post := lines2Posts(rf, r.URL.Path[1:])
 	t := template.Must(template.New(postTemplate).Funcs(template.FuncMap{
 		"markDown": markDowner,
 	}).ParseFiles(path.Join(templatePath, postTemplate)))
-
 	err = t.Execute(w, post)
 	if err != nil {
 		// todo buffer & return w code
@@ -86,7 +78,7 @@ func markDowner(args ...interface{}) template.HTML {
 }
 
 func getPosts() ([]Post, error) {
-	posts := &[]Post{}
+	var posts []Post
 	files, err := filepath.Glob(path.Join(postsPath, "*") + postsExt)
 	if err != nil {
 		return nil, err
@@ -98,15 +90,17 @@ func getPosts() ([]Post, error) {
 		if err != nil {
 			continue // skip bad file
 		}
-		//--------------
-		lines := strings.Split(string(rf), "\n")
-		title, date, summary := lines[0], lines[1], lines[2]
-		body := strings.Join(lines[3:], "\n")
-		//--------------
-		*posts = append(*posts, Post{title, date, summary, body, file})
-		//--------------
+		posts = append(posts, lines2Posts(rf, file))
 	}
-	return *posts, nil
+	return posts, nil
+}
+
+func lines2Posts(readFile []byte, file string) (post Post) {
+	lines := strings.Split(string(readFile), "\n")
+	title, date, summary := lines[0], lines[1], lines[2]
+	body := strings.Join(lines[3:], "\n")
+	post = Post{title, date, summary, body, file}
+	return
 }
 
 func main() {
