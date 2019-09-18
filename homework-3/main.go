@@ -44,14 +44,14 @@ var Posts map[string]Post
 var tIndex, tPost *template.Template
 
 func init() {
-	tIndex = template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
-	tPost = template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
+	//tIndex = template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
+	//tPost = template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
 
 	Posts = map[string]Post{
 		"1": {
 			"Мой первый пост!",
 			"18-е Сентября 2019 года",
-			"Это короткое вступление.",
+			"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.",
 			template.HTML(blackfriday.Run([]byte(`
 Здесь основной текст.
 # Markdown!
@@ -61,7 +61,10 @@ func init() {
 		"2": {
 			"Это уже второй пост!",
 			"19-е Сентября 2019 года",
-			"Блог потихоньку растет.",
+			`
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.
+`,
 			template.HTML(blackfriday.Run([]byte(`
 Разобрался в шаблонах и маркдаунах, как их совместить.
 
@@ -74,8 +77,10 @@ func init() {
 }
 
 func mainPage(w http.ResponseWriter, _ *http.Request) {
+	tIndex = template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
 	var b bytes.Buffer // no need to show bad content
-	if err := tIndex.Execute(&b, Posts); err != nil {
+	//if err := tIndex.Execute(&b, Posts); err != nil {
+	if err := tIndex.ExecuteTemplate(&b, "index", Posts); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -86,6 +91,7 @@ func mainPage(w http.ResponseWriter, _ *http.Request) {
 }
 
 func postPage(w http.ResponseWriter, r *http.Request) {
+	tPost = template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
 	postNum := strings.Replace(r.URL.Path[1:], postsURL, "", 1)
 	if _, ok := Posts[postNum]; !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -119,8 +125,11 @@ func main() {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
-	mux.Get("/*", postPage)
 	mux.Get("/", mainPage)
+	mux.Get("/posts", mainPage)
+	mux.Get("/posts/*", postPage)
+	//mux.Get("/posts/new", newPostPage)
+	//mux.Post("/posts/new", newPostPage)
 
 	fmt.Println("Starting server at:", servAddr)
 	log.Fatalln(http.ListenAndServe(servAddr, mux))
