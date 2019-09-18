@@ -18,6 +18,7 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strings"
 	"syscall"
 )
 
@@ -26,6 +27,7 @@ const (
 	indexTemplate = "index.gohtml"
 	postTemplate  = "post.gohtml"
 	templatePath  = "templates"
+	postsURL      = "posts/"
 )
 
 // Post is the base post type
@@ -84,12 +86,13 @@ func mainPage(w http.ResponseWriter, _ *http.Request) {
 }
 
 func postPage(w http.ResponseWriter, r *http.Request) {
-	if _, ok := Posts[r.URL.Path[1:]]; !ok {
+	postNum := strings.Replace(r.URL.Path[1:], postsURL, "", 1)
+	if _, ok := Posts[postNum]; !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 	var b bytes.Buffer // no need to show bad content
-	if err := tPost.Execute(&b, Posts[r.URL.Path[1:]]); err != nil {
+	if err := tPost.Execute(&b, Posts[postNum]); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
