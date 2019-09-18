@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"gopkg.in/russross/blackfriday.v2"
 	"html/template"
 	"log"
@@ -45,7 +46,7 @@ func init() {
 	tPost = template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
 
 	Posts = map[string]Post{
-		"Мой первый пост!": { // todo may be convert to short name
+		"1": {
 			"Мой первый пост!",
 			"18-е Сентября 2019 года",
 			"Это короткое вступление.",
@@ -55,7 +56,7 @@ func init() {
 *Это* **круто**!
 `))),
 		},
-		"Это уже второй пост!": {
+		"2": {
 			"Это уже второй пост!",
 			"19-е Сентября 2019 года",
 			"Блог потихоньку растет.",
@@ -71,14 +72,10 @@ func init() {
 }
 
 func mainPage(w http.ResponseWriter, _ *http.Request) {
-	defer func() {
-		if err := recover(); err != nil {
-			errorPost(w, http.StatusInternalServerError, fmt.Errorf("panic in indexPage: %v", err))
-		}
-	}()
-	var b bytes.Buffer
+	var b bytes.Buffer // no need to show bad content
 	if err := tIndex.Execute(&b, Posts); err != nil {
-		errorPost(w, http.StatusInternalServerError, fmt.Errorf("error executing template in mainPage: %w", err))
+		log.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if _, err := b.WriteTo(w); err != nil {
@@ -87,30 +84,18 @@ func mainPage(w http.ResponseWriter, _ *http.Request) {
 }
 
 func postPage(w http.ResponseWriter, r *http.Request) {
-	defer func() {
-		if err := recover(); err != nil {
-			errorPost(w, http.StatusInternalServerError, fmt.Errorf("panic in postPage: %s", err))
-		}
-	}()
 	if _, ok := Posts[r.URL.Path[1:]]; !ok {
-		errorPost(w, http.StatusNotFound, fmt.Errorf("post not found: %s", r.URL.Path[1:]))
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
-	var b bytes.Buffer
+	var b bytes.Buffer // no need to show bad content
 	if err := tPost.Execute(&b, Posts[r.URL.Path[1:]]); err != nil {
-		errorPost(w, http.StatusInternalServerError, fmt.Errorf("error executing template in postPage: %w", err))
+		log.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if _, err := b.WriteTo(w); err != nil {
 		log.Println("can't write to ResponseWriter in postPage")
-	}
-}
-
-func errorPost(w http.ResponseWriter, statusCode int, err error) {
-	log.Println(err)
-	w.WriteHeader(statusCode)
-	if _, err := fmt.Fprint(w, "Sorry, error occured, try again later..."); err != nil {
-		log.Println("can't write to ResponseWriter in errorPost")
 	}
 }
 
@@ -129,6 +114,8 @@ func main() {
 
 	// prepare server
 	mux := chi.NewRouter()
+	mux.Use(middleware.Logger)
+	mux.Use(middleware.Recoverer)
 	mux.Get("/*", postPage)
 	mux.Get("/", mainPage)
 

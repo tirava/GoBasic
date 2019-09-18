@@ -9,8 +9,8 @@
 </head>
   <body>
     <h1>Блог Евгения Климова</h1>
-    {{range .}}
-      <a href="/{{.Title}}"><h2>{{.Title}} ({{.Date}})</h2></a>
+    {{range $key, $value := .}}
+      <a href="/{{$key}}"><h2>{{.Title}} ({{.Date}})</h2></a>
       <p>{{.Summary}}</p>
     {{end}}
   </body>
