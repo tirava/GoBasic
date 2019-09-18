@@ -7,6 +7,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/go-chi/chi"
 	"gopkg.in/russross/blackfriday.v2"
@@ -24,8 +25,6 @@ const (
 	indexTemplate = "index.gohtml"
 	postTemplate  = "post.gohtml"
 	templatePath  = "templates"
-	//postsPath     = "posts"
-	//postsExt      = ".md"
 )
 
 // Post is the base post type
@@ -39,7 +38,12 @@ type Post struct {
 // Posts storage todo - need xSQL storage instead map
 var Posts map[string]Post
 
+var tIndex, tPost *template.Template
+
 func init() {
+	tIndex = template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
+	tPost = template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
+
 	Posts = map[string]Post{
 		"Мой первый пост!": { // todo may be convert to short name
 			"Мой первый пост!",
@@ -67,23 +71,46 @@ func init() {
 }
 
 func mainPage(w http.ResponseWriter, _ *http.Request) {
-	t := template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
-	if err := t.Execute(w, Posts); err != nil {
-		// todo buffer & return w code
-		log.Println("error executing template in mainPage:", err)
+	defer func() {
+		if err := recover(); err != nil {
+			errorPost(w, http.StatusInternalServerError, fmt.Errorf("panic in indexPage: %v", err))
+		}
+	}()
+	var b bytes.Buffer
+	if err := tIndex.Execute(&b, Posts); err != nil {
+		errorPost(w, http.StatusInternalServerError, fmt.Errorf("error executing template in mainPage: %w", err))
+		return
+	}
+	if _, err := b.WriteTo(w); err != nil {
+		log.Println("can't write to ResponseWriter in indexPage")
 	}
 }
 
 func postPage(w http.ResponseWriter, r *http.Request) {
+	defer func() {
+		if err := recover(); err != nil {
+			errorPost(w, http.StatusInternalServerError, fmt.Errorf("panic in postPage: %s", err))
+		}
+	}()
 	if _, ok := Posts[r.URL.Path[1:]]; !ok {
-		log.Printf("post not found: %s", r.URL.Path[1:])
-		w.WriteHeader(http.StatusNotFound)
+		errorPost(w, http.StatusNotFound, fmt.Errorf("post not found: %s", r.URL.Path[1:]))
 		return
 	}
-	t := template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
-	if err := t.Execute(w, Posts[r.URL.Path[1:]]); err != nil {
-		// todo buffer & return w code
-		log.Println("error executing template in postPage:", err)
+	var b bytes.Buffer
+	if err := tPost.Execute(&b, Posts[r.URL.Path[1:]]); err != nil {
+		errorPost(w, http.StatusInternalServerError, fmt.Errorf("error executing template in postPage: %w", err))
+		return
+	}
+	if _, err := b.WriteTo(w); err != nil {
+		log.Println("can't write to ResponseWriter in postPage")
+	}
+}
+
+func errorPost(w http.ResponseWriter, statusCode int, err error) {
+	log.Println(err)
+	w.WriteHeader(statusCode)
+	if _, err := fmt.Fprint(w, "Sorry, error occured, try again later..."); err != nil {
+		log.Println("can't write to ResponseWriter in errorPost")
 	}
 }
 
