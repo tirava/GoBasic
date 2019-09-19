@@ -8,18 +8,18 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"gopkg.in/russross/blackfriday.v2"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"path"
-	"strings"
 	"syscall"
+	"time"
 )
 
 const (
@@ -27,7 +27,7 @@ const (
 	indexTemplate = "index.gohtml"
 	postTemplate  = "post.gohtml"
 	templatePath  = "templates"
-	postsURL      = "posts/"
+	postsURL      = "/posts"
 )
 
 // Post is the base post type
@@ -36,44 +36,6 @@ type Post struct {
 	Date    string // todo change to time.Time
 	Summary string
 	Body    template.HTML
-}
-
-// Posts storage todo - need xSQL storage instead map
-var Posts map[string]Post
-
-var tIndex, tPost *template.Template
-
-func init() {
-	//tIndex = template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
-	//tPost = template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
-
-	Posts = map[string]Post{
-		"1": {
-			"Мой первый пост!",
-			"18-е Сентября 2019 года",
-			"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.",
-			template.HTML(blackfriday.Run([]byte(`
-Здесь основной текст.
-# Markdown!
-*Это* **круто**!
-`))),
-		},
-		"2": {
-			"Это уже второй пост!",
-			"19-е Сентября 2019 года",
-			`
-Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.
-Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.
-`,
-			template.HTML(blackfriday.Run([]byte(`
-Разобрался в шаблонах и маркдаунах, как их совместить.
-
-Теперь понять, как переходить на отдельные посты.
-# Anybody!
-*Hz* **cool**!
-`))),
-		},
-	}
 }
 
 func mainPage(w http.ResponseWriter, _ *http.Request) {
@@ -92,7 +54,7 @@ func mainPage(w http.ResponseWriter, _ *http.Request) {
 
 func postPage(w http.ResponseWriter, r *http.Request) {
 	tPost = template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
-	postNum := strings.Replace(r.URL.Path[1:], postsURL, "", 1)
+	postNum := chi.URLParam(r, "id")
 	if _, ok := Posts[postNum]; !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
@@ -110,27 +72,37 @@ func postPage(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	// safe shutdown
-	shutdown := make(chan os.Signal)
-	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM) // os.Kill wrong for linters
-
-	go func() {
-		<-shutdown
-		// any work here
-		fmt.Printf("\nShutdown server at: %s\n", servAddr)
-		os.Exit(0)
-	}()
-
 	// prepare server
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
 	mux.Get("/", mainPage)
-	mux.Get("/posts", mainPage)
-	mux.Get("/posts/*", postPage)
+	mux.Get(postsURL, mainPage)
+	mux.Get(postsURL+"/{id}", postPage)
 	//mux.Get("/posts/new", newPostPage)
 	//mux.Post("/posts/new", newPostPage)
 
+	srv := &http.Server{
+		Addr:    servAddr,
+		Handler: mux,
+	}
+
+	// graceful shutdown
+	shutdown := make(chan os.Signal)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM) // os.Kill cannot be trapped anyway!
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	go func() {
+		log.Println("Signal received:", <-shutdown)
+		// any work here
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Fatalln("Error while shutdown server:", err)
+		}
+	}()
+
 	fmt.Println("Starting server at:", servAddr)
-	log.Fatalln(http.ListenAndServe(servAddr, mux))
+	if err := srv.ListenAndServe(); err != nil {
+		log.Printf("Shutdown server at: %s\n%v", servAddr, err)
+	}
 }

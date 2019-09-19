@@ -7,8 +7,9 @@
 </head>
   <body>
     <h1 class="uk-heading-divider uk-heading-line uk-text-center">Блог Евгения Климова</h1>
-    <div class="uk-child-width-1-1 uk-grid-match" uk-grid>
+    <p uk-margin><button class="uk-button uk-button-primary uk-align-center">New</button></p>
 
+    <div class="uk-child-width-1-1 uk-grid-match" uk-grid>
       {{range $key, $value := .}}
       <div class="uk-card uk-card-default uk-width-1-1@m">
         <div class="uk-card-header">
@@ -27,8 +28,8 @@
         </div>
       </div>
       {{end}}
-
     </div>
+
   {{template "footer"}}
   </body>
 </html>
