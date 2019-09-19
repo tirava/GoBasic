@@ -7,6 +7,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -26,6 +27,7 @@ const (
 	postsURL     = "/posts"
 	editURL      = "/edit"
 	deleteURL    = "/delete"
+	createURL    = "/create"
 	staticPath   = "/static"
 )
 
@@ -65,12 +67,14 @@ func main() {
 		r.Route(deleteURL, func(r chi.Router) {
 			r.Post("/{id}", handlers.deletePostPage)
 		})
+		r.Route(createURL, func(r chi.Router) {
+			r.Get("/", handlers.createPostPageForm)
+			r.Post("/", handlers.createPostPage)
+		})
 		r.Route(editURL, func(r chi.Router) {
 			r.Get("/{id}", handlers.editPostPageForm)
 			r.Post("/{id}", handlers.editPostPage)
 		})
-		//r.Get("/create", handlers.newPostPageForm)
-		//r.Post("/create", handlers.newPostPage)
 	})
 
 	// custom server is for custom parameters & graceful shutdown
@@ -82,10 +86,12 @@ func main() {
 	// graceful shutdown
 	shutdown := make(chan os.Signal)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM) // os.Kill cannot be trapped anyway!
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	go func() {
 		log.Println("Signal received:", <-shutdown)
-		if err := srv.Shutdown(nil); err != nil {
+		if err := srv.Shutdown(ctx); err != nil {
 			log.Println("Error while shutdown server:", err)
 		}
 	}()

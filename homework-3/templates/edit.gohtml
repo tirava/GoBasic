@@ -16,16 +16,16 @@
                         <img class="uk-border-circle" width="40" height="40" src="../../static/images/avatar.png">
                       </div>
                       <div class="uk-width-expand">
-                          <h3><input type="text" class="uk-input" name="title" id="title" value="{{.Title}}"></h3>
-                          <input class="uk-text-meta" type="text" class="uk-input" name="date" id="date" value="{{.Date}}">
+                          <h3><input required type="text" class="uk-input" name="title" id="title" value="{{.Title}}"></h3>
+                          <input required class="uk-text-meta" type="text" class="uk-input" name="date" id="date" value="{{.Date}}">
                       </div>
                     </div>
                   </div>
                   <div class="uk-card-body">
-                      <textarea class="uk-textarea" rows="5" name="summary" id="summary">{{.Summary}}"</textarea>
+                      <textarea required class="uk-textarea" rows="5" name="summary" id="summary">{{.Summary}}</textarea>
                   </div>
                   <div class="uk-card-footer">
-                      <textarea class="uk-textarea" rows="10" name="body" id="body">{{.Body}}"</textarea>
+                      <textarea required class="uk-textarea" rows="10" name="body" id="body">{{.Body}}</textarea>
                   </div>
                   <div class="uk-card-footer">
                     <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts/{{.Id}}"><< Вернуться</a>

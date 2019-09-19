@@ -59,7 +59,7 @@ func (h *Handler) editPostPageForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if _, err := b.WriteTo(w); err != nil {
-		log.Println("can't write to ResponseWriter in newPostPageForm")
+		log.Println("can't write to ResponseWriter in editPostPageForm")
 	}
 }
 
@@ -81,9 +81,34 @@ func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, postsURL+"/"+postNum, http.StatusFound)
 }
 
+func (h *Handler) createPostPageForm(w http.ResponseWriter, r *http.Request) {
+	h.tGlob = template.Must(template.ParseGlob(path.Join(templatePath, templateExt))) // todo del
+	var b bytes.Buffer                                                                // no need to show bad content
+	post := Post{}
+	if err := h.tGlob.ExecuteTemplate(&b, "create", post); err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if _, err := b.WriteTo(w); err != nil {
+		log.Println("can't write to ResponseWriter in createPostPageForm")
+	}
+}
+
+func (h *Handler) createPostPage(w http.ResponseWriter, r *http.Request) {
+	id := len(h.posts) + 1
+	h.posts[strconv.Itoa(id)] = Post{
+		Id:      id,
+		Title:   r.FormValue("title"),
+		Date:    r.FormValue("date"),
+		Summary: r.FormValue("summary"),
+		Body:    template.HTML(r.FormValue("body")),
+	}
+	http.Redirect(w, r, postsURL+"/", http.StatusFound)
+}
+
 func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
-	postNum := chi.URLParam(r, "id")
-	delete(h.posts, postNum)
+	delete(h.posts, chi.URLParam(r, "id"))
 	http.Redirect(w, r, postsURL+"/", http.StatusFound)
 }
 
