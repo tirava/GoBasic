@@ -15,9 +15,9 @@ import (
 )
 
 func mainPage(w http.ResponseWriter, _ *http.Request) {
-	tIndex = template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate))) // todo del
-	var b bytes.Buffer                                                                  // no need to show bad content
-	if err := tIndex.ExecuteTemplate(&b, "index", Posts); err != nil {
+	tGlob = template.Must(template.ParseGlob(path.Join(templatePath, templateExt))) // todo del
+	var b bytes.Buffer                                                              // no need to show bad content
+	if err := tGlob.ExecuteTemplate(&b, "index", Posts); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -28,14 +28,14 @@ func mainPage(w http.ResponseWriter, _ *http.Request) {
 }
 
 func postPage(w http.ResponseWriter, r *http.Request) {
-	tPost = template.Must(template.ParseFiles(path.Join(templatePath, postTemplate))) // todo del
+	tGlob = template.Must(template.ParseGlob(path.Join(templatePath, templateExt))) // todo del
 	postNum := chi.URLParam(r, "id")
 	if _, ok := Posts[postNum]; !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 	var b bytes.Buffer // no need to show bad content
-	if err := tPost.ExecuteTemplate(&b, "post", Posts[postNum]); err != nil {
+	if err := tGlob.ExecuteTemplate(&b, "post", Posts[postNum]); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return

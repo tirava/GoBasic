@@ -18,12 +18,11 @@ import (
 )
 
 const (
-	servAddr      = "localhost:8080"
-	indexTemplate = "index.gohtml"
-	postTemplate  = "post.gohtml"
-	templatePath  = "templates"
-	postsURL      = "/posts"
-	staticPath    = "/static"
+	servAddr     = "localhost:8080"
+	templateExt  = "*.gohtml"
+	templatePath = "templates"
+	postsURL     = "/posts"
+	staticPath   = "/static"
 )
 
 func main() {
@@ -44,7 +43,7 @@ func main() {
 	srv := &http.Server{Addr: servAddr, Handler: mux}
 
 	// static files
-	mux.Handle("/static/*", http.StripPrefix("/static", http.FileServer(http.Dir("./static"))))
+	mux.Handle(staticPath+"/*", http.StripPrefix(staticPath, http.FileServer(http.Dir("."+staticPath))))
 
 	// graceful shutdown
 	shutdown := make(chan os.Signal)

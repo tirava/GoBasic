@@ -21,11 +21,10 @@ type Post struct {
 // Posts storage todo - need xSQL storage instead map
 var Posts map[string]Post
 
-var tIndex, tPost *template.Template
+var tGlob *template.Template
 
 func init() {
-	//tIndex = template.Must(template.ParseFiles(path.Join(templatePath, indexTemplate)))
-	//tPost = template.Must(template.ParseFiles(path.Join(templatePath, postTemplate)))
+	//tGlob = template.Must(template.ParseGlob(path.Join(templatePath, templateExt)))
 
 	Posts = map[string]Post{
 		"1": {

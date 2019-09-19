@@ -5,15 +5,9 @@
   {{template "head"}}
   <title>{{.Title}}</title>
 </head>
-{{/*  <body>
-    <a href="/posts"><h3>Назад</h3></a>
-    <h2>{{.Title}} ({{.Date}})</h2>
-    <p>{{.Summary}}</p>
-    <p>{{.Body}}</p>
-  </body>*/}}
-<body>
+    <body>
 
-<div class="uk-margin-left uk-margin-right" uk-grid>
+    <div class="uk-margin-left uk-margin-right uk-margin-top" uk-grid>
     <div class="uk-card uk-card-default uk-card-hover">
       <div class="uk-card-header">
         <div class="uk-grid-small uk-flex-middle" uk-grid>
@@ -36,13 +30,14 @@
         <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts"><< Вернуться</a>
       </div>
     </div>
-</div>
+    </div>
 
-{{template "footer"}}
-</body>
+    {{template "footer"}}
+    </body>
 </html>
 {{end}}
 
+{{/*
 {{define "head"}}
   <meta charset="UTF-8">
   <meta name="viewport"
@@ -54,4 +49,4 @@
 {{define "footer"}}
   <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.2.0/js/uikit.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.2.0/js/uikit-icons.min.js"></script>
-{{end}}
+{{end}}*/}}
