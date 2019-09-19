@@ -10,6 +10,14 @@ import (
 	"html/template"
 )
 
+// Post is the base post type
+type Post struct {
+	Title   string
+	Date    string // todo change to time.Time
+	Summary string
+	Body    template.HTML
+}
+
 // Posts storage todo - need xSQL storage instead map
 var Posts map[string]Post
 
