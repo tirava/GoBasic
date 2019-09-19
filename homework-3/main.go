@@ -24,6 +24,7 @@ const (
 	templateExt  = "*.gohtml"
 	templatePath = "templates"
 	postsURL     = "/posts"
+	editURL      = "/edit"
 	staticPath   = "/static"
 )
 
@@ -59,8 +60,12 @@ func main() {
 	mux.Route(postsURL, func(r chi.Router) {
 		r.Get("/{id}", handlers.postPage)
 		r.Get("/", handlers.mainPage)
-		//r.Get("/new", newPostPage)
-		//r.Post("/new", newPostPage)
+		r.Route(editURL, func(r chi.Router) {
+			r.Get("/{id}", handlers.editPostPageForm)
+			//r.Put("/{id}", handlers.editPostPage)
+		})
+		//r.Get("/create", handlers.newPostPageForm)
+		//r.Post("/create", handlers.newPostPage)
 	})
 
 	// custom server is for custom parameters & graceful shutdown

@@ -9,9 +9,14 @@
   <div class="uk-height-small uk-flex uk-flex-center uk-flex-middle uk-background-cover uk-light" data-src="static/images/backheader.jpg" uk-img>
       <h1 class="uk-heading-divider uk-heading-line uk-text-center uk-text-primary">Блог Евгения Климова</h1>
   </div>
-    <p uk-margin><button class="uk-margin-left uk-button uk-button-primary">Новый пост</button></p>
 
-    <div class="uk-margin-left uk-margin-right uk-margin-top" uk-grid>
+  <div class="uk-flex uk-flex-right">
+    <form action="/posts/create">
+      <button class="uk-margin-top uk-margin-right uk-button uk-button-primary " style="background: forestgreen;">Добавить новый</button>
+    </form>
+  </div>
+
+    <div class="uk-margin-left uk-margin-right uk-margin-top">
       {{range $key, $value := .}}
       <div class="uk-card uk-card-default uk-card-hover">
         <div class="uk-card-header">
@@ -29,9 +34,18 @@
           <p>{{.Summary}}</p>
         </div>
         <div class="uk-card-footer">
-          <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts/{{$key}}">Далее >></a>
+          <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts/{{$key}}">Читать полностью >></a>
         </div>
       </div>
+      <div class="uk-flex uk-flex-right uk-margin-small-top uk-margin-medium-bottom">
+         <form action="/posts/edit/{{$key}}">
+           <button class="uk-button uk-button-primary uk-margin-right">Редактировать</button>
+         </form>
+         <form action="/posts/delete/{{$key}}">
+           <button class="uk-button uk-button-danger">Удалить</button>
+         </form>
+      </div>
+
       {{end}}
     </div>
 

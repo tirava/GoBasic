@@ -46,6 +46,21 @@ func (h *Handler) postPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) editPostPageForm(w http.ResponseWriter, r *http.Request) {
+	h.tGlob = template.Must(template.ParseGlob(path.Join(templatePath, templateExt))) // todo del
+	postNum := chi.URLParam(r, "id")
+	println(postNum)
+	var b bytes.Buffer // no need to show bad content
+	if err := h.tGlob.ExecuteTemplate(&b, "edit", h.posts[postNum]); err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	if _, err := b.WriteTo(w); err != nil {
+		log.Println("can't write to ResponseWriter in newPostPageForm")
+	}
+}
+
 func (h *Handler) initPosts() {
 	h.posts = dbPosts{
 		"1": {
