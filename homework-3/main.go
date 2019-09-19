@@ -30,6 +30,7 @@ const (
 
 // Post is the base post type
 type Post struct {
+	Id      int
 	Title   string
 	Date    string // todo change to time.Time?
 	Summary string
@@ -62,7 +63,7 @@ func main() {
 		r.Get("/", handlers.mainPage)
 		r.Route(editURL, func(r chi.Router) {
 			r.Get("/{id}", handlers.editPostPageForm)
-			//r.Put("/{id}", handlers.editPostPage)
+			r.Post("/{id}", handlers.editPostPage)
 		})
 		//r.Get("/create", handlers.newPostPageForm)
 		//r.Post("/create", handlers.newPostPage)

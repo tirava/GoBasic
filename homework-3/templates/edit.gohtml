@@ -6,31 +6,37 @@
   <title>{{.Title}}</title>
 </head>
     <body class="uk-background-muted">
-
-    <div class="uk-margin-left uk-margin-right uk-margin-top" uk-grid>
-    <div class="uk-card uk-card-default uk-card-hover">
-      <div class="uk-card-header">
-        <div class="uk-grid-small uk-flex-middle" uk-grid>
-          <div class="uk-width-auto">
-            <img class="uk-border-circle" width="40" height="40" src="../../static/images/avatar.png">
-          </div>
-          <div class="uk-width-expand">
-            <h2 class="uk-card-title ">{{.Title}}</h2>
-            <p class="uk-text-meta">{{.Date}}</p>
-          </div>
+    <form method="post" action="/posts/edit/{{.Id}}">
+        <fieldset class="uk-fieldset">
+            <div class="uk-margin-left uk-margin-right uk-margin-top" uk-grid>
+                <div class="uk-card uk-card-default uk-card-hover uk-width-1-1">
+                  <div class="uk-card-header">
+                    <div class="uk-grid-small uk-flex-middle" uk-grid>
+                      <div class="uk-width-auto">
+                        <img class="uk-border-circle" width="40" height="40" src="../../static/images/avatar.png">
+                      </div>
+                      <div class="uk-width-expand">
+                          <h3><input type="text" class="uk-input" name="title" id="title" value="{{.Title}}"></h3>
+                          <input class="uk-text-meta" type="text" class="uk-input" name="date" id="date" value="{{.Date}}">
+                      </div>
+                    </div>
+                  </div>
+                  <div class="uk-card-body">
+                      <textarea class="uk-textarea" rows="5" name="summary" id="summary">{{.Summary}}"</textarea>
+                  </div>
+                  <div class="uk-card-footer">
+                      <textarea class="uk-textarea" rows="10" name="body" id="body">{{.Body}}"</textarea>
+                  </div>
+                  <div class="uk-card-footer">
+                    <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts"><< Вернуться</a>
+                  </div>
+                </div>
+            </div>
+        </fieldset>
+        <div class="uk-flex uk-flex-right uk-margin-small-top uk-margin-right">
+            <button type="submit" class="uk-button uk-button-primary" style="background: forestgreen;">Сохранить</button>
         </div>
-      </div>
-      <div class="uk-card-body">
-        <p>{{.Summary}}</p>
-      </div>
-      <div class="uk-card-footer">
-        <p>{{.Body}}</p>
-      </div>
-      <div class="uk-card-footer">
-        <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts"><< Вернуться</a>
-      </div>
-    </div>
-    </div>
+    </form>
 
     {{template "footer"}}
     </body>
