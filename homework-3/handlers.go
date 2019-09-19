@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"strconv"
 )
 
 func (h *Handler) mainPage(w http.ResponseWriter, _ *http.Request) {
@@ -63,31 +64,51 @@ func (h *Handler) editPostPageForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
-	//h.posts
+	postNum := chi.URLParam(r, "id")
+	id, err := strconv.Atoi(postNum)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+	post := Post{
+		Id:      id,
+		Title:   r.FormValue("title"),
+		Date:    r.FormValue("date"),
+		Summary: r.FormValue("summary"),
+		Body:    template.HTML(r.FormValue("body")),
+	}
+	h.posts[postNum] = post
+	http.Redirect(w, r, postsURL+"/"+postNum, http.StatusFound)
+}
+
+func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
+	postNum := chi.URLParam(r, "id")
+	delete(h.posts, postNum)
+	http.Redirect(w, r, postsURL+"/", http.StatusFound)
 }
 
 func (h *Handler) initPosts() {
 	h.posts = dbPosts{
 		"1": {
-			1,
-			"Мой первый пост!",
-			"18-е Сентября 2019 года",
-			"Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.",
-			`
+			Id:      1,
+			Title:   "Мой первый пост!",
+			Date:    "18-е Сентября 2019 года",
+			Summary: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.",
+			Body: `
 Здесь основной текст.
 # Markdown!
 *Это* **круто**!
 `,
 		},
 		"2": {
-			2,
-			"Это уже второй пост!",
-			"19-е Сентября 2019 года",
-			`
+			Id:    2,
+			Title: "Это уже второй пост!",
+			Date:  "19-е Сентября 2019 года",
+			Summary: `
 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.
 Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.
 `,
-			`
+			Body: `
 Разобрался в шаблонах и маркдаунах, как их совместить.
 
 Теперь понять, как переходить на отдельные посты.

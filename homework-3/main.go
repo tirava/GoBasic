@@ -25,6 +25,7 @@ const (
 	templatePath = "templates"
 	postsURL     = "/posts"
 	editURL      = "/edit"
+	deleteURL    = "/delete"
 	staticPath   = "/static"
 )
 
@@ -61,6 +62,9 @@ func main() {
 	mux.Route(postsURL, func(r chi.Router) {
 		r.Get("/{id}", handlers.postPage)
 		r.Get("/", handlers.mainPage)
+		r.Route(deleteURL, func(r chi.Router) {
+			r.Post("/{id}", handlers.deletePostPage)
+		})
 		r.Route(editURL, func(r chi.Router) {
 			r.Get("/{id}", handlers.editPostPageForm)
 			r.Post("/{id}", handlers.editPostPage)
