@@ -10,10 +10,12 @@ import (
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"path"
 	"syscall"
 )
 
@@ -25,16 +27,38 @@ const (
 	staticPath   = "/static"
 )
 
+// Post is the base post type
+type Post struct {
+	Title   string
+	Date    string // todo change to time.Time?
+	Summary string
+	Body    template.HTML
+}
+
+type dbPosts map[string]Post // todo - need xSQL storage instead map
+
+type Handler struct {
+	posts dbPosts
+	tGlob *template.Template
+}
+
 func main() {
+
+	// new handler struct
+	handlers := &Handler{
+		posts: dbPosts{},
+		tGlob: template.Must(template.ParseGlob(path.Join(templatePath, templateExt))),
+	}
+	handlers.initPosts()
 
 	// prepare routes & middleware
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
-	mux.Get("/", mainPage)
+	mux.Get("/", handlers.mainPage)
 	mux.Route(postsURL, func(r chi.Router) {
-		r.Get("/{id}", postPage)
-		r.Get("/", mainPage)
+		r.Get("/{id}", handlers.postPage)
+		r.Get("/", handlers.mainPage)
 		//r.Get("/new", newPostPage)
 		//r.Post("/new", newPostPage)
 	})

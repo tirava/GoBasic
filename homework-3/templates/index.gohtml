@@ -5,9 +5,11 @@
   {{template "head"}}
   <title>Блог Евгения Климова</title>
 </head>
-  <body>
-    <h1 class="uk-heading-divider uk-heading-line uk-text-center">Блог Евгения Климова</h1>
-    <p uk-margin><button class="uk-button uk-button-primary uk-align-center">New</button></p>
+  <body class="uk-background-muted">
+  <div class="uk-height-small uk-flex uk-flex-center uk-flex-middle uk-background-cover uk-light" data-src="static/images/backheader.jpg" uk-img>
+      <h1 class="uk-heading-divider uk-heading-line uk-text-center uk-text-primary">Блог Евгения Климова</h1>
+  </div>
+    <p uk-margin><button class="uk-margin-left uk-button uk-button-primary">Новый пост</button></p>
 
     <div class="uk-margin-left uk-margin-right uk-margin-top" uk-grid>
       {{range $key, $value := .}}
