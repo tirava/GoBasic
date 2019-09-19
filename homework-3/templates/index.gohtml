@@ -9,11 +9,14 @@
     <h1 class="uk-heading-divider uk-heading-line uk-text-center">Блог Евгения Климова</h1>
     <p uk-margin><button class="uk-button uk-button-primary uk-align-center">New</button></p>
 
-    <div class="uk-child-width-1-1 uk-grid-match" uk-grid>
+    <div class="uk-margin-left uk-margin-right" uk-grid>
       {{range $key, $value := .}}
-      <div class="uk-card uk-card-default uk-width-1-1@m">
+      <div class="uk-card uk-card-default uk-card-hover">
         <div class="uk-card-header">
           <div class="uk-grid-small uk-flex-middle" uk-grid>
+            <div class="uk-width-auto">
+              <img class="uk-border-circle" width="40" height="40" src="images/avatar.png">
+            </div>
             <div class="uk-width-expand">
               <h2 class="uk-card-title ">{{.Title}}</h2>
               <p class="uk-text-meta">{{.Date}}</p>

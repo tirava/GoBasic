@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 )
 
@@ -32,10 +33,19 @@ func main() {
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
 	mux.Get("/", mainPage)
-	mux.Get(postsURL, mainPage)
-	mux.Get(postsURL+"/{id}", postPage)
-	//mux.Get("/posts/new", newPostPage)
-	//mux.Post("/posts/new", newPostPage)
+	//mux.Get(postsURL, mainPage)
+	//mux.Get(postsURL+"/{id}", postPage)
+
+	mux.Route(postsURL, func(r chi.Router) {
+		r.Get("/{id}", postPage)
+		r.Get("/", mainPage)
+		//r.Get("/new", newPostPage)
+		//r.Post("/new", newPostPage)
+	})
+
+	workDir, _ := os.Getwd()
+	filesDir := filepath.Join(workDir, "static")
+	mux.Handle("/static", http.FileServer(http.Dir(filesDir)))
 
 	srv := &http.Server{Addr: servAddr, Handler: mux}
 
