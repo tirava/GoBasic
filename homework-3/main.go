@@ -23,6 +23,7 @@ const (
 	postTemplate  = "post.gohtml"
 	templatePath  = "templates"
 	postsURL      = "/posts"
+	staticPath    = "/static"
 )
 
 func main() {
@@ -39,7 +40,7 @@ func main() {
 		//r.Post("/new", newPostPage)
 	})
 
-	// custom server
+	// custom server is for custom parameters & graceful shutdown
 	srv := &http.Server{Addr: servAddr, Handler: mux}
 
 	// static files

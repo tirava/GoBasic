@@ -1,16 +1,57 @@
+{{define "post"}}
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  {{template "head"}}
   <title>{{.Title}}</title>
 </head>
-  <body>
+{{/*  <body>
     <a href="/posts"><h3>Назад</h3></a>
     <h2>{{.Title}} ({{.Date}})</h2>
     <p>{{.Summary}}</p>
     <p>{{.Body}}</p>
-  </body>
+  </body>*/}}
+<body>
+
+<div class="uk-margin-left uk-margin-right" uk-grid>
+    <div class="uk-card uk-card-default uk-card-hover">
+      <div class="uk-card-header">
+        <div class="uk-grid-small uk-flex-middle" uk-grid>
+          <div class="uk-width-auto">
+            <img class="uk-border-circle" width="40" height="40" src="../static/images/avatar.png">
+          </div>
+          <div class="uk-width-expand">
+            <h2 class="uk-card-title ">{{.Title}}</h2>
+            <p class="uk-text-meta">{{.Date}}</p>
+          </div>
+        </div>
+      </div>
+      <div class="uk-card-body">
+        <p>{{.Summary}}</p>
+      </div>
+      <div class="uk-card-footer">
+        <p>{{.Body}}</p>
+      </div>
+      <div class="uk-card-footer">
+        <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts"><< Вернуться</a>
+      </div>
+    </div>
+</div>
+
+{{template "footer"}}
+</body>
 </html>
+{{end}}
+
+{{define "head"}}
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.2.0/css/uikit.min.css" />
+{{end}}
+
+{{define "footer"}}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.2.0/js/uikit.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.2.0/js/uikit-icons.min.js"></script>
+{{end}}
