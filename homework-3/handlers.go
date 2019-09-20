@@ -145,6 +145,13 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos
 *Hz* **cool**!
 `,
 		},
+		"3": {
+			ID:      3,
+			Title:   "Пример основных вариантов разметки Markdown",
+			Date:    "20-е Сентября 2019 года",
+			Summary: "Официальное руководство по синтаксису Markdown мне кажется слишком длинным и не слишком наглядным, поэтому я составил краткое руководство, которое поможет выучить или повторить синтаксис Маркдауна за час.",
+			Body:    `todo`,
+		},
 	}
-	h.globID = 2 // last id
+	h.globID = 3 // last id
 }

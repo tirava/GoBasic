@@ -21,6 +21,9 @@
         {{range .}}
             <div class="uk-card uk-card-default uk-card-hover uk-width-1-1 uk-margin-bottom">
                 <div class="uk-card-header">
+                    <div class="uk-flex uk-flex-right">
+                        {{template "tools" .}}
+                    </div>
                     <div class="uk-grid-small uk-flex-middle" uk-grid>
                         <div class="uk-width-auto">
                             <img class="uk-border-circle" width="40" height="40" src="../static/images/avatar.png">
@@ -37,7 +40,6 @@
                 <div class="uk-card-footer uk-flex uk-flex-between">
                     <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts/{{.ID}}">Читать полностью
                         >></a>
-                    {{template "tools" .}}
                 </div>
             </div>
 
