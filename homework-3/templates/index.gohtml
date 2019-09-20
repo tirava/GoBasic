@@ -12,8 +12,6 @@
     </div>
 
     <div class="uk-flex uk-flex-right">
-        {{/*    <form action="/posts/create/">*/}}
-        {{/*      <button class="uk-margin-top uk-margin-right uk-button uk-button-primary" style="background: forestgreen;">Добавить новый</button>*/}}
         <a uk-tooltip="title: Добавить новый; pos: left" class="uk-icon-button uk-margin-top uk-margin-right"
            href="/posts/create/" uk-icon="icon: plus" style="background: forestgreen; color: white;"></a>
         {{/*    </form>*/}}
@@ -39,30 +37,32 @@
                 <div class="uk-card-footer uk-flex uk-flex-between">
                     <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts/{{.ID}}">Читать полностью
                         >></a>
-                    {{/*        </div>*/}}
-                    <div>
-                        <a uk-tooltip="title: Редактировать; pos: top" class="uk-icon-button "
-                           href="/posts/edit/{{.ID}}" uk-icon="icon: file-edit" style="color: deepskyblue;"></a>
-                        <a onclick="
-            if (confirm('Вы уверены, что хотите УДАЛИТЬ пост?')) {
-              document.getElementById('del_form').submit()}
-              else {
-                return false
-              }" uk-tooltip="title: Удалить; pos: top" class="uk-icon-button" href="#" uk-icon="icon: trash"
-                           style="color: red;"></a>
-                        <form action="/posts/delete/{{.ID}}" id="del_form" method="post">
-                            <input type="hidden" name="" value="">
-                        </form>
-                    </div>
+                    {{template "tools" .}}
                 </div>
             </div>
 
         {{end}}
     </div>
-
     {{template "footer"}}
     </body>
     </html>
+{{end}}
+
+{{define "tools"}}
+    <div>
+        <a uk-tooltip="title: Редактировать; pos: top" class="uk-icon-button "
+           href="/posts/edit/{{.ID}}" uk-icon="icon: file-edit" style="color: deepskyblue;"></a>
+        <a onclick="
+            if (confirm('Вы уверены, что хотите УДАЛИТЬ пост?')) {
+              document.getElementById('del_form').submit()}
+              else {
+                return false
+              }" uk-tooltip="title: Удалить; pos: top" class="uk-icon-button" href="#" uk-icon="icon: trash"
+           style="color: red;"></a>
+        <form action="/posts/delete/{{.ID}}" id="del_form" method="post">
+            <input type="hidden" name="" value="">
+        </form>
+    </div>
 {{end}}
 
 {{define "head"}}
