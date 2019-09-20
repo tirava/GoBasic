@@ -31,10 +31,10 @@
       </div>
     </div>
         <div class="uk-flex uk-flex-right uk-margin-small-top uk-margin-small-bottom">
-            <form action="/posts/edit/{{.Id}}">
+            <form action="/posts/edit/{{.ID}}">
                 <button class="uk-button uk-button-primary uk-margin-right">Редактировать</button>
             </form>
-            <form method="post" action="/posts/delete/{{.Id}}">
+            <form method="post" action="/posts/delete/{{.ID}}">
                 <button class="uk-button uk-button-danger" onclick="return confirm('Вы уверены, что хотите УДАЛИТЬ пост?')">Удалить</button>
             </form>
         </div>

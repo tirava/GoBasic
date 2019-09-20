@@ -6,7 +6,7 @@
   <title>{{.Title}}</title>
 </head>
     <body class="uk-background-muted">
-    <form method="post" action="/posts/edit/{{.Id}}">
+    <form method="post" action="/posts/edit/{{.ID}}">
         <fieldset class="uk-fieldset">
             <div class="uk-margin-left uk-margin-right uk-margin-top" uk-grid>
                 <div class="uk-card uk-card-default uk-card-hover uk-width-1-1">
@@ -28,7 +28,7 @@
                       <textarea required class="uk-textarea" rows="10" name="body" id="body">{{.Body}}</textarea>
                   </div>
                   <div class="uk-card-footer">
-                    <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts/{{.Id}}"><< Вернуться</a>
+                    <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts/{{.ID}}"><< Вернуться</a>
                   </div>
                 </div>
             </div>
