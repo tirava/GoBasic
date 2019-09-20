@@ -17,11 +17,12 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"sync"
 	"syscall"
 )
 
 const (
-	servAddr     = "localhost:8080"
+	servAddr     = ":8080"
 	templateExt  = "*.gohtml"
 	templatePath = "templates"
 	postsURL     = "/posts"
@@ -33,7 +34,7 @@ const (
 
 // Post is the base post type
 type Post struct {
-	Id      int
+	ID      int
 	Title   string
 	Date    string // todo change to time.Time?
 	Summary string
@@ -42,9 +43,12 @@ type Post struct {
 
 type dbPosts map[string]Post // todo - need xSQL storage instead map
 
+// Handler is the global handlers struct
 type Handler struct {
-	posts dbPosts
-	tGlob *template.Template
+	posts  dbPosts
+	tGlob  *template.Template
+	globID int
+	mux    sync.Mutex
 }
 
 func main() {

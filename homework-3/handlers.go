@@ -3,6 +3,7 @@
  * Created on 19.09.2019 19:35
  * Copyright (c) 2019 - Eugene Klimov
  */
+
 package main
 
 import (
@@ -12,13 +13,11 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"path"
 	"strconv"
 )
 
 func (h *Handler) mainPage(w http.ResponseWriter, _ *http.Request) {
-	h.tGlob = template.Must(template.ParseGlob(path.Join(templatePath, templateExt))) // todo del
-	var b bytes.Buffer                                                                // no need to show bad content
+	var b bytes.Buffer // no need to show bad content
 	if err := h.tGlob.ExecuteTemplate(&b, "index", h.posts); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -30,7 +29,6 @@ func (h *Handler) mainPage(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (h *Handler) postPage(w http.ResponseWriter, r *http.Request) {
-	h.tGlob = template.Must(template.ParseGlob(path.Join(templatePath, templateExt))) // todo del
 	postNum := chi.URLParam(r, "id")
 	if _, ok := h.posts[postNum]; !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -50,7 +48,6 @@ func (h *Handler) postPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) editPostPageForm(w http.ResponseWriter, r *http.Request) {
-	h.tGlob = template.Must(template.ParseGlob(path.Join(templatePath, templateExt))) // todo del
 	postNum := chi.URLParam(r, "id")
 	var b bytes.Buffer // no need to show bad content
 	if err := h.tGlob.ExecuteTemplate(&b, "edit", h.posts[postNum]); err != nil {
@@ -71,7 +68,7 @@ func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	post := Post{
-		Id:      id,
+		ID:      id,
 		Title:   r.FormValue("title"),
 		Date:    r.FormValue("date"),
 		Summary: r.FormValue("summary"),
@@ -82,8 +79,7 @@ func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createPostPageForm(w http.ResponseWriter, r *http.Request) {
-	h.tGlob = template.Must(template.ParseGlob(path.Join(templatePath, templateExt))) // todo del
-	var b bytes.Buffer                                                                // no need to show bad content
+	var b bytes.Buffer // no need to show bad content
 	post := Post{}
 	if err := h.tGlob.ExecuteTemplate(&b, "create", post); err != nil {
 		log.Println(err)
@@ -96,15 +92,16 @@ func (h *Handler) createPostPageForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createPostPage(w http.ResponseWriter, r *http.Request) {
-	id := len(h.posts) + 1
-	h.posts[strconv.Itoa(id)] = Post{
-		Id:      id,
+	id := h.nextGlobID()
+	ids := strconv.Itoa(id)
+	h.posts[ids] = Post{
+		ID:      id,
 		Title:   r.FormValue("title"),
 		Date:    r.FormValue("date"),
 		Summary: r.FormValue("summary"),
 		Body:    template.HTML(r.FormValue("body")),
 	}
-	http.Redirect(w, r, postsURL+"/", http.StatusFound)
+	http.Redirect(w, r, postsURL+"/"+ids, http.StatusFound)
 }
 
 func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
@@ -112,10 +109,17 @@ func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, postsURL+"/", http.StatusFound)
 }
 
+func (h *Handler) nextGlobID() int {
+	h.mux.Lock()
+	h.globID++
+	h.mux.Unlock()
+	return h.globID
+}
+
 func (h *Handler) initPosts() {
 	h.posts = dbPosts{
 		"1": {
-			Id:      1,
+			ID:      1,
 			Title:   "Мой первый пост!",
 			Date:    "18-е Сентября 2019 года",
 			Summary: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.",
@@ -126,7 +130,7 @@ func (h *Handler) initPosts() {
 `,
 		},
 		"2": {
-			Id:    2,
+			ID:    2,
 			Title: "Это уже второй пост!",
 			Date:  "19-е Сентября 2019 года",
 			Summary: `
@@ -142,4 +146,5 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos
 `,
 		},
 	}
+	h.globID = 2 // last id
 }
