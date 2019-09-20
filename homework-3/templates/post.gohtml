@@ -1,47 +1,47 @@
 {{define "post"}}
-<!doctype html>
-<html lang="ru">
-<head>
-  {{template "head"}}
-  <title>{{.Title}}</title>
-</head>
+    <!doctype html>
+    <html lang="ru">
+    <head>
+        {{template "head"}}
+        <title>{{.Title}}</title>
+    </head>
     <body class="uk-background-muted">
 
     <div class="uk-margin-left uk-margin-right uk-margin-top">
-    <div class="uk-card uk-card-default uk-card-hover uk-width-1-1">
-      <div class="uk-card-header">
-        <div class="uk-grid-small uk-flex-middle" uk-grid>
-          <div class="uk-width-auto">
-            <img class="uk-border-circle" width="40" height="40" src="../static/images/avatar.png">
-          </div>
-          <div class="uk-width-expand">
-            <h2 class="uk-card-title ">{{.Title}}</h2>
-            <p class="uk-text-meta">{{.Date}}</p>
-          </div>
+        <div class="uk-card uk-card-default uk-card-hover uk-width-1-1">
+            <div class="uk-card-header">
+                <div class="uk-grid-small uk-flex-middle" uk-grid>
+                    <div class="uk-width-auto">
+                        <img class="uk-border-circle" width="40" height="40" src="../static/images/avatar.png">
+                    </div>
+                    <div class="uk-width-expand">
+                        <h2 class="uk-card-title ">{{.Title}}</h2>
+                        <p class="uk-text-meta">{{.Date}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="uk-card-body">
+                <p>{{.Summary}}</p>
+            </div>
+            <div class="uk-card-footer">
+                <p>{{.Body}}</p>
+            </div>
+            <div class="uk-card-footer">
+                <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts"><< Вернуться</a>
+            </div>
         </div>
-      </div>
-      <div class="uk-card-body">
-        <p>{{.Summary}}</p>
-      </div>
-      <div class="uk-card-footer">
-        <p>{{.Body}}</p>
-      </div>
-      <div class="uk-card-footer">
-        <a class="uk-link-heading uk-text-primary uk-button-text" href="/posts"><< Вернуться</a>
-      </div>
-    </div>
         <div class="uk-flex uk-flex-right uk-margin-small-top uk-margin-small-bottom">
-            <form action="/posts/edit/{{.ID}}">
-                <button class="uk-button uk-button-primary uk-margin-right">Редактировать</button>
-            </form>
-            <form method="post" action="/posts/delete/{{.ID}}">
-                <button class="uk-button uk-button-danger" onclick="return confirm('Вы уверены, что хотите УДАЛИТЬ пост?')">Удалить</button>
-            </form>
+            {{/*            <form action="/posts/edit/{{.ID}}">*/}}
+            {{/*                <button class="uk-button uk-button-primary uk-margin-right">Редактировать</button>*/}}
+            {{/*            </form>*/}}
+            {{/*            <form method="post" action="/posts/delete/{{.ID}}">*/}}
+            {{/*                <button class="uk-button uk-button-danger" onclick="return confirm('Вы уверены, что хотите УДАЛИТЬ пост?')">Удалить</button>*/}}
+            {{/*            </form>*/}}
         </div>
     </div>
 
     {{template "footer"}}
     </body>
-</html>
+    </html>
 {{end}}
 
