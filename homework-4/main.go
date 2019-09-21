@@ -66,24 +66,17 @@ func main() {
 	mux.Use(middleware.Recoverer)
 	mux.Get("/", handlers.mainPageForm)
 	mux.Route(apiURL, func(r chi.Router) {
-		r.Post(createURL, handlers.createPostPage)
-		r.Post(editURL+"/{id}", handlers.editPostPage)
-		r.Post(deleteURL+"/{id}", handlers.deletePostPage)
+		r.Route(postsURL, func(r chi.Router) {
+			r.Post(createURL, handlers.createPostPage)
+			r.Post(editURL+"/{id}", handlers.editPostPage)
+			r.Post(deleteURL+"/{id}", handlers.deletePostPage)
+		})
 	})
 	mux.Route(postsURL, func(r chi.Router) {
-		r.Get("/{id}", handlers.postPageForm)
 		r.Get("/", handlers.mainPageForm)
-		//r.Route(deleteURL, func(r chi.Router) {
-		//	r.Post("/{id}", handlers.deletePostPage)
-		//})
-		r.Route(createURL, func(r chi.Router) {
-			r.Get("/", handlers.createPostPageForm)
-			//r.Post("/", handlers.createPostPage)
-		})
-		r.Route(editURL, func(r chi.Router) {
-			r.Get("/{id}", handlers.editPostPageForm)
-			//r.Post("/{id}", handlers.editPostPage)
-		})
+		r.Get("/{id}", handlers.postPageForm)
+		r.Get(createURL, handlers.createPostPageForm)
+		r.Get(editURL+"/{id}", handlers.editPostPageForm)
 	})
 
 	// custom server is for custom parameters & graceful shutdown

@@ -60,7 +60,7 @@
                 return false
               }" uk-tooltip="title: Удалить; pos: top" class="uk-icon-button" href="#" uk-icon="icon: trash"
            style="color: red;"></a>
-        <form action="/posts/delete/{{.ID}}" id="del_form_{{.ID}}" method="post">
+        <form action="/api/v1/posts/delete/{{.ID}}" id="del_form_{{.ID}}" method="post">
             <input type="hidden" name="" value="">
         </form>
     </div>
