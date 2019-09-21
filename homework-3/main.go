@@ -27,8 +27,10 @@ const (
 	templatePath = "templates"
 	postsURL     = "/posts"
 	editURL      = "/edit"
+	editHTML     = "/edit.html"
 	deleteURL    = "/delete"
 	createURL    = "/create"
+	createHTML   = "/create.html"
 	staticPath   = "/static"
 )
 
@@ -36,27 +38,26 @@ const (
 type Post struct {
 	ID      int
 	Title   string
-	Date    string // todo change to time.Time?
+	Date    string // todo change to time.Time
 	Summary string
 	Body    template.HTML
 }
 
-type dbPosts map[string]Post // todo - need xSQL storage instead map
+type dbPosts map[string]Post
 
 // Handler is the global handlers struct
 type Handler struct {
-	posts  dbPosts
-	tGlob  *template.Template
-	globID int
-	mux    sync.Mutex
+	posts    dbPosts
+	tmplGlob *template.Template
+	globID   int
+	mux      sync.Mutex
 }
 
 func main() {
 
 	// new handler struct
 	handlers := &Handler{
-		posts: dbPosts{},
-		tGlob: template.Must(template.ParseGlob(path.Join(templatePath, templateExt))),
+		tmplGlob: template.Must(template.ParseGlob(path.Join(templatePath, templateExt))),
 	}
 	handlers.initPosts()
 
@@ -64,10 +65,10 @@ func main() {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
-	mux.Get("/", handlers.mainPage)
+	mux.Get("/", handlers.mainPageForm)
 	mux.Route(postsURL, func(r chi.Router) {
-		r.Get("/{id}", handlers.postPage)
-		r.Get("/", handlers.mainPage)
+		r.Get("/{id}", handlers.postPageForm)
+		r.Get("/", handlers.mainPageForm)
 		r.Route(deleteURL, func(r chi.Router) {
 			r.Post("/{id}", handlers.deletePostPage)
 		})

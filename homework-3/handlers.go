@@ -16,9 +16,9 @@ import (
 	"strconv"
 )
 
-func (h *Handler) mainPage(w http.ResponseWriter, _ *http.Request) {
+func (h *Handler) mainPageForm(w http.ResponseWriter, _ *http.Request) {
 	var b bytes.Buffer // no need to show bad content
-	if err := h.tGlob.ExecuteTemplate(&b, "index", h.posts); err != nil {
+	if err := h.tmplGlob.ExecuteTemplate(&b, "index", h.posts); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -28,7 +28,7 @@ func (h *Handler) mainPage(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (h *Handler) postPage(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) postPageForm(w http.ResponseWriter, r *http.Request) {
 	postNum := chi.URLParam(r, "id")
 	if _, ok := h.posts[postNum]; !ok {
 		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -37,7 +37,7 @@ func (h *Handler) postPage(w http.ResponseWriter, r *http.Request) {
 	post := h.posts[postNum] // create copy for markdown convert
 	post.Body = template.HTML(blackfriday.Run([]byte(post.Body)))
 	var b bytes.Buffer // no need to show bad content
-	if err := h.tGlob.ExecuteTemplate(&b, "post", post); err != nil {
+	if err := h.tmplGlob.ExecuteTemplate(&b, "post", post); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -50,7 +50,7 @@ func (h *Handler) postPage(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) editPostPageForm(w http.ResponseWriter, r *http.Request) {
 	postNum := chi.URLParam(r, "id")
 	var b bytes.Buffer // no need to show bad content
-	if err := h.tGlob.ExecuteTemplate(&b, "edit", h.posts[postNum]); err != nil {
+	if err := h.tmplGlob.ExecuteTemplate(&b, "edit", h.posts[postNum]); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
@@ -81,7 +81,7 @@ func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) createPostPageForm(w http.ResponseWriter, r *http.Request) {
 	var b bytes.Buffer // no need to show bad content
 	post := Post{}
-	if err := h.tGlob.ExecuteTemplate(&b, "create", post); err != nil {
+	if err := h.tmplGlob.ExecuteTemplate(&b, "create", post); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return

@@ -13,8 +13,7 @@
 
     <div class="uk-flex uk-flex-right">
         <a uk-tooltip="title: Добавить новый; pos: left" class="uk-icon-button uk-margin-top uk-margin-right"
-           href="/posts/create/" uk-icon="icon: plus" style="background: forestgreen; color: white;"></a>
-        {{/*    </form>*/}}
+           href="/posts/create" uk-icon="icon: plus" style="background: forestgreen; color: white;"></a>
     </div>
 
     <div class="uk-margin-left uk-margin-right uk-margin-top">
@@ -55,13 +54,13 @@
         <a uk-tooltip="title: Редактировать; pos: top" class="uk-icon-button "
            href="/posts/edit/{{.ID}}" uk-icon="icon: file-edit" style="color: deepskyblue;"></a>
         <a onclick="
-            if (confirm('Вы уверены, что хотите УДАЛИТЬ пост?')) {
-              document.getElementById('del_form').submit()}
+            if (confirm('Вы уверены, что хотите УДАЛИТЬ этот пост?')) {
+              document.getElementById('del_form_{{.ID}}').submit()}
               else {
                 return false
               }" uk-tooltip="title: Удалить; pos: top" class="uk-icon-button" href="#" uk-icon="icon: trash"
            style="color: red;"></a>
-        <form action="/posts/delete/{{.ID}}" id="del_form" method="post">
+        <form action="/posts/delete/{{.ID}}" id="del_form_{{.ID}}" method="post">
             <input type="hidden" name="" value="">
         </form>
     </div>
