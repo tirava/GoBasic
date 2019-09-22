@@ -1,6 +1,6 @@
 /*
- * HomeWork-3: Simple blog
- * Created on 18.09.2019 23:11
+ * HomeWork-4: Simple blog - MySQL
+ * Created on 22.09.2019 13:11
  * Copyright (c) 2019 - Eugene Klimov
  */
 
@@ -21,16 +21,20 @@ import (
 	"syscall"
 )
 
+// Constants
 const (
-	servAddr     = ":8080"
-	templateExt  = "*.gohtml"
-	templatePath = "templates"
-	postsURL     = "/posts"
-	editURL      = "/edit"
-	deleteURL    = "/delete"
-	createURL    = "/create"
-	apiURL       = "/api/v1"
-	staticPath   = "/static"
+	SERVADDR     = ":8080"
+	TEMPLATEEXT  = "*.gohtml"
+	TEMPLATEPATH = "templates"
+	POSTSURL     = "/posts"
+	EDITURL      = "/edit"
+	DELETEURL    = "/delete"
+	CREATEURL    = "/create"
+	APIURL       = "/api/v1"
+	STATICPATH   = "/static"
+	TITLE        = "title"
+	DATE         = "date"
+	SUMMARY      = "summary"
 )
 
 // Post is the base post type
@@ -56,7 +60,7 @@ func main() {
 
 	// new handler struct
 	handlers := &Handler{
-		tmplGlob: template.Must(template.ParseGlob(path.Join(templatePath, templateExt))),
+		tmplGlob: template.Must(template.ParseGlob(path.Join(TEMPLATEPATH, TEMPLATEEXT))),
 	}
 	handlers.initPosts()
 
@@ -65,25 +69,24 @@ func main() {
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
 	mux.Get("/", handlers.mainPageForm)
-	mux.Route(apiURL, func(r chi.Router) {
-		r.Route(postsURL, func(r chi.Router) {
-			r.Post(createURL, handlers.createPostPage)
-			r.Post(editURL+"/{id}", handlers.editPostPage)
-			r.Post(deleteURL+"/{id}", handlers.deletePostPage)
+	mux.Route(APIURL, func(r chi.Router) {
+		r.Route(POSTSURL, func(r chi.Router) {
+			r.Post(CREATEURL, handlers.createPostPage)
+			r.Post(EDITURL+"/{id}", handlers.editPostPage)
+			r.Post(DELETEURL+"/{id}", handlers.deletePostPage)
 		})
 	})
-	mux.Route(postsURL, func(r chi.Router) {
-		r.Get("/", handlers.mainPageForm)
-		r.Get("/{id}", handlers.postPageForm)
-		r.Get(createURL, handlers.createPostPageForm)
-		r.Get(editURL+"/{id}", handlers.editPostPageForm)
+	mux.Route(POSTSURL, func(r chi.Router) {
+		r.Get("/", handlers.postsPageForm)
+		r.Get(CREATEURL, handlers.createPostPageForm)
+		r.Get(EDITURL+"/", handlers.editPostPageForm)
 	})
 
 	// custom server is for custom parameters & graceful shutdown
-	srv := &http.Server{Addr: servAddr, Handler: mux}
+	srv := &http.Server{Addr: SERVADDR, Handler: mux}
 
 	// static files
-	mux.Handle(staticPath+"/*", http.StripPrefix(staticPath, http.FileServer(http.Dir("."+staticPath))))
+	mux.Handle(STATICPATH+"/*", http.StripPrefix(STATICPATH, http.FileServer(http.Dir("."+STATICPATH))))
 
 	// graceful shutdown
 	shutdown := make(chan os.Signal)
@@ -98,6 +101,6 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Starting server at:", servAddr)
-	log.Printf("Shutdown server at: %s\n%v", servAddr, srv.ListenAndServe())
+	fmt.Println("Starting server at:", SERVADDR)
+	log.Printf("Shutdown server at: %s\n%v", SERVADDR, srv.ListenAndServe())
 }
