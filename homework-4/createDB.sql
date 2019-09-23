@@ -1,5 +1,5 @@
--- DROP TABLE IF EXISTS posts;
-/*CREATE TABLE posts (
+/*DROP TABLE IF EXISTS posts;
+CREATE TABLE posts (
 	id SERIAL PRIMARY KEY,
 	title TEXT,
 	summary TEXT,
@@ -32,5 +32,5 @@ INSERT INTO posts (title, summary, body) VALUES(
 	"TODO"
 );*/
 
-SELECT id, title, summary, body, updated FROM posts WHERE id = 2;
+-- SELECT id, title, summary, body, updated FROM posts WHERE id = 2;
 SELECT * FROM posts;

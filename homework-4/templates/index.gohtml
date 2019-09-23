@@ -90,14 +90,14 @@
         function commonCreateUpdatePost(id, api, method) {
             let postEdit = document.querySelector(`fieldset[id="editPost"]`);
             let title = postEdit.querySelector('input[id="title"]').value;
-            let date = postEdit.querySelector('input[id="date"]').value;
+            // let date = postEdit.querySelector('input[id="date"]').value;
             let summary = postEdit.querySelector('textarea[id="summary"]').value;
             let body = postEdit.querySelector('textarea[id="body"]').value;
             fetch(api + id, {
                 method: method,
                 body: JSON.stringify({
                     title,
-                    date,
+                    // date,
                     summary,
                     body,
                 })

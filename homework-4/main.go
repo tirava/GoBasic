@@ -41,9 +41,6 @@ func main() {
 		db:       db,
 	}
 
-	// fill posts
-	//handlers.initPosts()
-
 	// prepare server, routes & middleware
 	srv := &http.Server{Addr: SERVADDR, Handler: handlers.prepareRoutes()}
 

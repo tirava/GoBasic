@@ -24,6 +24,7 @@ type Post struct {
 //type dbPosts map[string]Post
 type dbPosts []Post
 
+// get one or all posts
 func (p *dbPosts) getPosts(id string, db *sql.DB) (dbPosts, error) {
 	var rows *sql.Rows
 	var err error
@@ -50,23 +51,20 @@ func (p *dbPosts) getPosts(id string, db *sql.DB) (dbPosts, error) {
 	return posts, nil
 }
 
-func (p dbPosts) delete(id string) error {
-	//if _, ok := p[id]; !ok {
-	//	return fmt.Errorf("post not found: %v", id)
-	//}
-	//delete(p, id)
-	return nil
+// create one post
+func (p *dbPosts) createPost(post *Post, db *sql.DB) error {
+	_, err := db.Exec(INSERTPOST, post.Title, post.Summary, post.Body)
+	return err
 }
 
-func (p dbPosts) update(post *Post) error {
-	//if _, ok := p[post.ID]; !ok {
-	//	return fmt.Errorf("post not found: %v", post.ID)
-	//}
-	//p[post.ID] = *post
-	return nil
+// delete one post
+func (p *dbPosts) deletePost(id string, db *sql.DB) error {
+	_, err := db.Exec(DELETEPOST, id)
+	return err
 }
 
-func (p dbPosts) create(post *Post) error {
-	//p[post.ID] = *post
-	return nil
+// update one post
+func (p *dbPosts) updatePost(post *Post, db *sql.DB) error {
+	_, err := db.Exec(UPDATEPOST, post.Title, post.Summary, post.Body, post.ID)
+	return err
 }

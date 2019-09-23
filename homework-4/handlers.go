@@ -59,15 +59,20 @@ func (h *Handler) postsPageForm(w http.ResponseWriter, r *http.Request) {
 	h.execTemplate(w, posts[0], "post")
 }
 
-// crete post page
+// create post page
 func (h *Handler) createPostPageForm(w http.ResponseWriter, _ *http.Request) {
 	h.execTemplate(w, Post{}, "create")
 }
 
 // edit post page
 func (h *Handler) editPostPageForm(w http.ResponseWriter, r *http.Request) {
-	//post := h.posts[r.URL.Query().Get("id")]
-	//h.execTemplate(w, post, "edit")
+	posts, err := h.posts.getPosts(r.URL.Query().Get("id"), h.db)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		return
+	}
+	h.execTemplate(w, posts[0], "edit")
 }
 
 // exec template helper
@@ -81,17 +86,15 @@ func (h *Handler) execTemplate(w http.ResponseWriter, post Post, tmpl string) {
 
 // api create post
 func (h *Handler) createPostPage(w http.ResponseWriter, r *http.Request) {
-	//post := h.decodePost(w, r)
-	//if post == nil {
-	//	return
-	//}
-	//post.ID = h.nextGlobID()
-	//if err := h.posts.create(post); err != nil {
-	//	//if err := post.create(); err != nil {
-	//	h.sendError(w, http.StatusInternalServerError, err, "error while create post")
-	//	return
-	//}
-	//w.WriteHeader(http.StatusCreated)
+	post := h.decodePost(w, r)
+	if post == nil {
+		return
+	}
+	if err := h.posts.createPost(post, h.db); err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while create post")
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
 }
 
 // api edit post
@@ -102,9 +105,19 @@ func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	post.ID = postNum
-	if err := h.posts.update(post); err != nil {
-		//if err := post.update(); err != nil {
+	err := h.posts.updatePost(post, h.db)
+	if err != nil {
 		h.sendError(w, http.StatusInternalServerError, err, "error while update post")
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+// api delete post
+func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
+	err := h.posts.deletePost(chi.URLParam(r, "id"), h.db)
+	if err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while delete post")
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -119,13 +132,4 @@ func (h *Handler) decodePost(w http.ResponseWriter, r *http.Request) *Post {
 		return nil
 	}
 	return post
-}
-
-// api delete post
-func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
-	if err := h.posts.delete(chi.URLParam(r, "id")); err != nil {
-		h.sendError(w, http.StatusInternalServerError, err, "error while delete post")
-		return
-	}
-	w.WriteHeader(http.StatusOK)
 }
