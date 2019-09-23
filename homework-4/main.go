@@ -37,23 +37,19 @@ const (
 	SUMMARY      = "summary"
 )
 
-// Post is the base post type
-type Post struct {
-	ID      int
-	Title   string
-	Date    string // todo change to time.Time
-	Summary string
-	Body    template.HTML
-}
-
-type dbPosts map[string]Post
-
-// Handler is the global handlers struct
+// Handler is the global handlers struct.
 type Handler struct {
 	posts    dbPosts
 	tmplGlob *template.Template
 	globID   int
 	mux      sync.Mutex
+}
+
+// Error model.
+type Error struct {
+	Code  int    `json:"code"`
+	Err   string `json:"error"`
+	Descr string `json:"descr"`
 }
 
 func main() {
@@ -68,13 +64,11 @@ func main() {
 	mux := chi.NewRouter()
 	mux.Use(middleware.Logger)
 	mux.Use(middleware.Recoverer)
-	mux.Get("/", handlers.mainPageForm)
-	mux.Route(APIURL, func(r chi.Router) {
-		r.Route(POSTSURL, func(r chi.Router) {
-			r.Post(CREATEURL, handlers.createPostPage)
-			r.Post(EDITURL+"/{id}", handlers.editPostPage)
-			r.Post(DELETEURL+"/{id}", handlers.deletePostPage)
-		})
+	mux.HandleFunc("/", handlers.mainPageForm)
+	mux.Route(APIURL+POSTSURL, func(r chi.Router) {
+		r.Post(CREATEURL, handlers.createPostPage)
+		r.Put("/{id}", handlers.editPostPage)
+		r.Delete("/{id}", handlers.deletePostPage)
 	})
 	mux.Route(POSTSURL, func(r chi.Router) {
 		r.Get("/", handlers.postsPageForm)

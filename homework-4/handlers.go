@@ -7,6 +7,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/go-chi/chi"
 	"gopkg.in/russross/blackfriday.v2"
 	"html/template"
@@ -52,20 +53,23 @@ func (h *Handler) editPostPageForm(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 	postNum := chi.URLParam(r, "id")
-	id, err := strconv.Atoi(postNum)
+	post := &Post{}
+	err := json.NewDecoder(r.Body).Decode(post)
 	if err != nil {
-		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		h.sendError(w, http.StatusInternalServerError, err, "error while decoding post body for update")
 		return
 	}
-	post := Post{
-		ID:      id,
-		Title:   r.FormValue(TITLE),
-		Date:    r.FormValue(DATE),
-		Summary: r.FormValue(SUMMARY),
-		Body:    template.HTML(r.FormValue("body")),
+	id, err := strconv.Atoi(postNum)
+	if err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while preparing post id for update")
+		return
 	}
-	h.posts[postNum] = post
-	http.Redirect(w, r, POSTSURL+"/?id="+postNum, http.StatusFound)
+	post.ID = id
+	if err := h.posts.update(post); err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while update post")
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *Handler) createPostPageForm(w http.ResponseWriter, r *http.Request) {
@@ -78,21 +82,44 @@ func (h *Handler) createPostPageForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) createPostPage(w http.ResponseWriter, r *http.Request) {
-	id := h.nextGlobID()
-	ids := strconv.Itoa(id)
-	h.posts[ids] = Post{
-		ID:      id,
-		Title:   r.FormValue(TITLE),
-		Date:    r.FormValue(DATE),
-		Summary: r.FormValue(SUMMARY),
-		Body:    template.HTML(r.FormValue("body")),
+	post := &Post{}
+	err := json.NewDecoder(r.Body).Decode(post)
+	if err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while decoding post body for create")
+		return
 	}
-	http.Redirect(w, r, POSTSURL+"/?id="+ids, http.StatusFound)
+	post.ID = h.nextGlobID()
+	if err := h.posts.create(post); err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while create post")
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
-	delete(h.posts, chi.URLParam(r, "id"))
-	http.Redirect(w, r, POSTSURL+"/", http.StatusFound)
+	if err := h.posts.delete(chi.URLParam(r, "id")); err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while delete post")
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (h *Handler) sendError(w http.ResponseWriter, code int, err error, descr string) {
+	log.Println(err, descr)
+	w.WriteHeader(code)
+	errMsg := Error{
+		Code:  code,
+		Err:   err.Error(),
+		Descr: descr,
+	}
+	data, err := json.Marshal(errMsg)
+	if err != nil {
+		log.Println("Can't marshal error data:", err)
+		return
+	}
+	if _, err = w.Write(data); err != nil {
+		log.Println("Can't write to ResponseWriter:", err)
+	}
 }
 
 func (h *Handler) nextGlobID() int {
