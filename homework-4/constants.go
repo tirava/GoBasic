@@ -19,9 +19,9 @@ const (
 	DBNAME       = "blog"
 	DSN          = "/" + DBNAME + "?charset=utf8&interpolateParams=true"
 	TABLENAME    = "posts"
-	GETALLPOSTS  = "SELECT id, title, summary, body, updated FROM " + TABLENAME + " ORDER BY id DESC"
-	GETONEPOST   = "SELECT id, title, summary, body, updated FROM " + TABLENAME + " WHERE id = ?"
+	GETALLPOSTS  = "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + TABLENAME + " ORDER BY id DESC"
+	GETONEPOST   = "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + TABLENAME + " WHERE id = ?"
 	DELETEPOST   = "DELETE FROM " + TABLENAME + " WHERE id = ?"
-	INSERTPOST   = "INSERT INTO " + TABLENAME + " (title, summary, summary) VALUES(?, ?, ?)"
-	UPDATEPOST   = "UPDATE " + TABLENAME + " SET title = ?, summary = ? summary = ? WHERE ID = ?"
+	INSERTPOST   = "INSERT INTO " + TABLENAME + " (title, summary, body) VALUES(?, ?, ?)"
+	UPDATEPOST   = "UPDATE " + TABLENAME + " SET title = ?, summary = ?, body = ? WHERE ID = ?"
 )

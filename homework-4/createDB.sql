@@ -32,5 +32,4 @@ INSERT INTO posts (title, summary, body) VALUES(
 	"TODO"
 );*/
 
--- SELECT id, title, summary, body, updated FROM posts WHERE id = 2;
-SELECT * FROM posts;
+-- SELECT * FROM posts;

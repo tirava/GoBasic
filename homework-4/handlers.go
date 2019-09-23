@@ -14,7 +14,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"sync"
 )
 
 // Handler is the global server handlers struct.
@@ -22,8 +21,6 @@ type Handler struct {
 	db       *sql.DB
 	posts    dbPosts
 	tmplGlob *template.Template
-	//globID   int
-	mux sync.Mutex
 	Error
 }
 
