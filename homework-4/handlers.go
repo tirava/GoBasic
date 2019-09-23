@@ -9,7 +9,6 @@ package main
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"github.com/go-chi/chi"
 	"gopkg.in/russross/blackfriday.v2"
 	"html/template"
@@ -28,49 +27,13 @@ type Handler struct {
 	Error
 }
 
-// get all posts from DB
-func (h *Handler) getAllPosts() error {
-	rows, err := h.db.Query(GETALLPOSTS)
-	if err != nil {
-		return fmt.Errorf("error in all db.query: %v", err)
-	}
-	for rows.Next() {
-		post := Post{}
-		err = rows.Scan(&post.ID, &post.Title, &post.Summary, &post.Body, &post.Date)
-		if err != nil {
-			return fmt.Errorf("error in all row.scan: %v", err)
-		}
-		h.posts = append(h.posts, post)
-	}
-	if err := rows.Close(); err != nil {
-		return err
-	}
-	return nil
-}
-
-// get one post from DB
-func (h *Handler) getOnePost(id string) (Post, error) {
-	post := Post{}
-	rows, err := h.db.Query(GETONEPOST, id)
-	if err != nil {
-		return post, fmt.Errorf("error in one db.query: %v", err)
-	}
-	rows.Next()
-	if err := rows.Scan(&post.ID, &post.Title, &post.Summary, &post.Body, &post.Date); err != nil {
-		return post, fmt.Errorf("error in one row.scan: %v", err)
-	}
-	if err := rows.Close(); err != nil {
-		return post, fmt.Errorf("error in one row.close: %v", err)
-	}
-	return post, nil
-}
-
 // main page
 func (h *Handler) mainPageForm(w http.ResponseWriter, _ *http.Request) {
-	h.posts = dbPosts{}
-	if err := h.getAllPosts(); err != nil {
+	var err error
+	h.posts, err = h.posts.getPosts("", h.db)
+	if err != nil {
 		log.Println(err)
-		//http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if err := h.tmplGlob.ExecuteTemplate(w, "index", h.posts); err != nil {
@@ -86,14 +49,14 @@ func (h *Handler) postsPageForm(w http.ResponseWriter, r *http.Request) {
 	if postNum == "" {
 		http.Redirect(w, r, "/", http.StatusMovedPermanently)
 	}
-	post, err := h.getOnePost(postNum)
+	posts, err := h.posts.getPosts(postNum, h.db)
 	if err != nil {
 		log.Println(err)
-		//http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
-	post.Body = template.HTML(blackfriday.Run([]byte(post.Body)))
-	h.execTemplate(w, post, "post")
+	posts[0].Body = template.HTML(blackfriday.Run([]byte(posts[0].Body)))
+	h.execTemplate(w, posts[0], "post")
 }
 
 // crete post page
@@ -166,65 +129,3 @@ func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 }
-
-// id counter
-//func (h *Handler) nextGlobID() string {
-//	h.mux.Lock()
-//	h.globID++
-//	h.mux.Unlock()
-//	return strconv.Itoa(h.globID)
-//}
-
-// fill post map
-//func (h *Handler) initPosts() {
-//	h.posts = dbPosts{
-//		"1": {
-//			ID:      "1",
-//			Title:   "Мой первый пост!",
-//			Date:    "18-е Сентября 2019 года",
-//			Summary: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.",
-//			Body: `
-//Здесь основной текст.
-//# Markdown!
-//*Это* **круто**!
-//`,
-//		},
-//		"2": {
-//			ID:    "2",
-//			Title: "Это уже второй пост!",
-//			Date:  "19-е Сентября 2019 года",
-//			Summary: `
-//Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.
-//Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.
-//`,
-//			Body: `
-//Разобрался в шаблонах и маркдаунах, как их совместить.
-//
-//Теперь понять, как переходить на отдельные посты.
-//# Anybody!
-//*Hz* **cool**!
-//`,
-//		},
-//		"3": {
-//			ID:      "3",
-//			Title:   "Пример основных вариантов разметки Markdown",
-//			Date:    "20-е Сентября 2019 года",
-//			Summary: "Официальное руководство по синтаксису Markdown мне кажется слишком длинным и не слишком наглядным, поэтому я составил краткое руководство, которое поможет выучить или повторить синтаксис Маркдауна за час.",
-//			Body:    `todo`,
-//		},
-//	}
-//	h.globID = 3 // last id
-//
-//	items := []*Post{}
-//
-//	rows, err := h.DB.Query("SELECT id, title, updated FROM items")
-//	__err_panic(err)
-//	for rows.Next() {
-//		post := &Item{}
-//		err = rows.Scan(&post.Id, &post.Title, &post.Updated)
-//		__err_panic(err)
-//		items = append(items, post)
-//	}
-//	// надо закрывать соединение, иначе будет течь
-//	rows.Close()
-//}
