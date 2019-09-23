@@ -8,7 +8,10 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"github.com/go-ini/ini"
+	_ "github.com/go-sql-driver/mysql"
 	"html/template"
 	"log"
 	"net/http"
@@ -28,9 +31,22 @@ const (
 	CREATEURL    = "/create"
 	APIURL       = "/api/v1"
 	STATICPATH   = "/static"
+	DSN          = "/blog?charset=utf8&interpolateParams=true"
 )
 
 func main() {
+
+	// connect to DB
+	db, err := sql.Open("mysql", myCnf("client")+DSN)
+	if err != nil {
+		log.Fatalln("Can't open DB:", err)
+	}
+	defer db.Close()
+	db.SetMaxOpenConns(25)
+	// 1st connect wil be here
+	if err = db.Ping(); err != nil {
+		log.Fatalln("Can't ping DB:", err)
+	}
 
 	// new handlers struct
 	handlers := &Handler{
@@ -58,4 +74,23 @@ func main() {
 
 	fmt.Println("Starting server at:", SERVADDR)
 	log.Printf("Shutdown server at: %s\n%v", SERVADDR, srv.ListenAndServe())
+}
+
+// read MySQL parameters from .my.cnf
+func myCnf(profile string) string {
+	cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, os.Getenv("HOME")+"/.my.cnf")
+	if err != nil {
+		return ""
+	}
+	for _, s := range cfg.Sections() {
+		if s.Name() != profile {
+			continue
+		}
+		user := s.Key("user")
+		password := s.Key("password")
+		host := s.Key("host")
+		port := s.Key("port")
+		return fmt.Sprintf("%s:%s@tcp(%s:%s)", user, password, host, port)
+	}
+	return ""
 }
