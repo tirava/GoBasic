@@ -16,9 +16,9 @@
            href="/posts/create" uk-icon="icon: plus" style="background: forestgreen; color: white;"></a>
     </div>
 
-    <div class="uk-margin-left uk-margin-right uk-margin-top">
+    <div class="uk-margin-top uk-margin-right uk-margin-left uk-child-width-1-1 uk-grid-collapse" uk-height-match=".uk-card-body" uk-grid>
         {{range .}}
-            <div class="uk-card uk-card-default uk-card-hover uk-width-1-1 uk-margin-bottom">
+            <div class="uk-card uk-card-default uk-card-hover uk-margin-bottom ">
                 <div class="uk-card-header">
                     <div class="uk-flex uk-flex-right">
                         {{template "tools" .}}
