@@ -15,7 +15,6 @@ import (
 	"os"
 	"os/signal"
 	"path"
-	"sync"
 	"syscall"
 )
 
@@ -26,26 +25,10 @@ const (
 	TEMPLATEPATH = "templates"
 	POSTSURL     = "/posts"
 	EDITURL      = "/edit"
-	DELETEURL    = "/delete"
 	CREATEURL    = "/create"
 	APIURL       = "/api/v1"
 	STATICPATH   = "/static"
 )
-
-// Handler is the global handlers struct.
-type Handler struct {
-	posts    dbPosts
-	tmplGlob *template.Template
-	globID   int
-	mux      sync.Mutex
-}
-
-// Error model.
-type Error struct {
-	ErrCode  int    `json:"code"`
-	ErrText  string `json:"error"`
-	ErrDescr string `json:"descr"`
-}
 
 func main() {
 

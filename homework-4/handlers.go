@@ -15,7 +15,17 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"sync"
 )
+
+// Handler is the global server handlers struct.
+type Handler struct {
+	posts    dbPosts
+	tmplGlob *template.Template
+	globID   int
+	mux      sync.Mutex
+	Error
+}
 
 // main page
 func (h *Handler) mainPageForm(w http.ResponseWriter, _ *http.Request) {
@@ -69,6 +79,7 @@ func (h *Handler) createPostPage(w http.ResponseWriter, r *http.Request) {
 	}
 	post.ID = h.nextGlobID()
 	if err := h.posts.create(post); err != nil {
+		//if err := post.create(); err != nil {
 		h.sendError(w, http.StatusInternalServerError, err, "error while create post")
 		return
 	}
@@ -84,6 +95,7 @@ func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 	}
 	post.ID = postNum
 	if err := h.posts.update(post); err != nil {
+		//if err := post.update(); err != nil {
 		h.sendError(w, http.StatusInternalServerError, err, "error while update post")
 		return
 	}
@@ -108,25 +120,6 @@ func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-}
-
-// errors helper
-func (h *Handler) sendError(w http.ResponseWriter, code int, err error, descr string) {
-	log.Println(descr, "-", err)
-	w.WriteHeader(code)
-	errMsg := Error{
-		ErrCode:  code,
-		ErrText:  err.Error(),
-		ErrDescr: descr,
-	}
-	data, err := json.Marshal(errMsg)
-	if err != nil {
-		log.Println("Can't marshal error data:", err)
-		return
-	}
-	if _, err = w.Write(data); err != nil {
-		log.Println("Can't write to ResponseWriter:", err)
-	}
 }
 
 // id counter

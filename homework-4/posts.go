@@ -42,3 +42,16 @@ func (p dbPosts) create(post *Post) error {
 	p[post.ID] = *post
 	return nil
 }
+
+//func (p *Post) create() error {
+//	p[post.ID] = *post
+//	return nil
+//}
+
+//func (p *Post) update() error {
+//	if _, ok := p[post.ID]; !ok {
+//		return fmt.Errorf("post not found: %v", post.ID)
+//	}
+//	p[post.ID] = *post
+//	return nil
+//}
