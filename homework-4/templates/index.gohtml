@@ -81,12 +81,10 @@
 
         function updatePost(id) {
             commonCreateUpdatePost(id, `/api/v1/posts/`, 'PUT')
-            return false
         }
 
         function createPost() {
             commonCreateUpdatePost("", `/api/v1/posts/create`, 'POST')
-            return false
         }
 
         function commonCreateUpdatePost(id, api, method) {

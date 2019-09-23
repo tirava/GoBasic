@@ -9,6 +9,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"gopkg.in/russross/blackfriday.v2"
 	"html/template"
 	"log"
@@ -16,6 +17,7 @@ import (
 	"strconv"
 )
 
+// main page
 func (h *Handler) mainPageForm(w http.ResponseWriter, _ *http.Request) {
 	if err := h.tmplGlob.ExecuteTemplate(w, "index", h.posts); err != nil {
 		log.Println(err)
@@ -24,6 +26,7 @@ func (h *Handler) mainPageForm(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
+// one post page
 func (h *Handler) postsPageForm(w http.ResponseWriter, r *http.Request) {
 	postNum := r.URL.Query().Get("id")
 	if postNum == "" {
@@ -35,22 +38,46 @@ func (h *Handler) postsPageForm(w http.ResponseWriter, r *http.Request) {
 	}
 	post := h.posts[postNum] // create copy for markdown convert
 	post.Body = template.HTML(blackfriday.Run([]byte(post.Body)))
-	if err := h.tmplGlob.ExecuteTemplate(w, "post", post); err != nil {
-		log.Println(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
+	h.execTemplate(w, post, "post")
 }
 
+// crete post page
+func (h *Handler) createPostPageForm(w http.ResponseWriter, r *http.Request) {
+	h.execTemplate(w, Post{}, "create")
+}
+
+// edit post page
 func (h *Handler) editPostPageForm(w http.ResponseWriter, r *http.Request) {
-	postNum := r.URL.Query().Get("id")
-	if err := h.tmplGlob.ExecuteTemplate(w, "edit", h.posts[postNum]); err != nil {
+	post := h.posts[r.URL.Query().Get("id")]
+	h.execTemplate(w, post, "edit")
+}
+
+// exec template helper
+func (h *Handler) execTemplate(w http.ResponseWriter, post Post, tmpl string) {
+	if err := h.tmplGlob.ExecuteTemplate(w, tmpl, post); err != nil {
 		log.Println(err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 }
 
+// api create post
+func (h *Handler) createPostPage(w http.ResponseWriter, r *http.Request) {
+	post := &Post{}
+	err := json.NewDecoder(r.Body).Decode(post)
+	if err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while decoding post body for create")
+		return
+	}
+	post.ID = h.nextGlobID()
+	if err := h.posts.create(post); err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while create post")
+		return
+	}
+	w.WriteHeader(http.StatusCreated)
+}
+
+// api edit post
 func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 	postNum := chi.URLParam(r, "id")
 	post := &Post{}
@@ -72,30 +99,7 @@ func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (h *Handler) createPostPageForm(w http.ResponseWriter, r *http.Request) {
-	post := Post{}
-	if err := h.tmplGlob.ExecuteTemplate(w, "create", post); err != nil {
-		log.Println(err)
-		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
-		return
-	}
-}
-
-func (h *Handler) createPostPage(w http.ResponseWriter, r *http.Request) {
-	post := &Post{}
-	err := json.NewDecoder(r.Body).Decode(post)
-	if err != nil {
-		h.sendError(w, http.StatusInternalServerError, err, "error while decoding post body for create")
-		return
-	}
-	post.ID = h.nextGlobID()
-	if err := h.posts.create(post); err != nil {
-		h.sendError(w, http.StatusInternalServerError, err, "error while create post")
-		return
-	}
-	w.WriteHeader(http.StatusCreated)
-}
-
+// api delete post
 func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
 	if err := h.posts.delete(chi.URLParam(r, "id")); err != nil {
 		h.sendError(w, http.StatusInternalServerError, err, "error while delete post")
@@ -104,6 +108,7 @@ func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// errors helper
 func (h *Handler) sendError(w http.ResponseWriter, code int, err error, descr string) {
 	log.Println(err, descr)
 	w.WriteHeader(code)
@@ -122,6 +127,7 @@ func (h *Handler) sendError(w http.ResponseWriter, code int, err error, descr st
 	}
 }
 
+// id counter
 func (h *Handler) nextGlobID() int {
 	h.mux.Lock()
 	h.globID++
@@ -129,6 +135,26 @@ func (h *Handler) nextGlobID() int {
 	return h.globID
 }
 
+// routes preparer
+func (h *Handler) prepareRoutes() *chi.Mux {
+	mux := chi.NewRouter()
+	mux.Use(middleware.Logger)
+	mux.Use(middleware.Recoverer)
+	mux.HandleFunc("/", h.mainPageForm)
+	mux.Route(APIURL+POSTSURL, func(r chi.Router) {
+		r.Post(CREATEURL, h.createPostPage)
+		r.Put("/{id}", h.editPostPage)
+		r.Delete("/{id}", h.deletePostPage)
+	})
+	mux.Route(POSTSURL, func(r chi.Router) {
+		r.Get("/", h.postsPageForm)
+		r.Get(CREATEURL, h.createPostPageForm)
+		r.Get(EDITURL+"/", h.editPostPageForm)
+	})
+	return mux
+}
+
+// fill post map
 func (h *Handler) initPosts() {
 	h.posts = dbPosts{
 		"1": {

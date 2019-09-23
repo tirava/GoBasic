@@ -9,8 +9,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 	"html/template"
 	"log"
 	"net/http"
@@ -32,9 +30,6 @@ const (
 	CREATEURL    = "/create"
 	APIURL       = "/api/v1"
 	STATICPATH   = "/static"
-	TITLE        = "title"
-	DATE         = "date"
-	SUMMARY      = "summary"
 )
 
 // Handler is the global handlers struct.
@@ -54,33 +49,20 @@ type Error struct {
 
 func main() {
 
-	// new handler struct
+	// new handlers struct
 	handlers := &Handler{
 		tmplGlob: template.Must(template.ParseGlob(path.Join(TEMPLATEPATH, TEMPLATEEXT))),
 	}
+
+	// fill posts slice
 	handlers.initPosts()
 
 	// prepare routes & middleware
-	mux := chi.NewRouter()
-	mux.Use(middleware.Logger)
-	mux.Use(middleware.Recoverer)
-	mux.HandleFunc("/", handlers.mainPageForm)
-	mux.Route(APIURL+POSTSURL, func(r chi.Router) {
-		r.Post(CREATEURL, handlers.createPostPage)
-		r.Put("/{id}", handlers.editPostPage)
-		r.Delete("/{id}", handlers.deletePostPage)
-	})
-	mux.Route(POSTSURL, func(r chi.Router) {
-		r.Get("/", handlers.postsPageForm)
-		r.Get(CREATEURL, handlers.createPostPageForm)
-		r.Get(EDITURL+"/", handlers.editPostPageForm)
-	})
-
-	// custom server is for custom parameters & graceful shutdown
-	srv := &http.Server{Addr: SERVADDR, Handler: mux}
-
-	// static files
+	mux := handlers.prepareRoutes()
 	mux.Handle(STATICPATH+"/*", http.StripPrefix(STATICPATH, http.FileServer(http.Dir("."+STATICPATH))))
+
+	// custom server needs for custom parameters & graceful shutdown
+	srv := &http.Server{Addr: SERVADDR, Handler: mux}
 
 	// graceful shutdown
 	shutdown := make(chan os.Signal)
