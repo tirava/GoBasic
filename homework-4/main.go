@@ -37,15 +37,11 @@ func main() {
 		tmplGlob: template.Must(template.ParseGlob(path.Join(TEMPLATEPATH, TEMPLATEEXT))),
 	}
 
-	// fill posts slice
+	// fill posts
 	handlers.initPosts()
 
-	// prepare routes & middleware
-	mux := handlers.prepareRoutes()
-	mux.Handle(STATICPATH+"/*", http.StripPrefix(STATICPATH, http.FileServer(http.Dir("."+STATICPATH))))
-
-	// custom server needs for custom parameters & graceful shutdown
-	srv := &http.Server{Addr: SERVADDR, Handler: mux}
+	// prepare server, routes & middleware
+	srv := &http.Server{Addr: SERVADDR, Handler: handlers.prepareRoutes()}
 
 	// graceful shutdown
 	shutdown := make(chan os.Signal)

@@ -9,7 +9,6 @@ package main
 import (
 	"encoding/json"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
 	"gopkg.in/russross/blackfriday.v2"
 	"html/template"
 	"log"
@@ -128,25 +127,6 @@ func (h *Handler) nextGlobID() string {
 	h.globID++
 	h.mux.Unlock()
 	return strconv.Itoa(h.globID)
-}
-
-// routes preparer
-func (h *Handler) prepareRoutes() *chi.Mux {
-	mux := chi.NewRouter()
-	mux.Use(middleware.Logger)
-	mux.Use(middleware.Recoverer)
-	mux.HandleFunc("/", h.mainPageForm)
-	mux.Route(APIURL+POSTSURL, func(r chi.Router) {
-		r.Post(CREATEURL, h.createPostPage)
-		r.Put("/{id}", h.editPostPage)
-		r.Delete("/{id}", h.deletePostPage)
-	})
-	mux.Route(POSTSURL, func(r chi.Router) {
-		r.Get("/", h.postsPageForm)
-		r.Get(CREATEURL, h.createPostPageForm)
-		r.Get(EDITURL+"/", h.editPostPageForm)
-	})
-	return mux
 }
 
 // fill post map
