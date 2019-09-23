@@ -42,9 +42,9 @@ type Handler struct {
 
 // Error model.
 type Error struct {
-	Code  int    `json:"code"`
-	Err   string `json:"error"`
-	Descr string `json:"descr"`
+	ErrCode  int    `json:"code"`
+	ErrText  string `json:"error"`
+	ErrDescr string `json:"descr"`
 }
 
 func main() {

@@ -9,12 +9,11 @@ package main
 import (
 	"fmt"
 	"html/template"
-	"strconv"
 )
 
 // Post is the base post type.
 type Post struct {
-	ID      int
+	ID      string
 	Title   string        `json:"title"`
 	Date    string        `json:"date"` // todo convert to DateTime
 	Summary string        `json:"summary"`
@@ -32,16 +31,14 @@ func (p dbPosts) delete(id string) error {
 }
 
 func (p dbPosts) update(post *Post) error {
-	ids := strconv.Itoa(post.ID)
-	if _, ok := p[ids]; !ok {
+	if _, ok := p[post.ID]; !ok {
 		return fmt.Errorf("post not found: %v", post.ID)
 	}
-	p[ids] = *post
+	p[post.ID] = *post
 	return nil
 }
 
 func (p dbPosts) create(post *Post) error {
-	ids := strconv.Itoa(post.ID)
-	p[ids] = *post
+	p[post.ID] = *post
 	return nil
 }

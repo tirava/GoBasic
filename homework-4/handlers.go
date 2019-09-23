@@ -42,7 +42,7 @@ func (h *Handler) postsPageForm(w http.ResponseWriter, r *http.Request) {
 }
 
 // crete post page
-func (h *Handler) createPostPageForm(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) createPostPageForm(w http.ResponseWriter, _ *http.Request) {
 	h.execTemplate(w, Post{}, "create")
 }
 
@@ -63,10 +63,8 @@ func (h *Handler) execTemplate(w http.ResponseWriter, post Post, tmpl string) {
 
 // api create post
 func (h *Handler) createPostPage(w http.ResponseWriter, r *http.Request) {
-	post := &Post{}
-	err := json.NewDecoder(r.Body).Decode(post)
-	if err != nil {
-		h.sendError(w, http.StatusInternalServerError, err, "error while decoding post body for create")
+	post := h.decodePost(w, r)
+	if post == nil {
 		return
 	}
 	post.ID = h.nextGlobID()
@@ -80,23 +78,27 @@ func (h *Handler) createPostPage(w http.ResponseWriter, r *http.Request) {
 // api edit post
 func (h *Handler) editPostPage(w http.ResponseWriter, r *http.Request) {
 	postNum := chi.URLParam(r, "id")
-	post := &Post{}
-	err := json.NewDecoder(r.Body).Decode(post)
-	if err != nil {
-		h.sendError(w, http.StatusInternalServerError, err, "error while decoding post body for update")
+	post := h.decodePost(w, r)
+	if post == nil {
 		return
 	}
-	id, err := strconv.Atoi(postNum)
-	if err != nil {
-		h.sendError(w, http.StatusInternalServerError, err, "error while preparing post id for update")
-		return
-	}
-	post.ID = id
+	post.ID = postNum
 	if err := h.posts.update(post); err != nil {
 		h.sendError(w, http.StatusInternalServerError, err, "error while update post")
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+}
+
+// JSON decoder helper
+func (h *Handler) decodePost(w http.ResponseWriter, r *http.Request) *Post {
+	post := &Post{}
+	err := json.NewDecoder(r.Body).Decode(post)
+	if err != nil {
+		h.sendError(w, http.StatusInternalServerError, err, "error while decoding post body")
+		return nil
+	}
+	return post
 }
 
 // api delete post
@@ -110,12 +112,12 @@ func (h *Handler) deletePostPage(w http.ResponseWriter, r *http.Request) {
 
 // errors helper
 func (h *Handler) sendError(w http.ResponseWriter, code int, err error, descr string) {
-	log.Println(err, descr)
+	log.Println(descr, "-", err)
 	w.WriteHeader(code)
 	errMsg := Error{
-		Code:  code,
-		Err:   err.Error(),
-		Descr: descr,
+		ErrCode:  code,
+		ErrText:  err.Error(),
+		ErrDescr: descr,
 	}
 	data, err := json.Marshal(errMsg)
 	if err != nil {
@@ -128,11 +130,11 @@ func (h *Handler) sendError(w http.ResponseWriter, code int, err error, descr st
 }
 
 // id counter
-func (h *Handler) nextGlobID() int {
+func (h *Handler) nextGlobID() string {
 	h.mux.Lock()
 	h.globID++
 	h.mux.Unlock()
-	return h.globID
+	return strconv.Itoa(h.globID)
 }
 
 // routes preparer
@@ -158,7 +160,7 @@ func (h *Handler) prepareRoutes() *chi.Mux {
 func (h *Handler) initPosts() {
 	h.posts = dbPosts{
 		"1": {
-			ID:      1,
+			ID:      "1",
 			Title:   "Мой первый пост!",
 			Date:    "18-е Сентября 2019 года",
 			Summary: "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos. Aspernatur assumenda cupiditate deserunt ducimus, eveniet, expedita inventore laboriosam magni modi non odio, officia qui sequi similique unde voluptatem.",
@@ -169,7 +171,7 @@ func (h *Handler) initPosts() {
 `,
 		},
 		"2": {
-			ID:    2,
+			ID:    "2",
 			Title: "Это уже второй пост!",
 			Date:  "19-е Сентября 2019 года",
 			Summary: `
@@ -185,7 +187,7 @@ Lorem ipsum dolor sit amet, consectetur adipisicing elit. Odio praesentium, quos
 `,
 		},
 		"3": {
-			ID:      3,
+			ID:      "3",
 			Title:   "Пример основных вариантов разметки Markdown",
 			Date:    "20-е Сентября 2019 года",
 			Summary: "Официальное руководство по синтаксису Markdown мне кажется слишком длинным и не слишком наглядным, поэтому я составил краткое руководство, которое поможет выучить или повторить синтаксис Маркдауна за час.",
