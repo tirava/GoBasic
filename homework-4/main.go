@@ -21,19 +21,6 @@ import (
 	"syscall"
 )
 
-// Constants
-const (
-	SERVADDR     = ":8080"
-	TEMPLATEEXT  = "*.gohtml"
-	TEMPLATEPATH = "templates"
-	POSTSURL     = "/posts"
-	EDITURL      = "/edit"
-	CREATEURL    = "/create"
-	APIURL       = "/api/v1"
-	STATICPATH   = "/static"
-	DSN          = "/blog?charset=utf8&interpolateParams=true"
-)
-
 func main() {
 
 	// connect to DB
@@ -51,10 +38,11 @@ func main() {
 	// new handlers struct
 	handlers := &Handler{
 		tmplGlob: template.Must(template.ParseGlob(path.Join(TEMPLATEPATH, TEMPLATEEXT))),
+		db:       db,
 	}
 
 	// fill posts
-	handlers.initPosts()
+	//handlers.initPosts()
 
 	// prepare server, routes & middleware
 	srv := &http.Server{Addr: SERVADDR, Handler: handlers.prepareRoutes()}

@@ -7,7 +7,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 )
 
@@ -20,26 +19,27 @@ type Post struct {
 	Body    template.HTML `json:"body"`
 }
 
-type dbPosts map[string]Post
+//type dbPosts map[string]Post
+type dbPosts []Post
 
 func (p dbPosts) delete(id string) error {
-	if _, ok := p[id]; !ok {
-		return fmt.Errorf("post not found: %v", id)
-	}
-	delete(p, id)
+	//if _, ok := p[id]; !ok {
+	//	return fmt.Errorf("post not found: %v", id)
+	//}
+	//delete(p, id)
 	return nil
 }
 
 func (p dbPosts) update(post *Post) error {
-	if _, ok := p[post.ID]; !ok {
-		return fmt.Errorf("post not found: %v", post.ID)
-	}
-	p[post.ID] = *post
+	//if _, ok := p[post.ID]; !ok {
+	//	return fmt.Errorf("post not found: %v", post.ID)
+	//}
+	//p[post.ID] = *post
 	return nil
 }
 
 func (p dbPosts) create(post *Post) error {
-	p[post.ID] = *post
+	//p[post.ID] = *post
 	return nil
 }
 
