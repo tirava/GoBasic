@@ -6,7 +6,7 @@
         <title>{{.Title}}</title>
     </head>
     <body class="uk-background-muted">
-{{/*    <form method="post" action="/api/v1/posts/create">*/}}
+    <form onsubmit="createPost()">
         <fieldset id="editPost" class="uk-fieldset">
             <div class="uk-margin-left uk-margin-right uk-margin-top" uk-grid>
                 <div class="uk-card uk-card-default uk-card-hover uk-width-1-1">
@@ -39,10 +39,10 @@
             </div>
         </fieldset>
         <div class="uk-flex uk-flex-right uk-margin-small-top uk-margin-right uk-margin-small-bottom">
-            <button onclick="createPost('{{.ID}}')" class="uk-button uk-button-primary" style="background: forestgreen;">Сохранить
+            <button type="submit" class="uk-button uk-button-primary" style="background: forestgreen;">Сохранить
             </button>
         </div>
-{{/*    </form>*/}}
+    </form>
 
     {{template "footer"}}
     </body>

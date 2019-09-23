@@ -56,19 +56,22 @@
         <a onclick="
                 if (confirm('Вы уверены, что хотите УДАЛИТЬ этот пост?')) {
                 deletePost('{{.ID}}')}
-        {{/*document.getElementById('del_form_{{.ID}}').submit()}*/}}
                 else {
                 return false
                 }" uk-tooltip="title: Удалить; pos: top" class="uk-icon-button" href="#" uk-icon="icon: trash"
            style="color: red;"></a>
-        {{/*        <form action="/api/v1/posts/{{.ID}}" id="del_form_{{.ID}}" method="post">*/}}
-        {{/*            <input type="hidden" name="" value="">*/}}
-        {{/*        </form>*/}}
     </div>
 {{end}}
 
 {{define "Script"}}
     <script>
+        let form = document.querySelector('form');
+        if (form !== null) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+            });
+        }
+
         function deletePost(id) {
             fetch(`/api/v1/posts/${id}`, {method: 'DELETE'})
                 .then(resp => {
@@ -77,13 +80,23 @@
         }
 
         function updatePost(id) {
+            commonCreateUpdatePost(id, `/api/v1/posts/`, 'PUT')
+            return false
+        }
+
+        function createPost() {
+            commonCreateUpdatePost("", `/api/v1/posts/create`, 'POST')
+            return false
+        }
+
+        function commonCreateUpdatePost(id, api, method) {
             let postEdit = document.querySelector(`fieldset[id="editPost"]`);
             let title = postEdit.querySelector('input[id="title"]').value;
             let date = postEdit.querySelector('input[id="date"]').value;
             let summary = postEdit.querySelector('textarea[id="summary"]').value;
             let body = postEdit.querySelector('textarea[id="body"]').value;
-            fetch(`/api/v1/posts/${id}`, {
-                method: 'PUT',
+            fetch(api + id, {
+                method: method,
                 body: JSON.stringify({
                     title,
                     date,
@@ -93,27 +106,6 @@
             })
                 .then(resp => {
                     window.location = `/posts/?id=${id}`
-                })
-        }
-
-        function createPost(id) {
-            let postEdit = document.querySelector(`fieldset[id="editPost"]`);
-            let title = postEdit.querySelector('input[id="title"]').value;
-            let date = postEdit.querySelector('input[id="date"]').value;
-            let summary = postEdit.querySelector('textarea[id="summary"]').value;
-            let body = postEdit.querySelector('textarea[id="body"]').value;
-            fetch(`/api/v1/posts/create`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    title,
-                    date,
-                    summary,
-                    body,
-                })
-            })
-                .then(resp => {
-                    window.location = "/"
-                    // window.location = `/posts/?id=${id}`;
                 })
         }
     </script>
