@@ -1,4 +1,4 @@
-/*DROP TABLE IF EXISTS posts;
+DROP TABLE IF EXISTS posts;
 CREATE TABLE posts (
 	id SERIAL PRIMARY KEY,
 	title TEXT,
@@ -30,6 +30,6 @@ INSERT INTO posts (title, summary, body) VALUES(
 	"Пример основных вариантов разметки Markdown",
 	"Официальное руководство по синтаксису Markdown мне кажется слишком длинным и не слишком наглядным, поэтому я составил краткое руководство, которое поможет выучить или повторить синтаксис Маркдауна за час.",
 	"TODO"
-);*/
+);
 
 -- SELECT * FROM posts;

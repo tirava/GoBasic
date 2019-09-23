@@ -63,7 +63,8 @@ func main() {
 
 // read MySQL parameters from .my.cnf
 func myCnf(profile string) string {
-	cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, os.Getenv("HOME")+"/.my.cnf")
+	cnf := path.Join(os.Getenv("HOME"), ".my.cnf")
+	cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, cnf)
 	if err != nil {
 		return ""
 	}
