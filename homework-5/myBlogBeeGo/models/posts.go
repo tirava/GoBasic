@@ -51,6 +51,7 @@ func (p DBPosts) GetPosts(id string) (DBPosts, error) {
 	} else {
 		rows, err = p.DB.Query(GETALLPOSTS)
 	}
+	defer rows.Close()
 	if err != nil {
 		return posts, fmt.Errorf("error in db.query: %v", err)
 	}
@@ -62,8 +63,8 @@ func (p DBPosts) GetPosts(id string) (DBPosts, error) {
 		}
 		posts.Posts = append(posts.Posts, post)
 	}
-	if err := rows.Close(); err != nil {
-		return posts, err
+	if len(posts.Posts) == 0 {
+		return posts, fmt.Errorf("post not found: %s", id)
 	}
 	return posts, nil
 }

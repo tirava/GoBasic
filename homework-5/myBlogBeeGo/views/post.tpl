@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     {{template "head.tpl"}}
-    <title>{{.Title}}</title>
+    <title>{{.Post.Title}}</title>
 </head>
 <body class="uk-background-muted">
 
@@ -17,16 +17,16 @@
                     <img class="uk-border-circle" width="40" height="40" src="../static/img/avatar.png">
                 </div>
                 <div class="uk-width-expand">
-                    <h2 class="uk-card-title ">{{.Title}}</h2>
-                    <p class="uk-text-meta">{{.Date}}</p>
+                    <h2 class="uk-card-title ">{{.Post.Title}}</h2>
+                    <p class="uk-text-meta">{{.Post.Date}}</p>
                 </div>
             </div>
         </div>
         <div class="uk-card-body">
-            <p>{{.Summary}}</p>
+            <p>{{.Post.Summary}}</p>
         </div>
         <div class="uk-card-footer">
-            <p>{{.Body}}</p>
+            <p>{{.Post.Body}}</p>
         </div>
         <div class="uk-card-footer uk-flex uk-flex-between">
             <a class="uk-link-heading uk-text-primary uk-button-text" href="/"><< Вернуться</a>
