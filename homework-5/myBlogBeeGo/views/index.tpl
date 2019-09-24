@@ -2,12 +2,12 @@
 <html lang="ru">
 <head>
     {{template "head.tpl"}}
-    <title>Блог Евгения Климова</title>
+    <title>{{.BlogName}}</title>
 </head>
 <body class="uk-background-muted">
 <div class="uk-height-small uk-flex uk-flex-center uk-flex-middle uk-background-cover uk-light"
-     data-src="static/images/backheader.jpg" uk-img>
-    <h1 class="uk-heading-divider uk-heading-line uk-text-center uk-text-primary">Блог Евгения Климова</h1>
+     data-src="static/img/backheader.jpg" uk-img>
+    <h1 class="uk-heading-divider uk-heading-line uk-text-center uk-text-primary">{{.BlogName}}</h1>
 </div>
 
 <div class="uk-flex uk-flex-right">
@@ -17,7 +17,7 @@
 
 <div class="uk-margin-top uk-margin-right uk-margin-left uk-child-width-1-1 uk-grid-collapse"
      uk-height-match=".uk-card-body" uk-grid>
-    {{range .}}
+    {{range .Posts}}
         <div class="uk-card uk-card-default uk-card-hover uk-margin-bottom ">
             <div class="uk-card-header">
                 <div class="uk-flex uk-flex-right">
@@ -25,7 +25,7 @@
                 </div>
                 <div class="uk-grid-small uk-flex-middle" uk-grid>
                     <div class="uk-width-auto">
-                        <img class="uk-border-circle" width="40" height="40" src="../static/images/avatar.png">
+                        <img class="uk-border-circle" width="40" height="40" src="../static/img/avatar.png">
                     </div>
                     <div class="uk-width-expand">
                         <h2 class="uk-card-title ">{{.Title}}</h2>

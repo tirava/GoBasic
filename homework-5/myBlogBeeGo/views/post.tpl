@@ -14,7 +14,7 @@
             </div>
             <div class="uk-grid-small uk-flex-middle" uk-grid>
                 <div class="uk-width-auto">
-                    <img class="uk-border-circle" width="40" height="40" src="../static/images/avatar.png">
+                    <img class="uk-border-circle" width="40" height="40" src="../static/img/avatar.png">
                 </div>
                 <div class="uk-width-expand">
                     <h2 class="uk-card-title ">{{.Title}}</h2>

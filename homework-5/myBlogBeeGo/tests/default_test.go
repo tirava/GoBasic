@@ -2,13 +2,13 @@ package test
 
 import (
 	_ "GoBasic/homework-5/myBlogBeeGo/routers"
+	"github.com/astaxie/beego"
+	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
 	"runtime"
 	"testing"
-
-	"github.com/astaxie/beego"
 )
 
 func init() {
