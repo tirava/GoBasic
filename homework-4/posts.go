@@ -10,6 +10,7 @@ import (
 	"database/sql"
 	"fmt"
 	"html/template"
+	"time"
 )
 
 // Post is the base post type.
@@ -59,7 +60,8 @@ func (p *dbPosts) createPost(post *Post, db *sql.DB) error {
 
 // delete one post
 func (p *dbPosts) deletePost(id string, db *sql.DB) error {
-	_, err := db.Exec(DELETEPOST, id)
+	delTime := time.Now().Format("2006-01-02 15:04:05")
+	_, err := db.Exec(DELETEPOST, delTime, id)
 	return err
 }
 

@@ -22,6 +22,7 @@ type Error struct {
 // errors helper
 func (e *Error) sendError(w http.ResponseWriter, code int, err error, descr string) {
 	log.Println(descr, "-", err)
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	errMsg := Error{
 		ErrCode:  code,
