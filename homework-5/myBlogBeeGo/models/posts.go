@@ -82,10 +82,8 @@ func (p *DBPosts) GetPosts(id string) error {
 
 // CreatePost creates post.
 func (p *DBPosts) CreatePost() error {
-	fmt.Println(p.Posts[0])
-	return nil
-	//_, err := db.Exec(INSERTPOST, post.Title, post.Summary, post.Body)
-	//return err
+	_, err := p.DB.Exec(INSERTPOST, p.Posts[0].Title, p.Posts[0].Summary, p.Posts[0].Body)
+	return err
 }
 
 // DeletePost deletes one post.

@@ -70,8 +70,8 @@ func (c *MainController) DeletePost() {
 	c.Ctx.ResponseWriter.WriteHeader(http.StatusOK)
 }
 
-// EditPost shows edit form for edit post.
-func (c *MainController) EditPost() {
+// GetEditPost shows edit form for edit post.
+func (c *MainController) GetEditPost() {
 	postNum := c.Ctx.Request.URL.Query().Get("id")
 	if postNum == "" {
 		c.Redirect("/", http.StatusMovedPermanently)
@@ -93,15 +93,14 @@ func (c *MainController) UpdatePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
 
-	post := models.Post{}
-	err := json.NewDecoder(c.Ctx.Request.Body).Decode(&post)
+	post, err := c.decodePost()
 	if err != nil {
 		posts.Lg.Error("error while decoding post body: %s", err)
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while decoding post body")
 		return
 	}
 	post.ID = postNum
-	posts.Posts = append(posts.Posts, post)
+	posts.Posts = append(posts.Posts, *post)
 	err = posts.UpdatePost()
 	if err != nil {
 		posts.Lg.Error("error edit post: %s", err)
@@ -109,4 +108,40 @@ func (c *MainController) UpdatePost() {
 		return
 	}
 	c.Ctx.ResponseWriter.WriteHeader(http.StatusOK)
+}
+
+// GetCreatePost shows clean form for new post.
+func (c *MainController) GetCreatePost() {
+	c.Data["BlogName"] = BLOGNAME
+	c.TplName = "create.tpl"
+}
+
+// CreatePost create new post in DB.
+func (c *MainController) CreatePost() {
+	posts := models.NewPosts()
+
+	post, err := c.decodePost()
+	if err != nil {
+		posts.Lg.Error("error while decoding new post body: %s", err)
+		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while decoding new post body")
+		return
+	}
+	posts.Posts = append(posts.Posts, *post)
+	err = posts.CreatePost()
+	if err != nil {
+		posts.Lg.Error("error create new post: %s", err)
+		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while create new post")
+		return
+	}
+	c.Ctx.ResponseWriter.WriteHeader(http.StatusCreated)
+}
+
+// decodePost is JSON decoder helper
+func (c *MainController) decodePost() (*models.Post, error) {
+	post := &models.Post{}
+	err := json.NewDecoder(c.Ctx.Request.Body).Decode(post)
+	if err != nil {
+		return nil, err
+	}
+	return post, nil
 }
