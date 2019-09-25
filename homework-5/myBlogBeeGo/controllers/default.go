@@ -15,10 +15,12 @@ import (
 	"net/http"
 )
 
+// MainController is.
 type MainController struct {
 	beego.Controller
 }
 
+// Constants.
 const (
 	BLOGNAME = "Блог Евгения Климова"
 )

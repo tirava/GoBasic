@@ -5,6 +5,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
+// Constants.
 const (
 	POSTSURL  = "/posts"
 	APIURL    = "/api/v1"

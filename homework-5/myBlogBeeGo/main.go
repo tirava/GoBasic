@@ -16,6 +16,7 @@ import (
 	"log"
 )
 
+// Constants.
 const (
 	DBNAME = "blog"
 	DSN    = "/" + DBNAME + "?charset=utf8&interpolateParams=true"
