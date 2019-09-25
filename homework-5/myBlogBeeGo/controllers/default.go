@@ -63,4 +63,7 @@ func (c *MainController) DeletePost() {
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while delete post")
 	}
 	c.Ctx.ResponseWriter.WriteHeader(http.StatusOK)
+	//c.Data["BlogName"] = BLOGNAME
+	//c.Data["Posts"] = &posts.Posts
+	//c.TplName = "index.tpl"
 }

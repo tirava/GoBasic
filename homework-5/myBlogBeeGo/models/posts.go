@@ -47,7 +47,11 @@ type DBPosts struct {
 
 // NewPosts creates new DBPosts with DB link
 func NewPosts() *DBPosts {
-	return &DBPosts{DB: DB, Lg: Lg}
+	return &DBPosts{
+		DB:    DB,
+		Lg:    Lg,
+		Error: Error{Lg: Lg},
+	}
 }
 
 // GetPosts gets one or all posts.
@@ -85,7 +89,6 @@ func (p *DBPosts) createPost(post *Post, db *sql.DB) error {
 
 // DeletePost deletes one post.
 func (p *DBPosts) DeletePost(id string) error {
-	return fmt.Errorf("ddd: %s", id)
 	delTime := time.Now().Format("2006-01-02 15:04:05")
 	_, err := p.DB.Exec(DELETEPOST, delTime, id)
 	return err
