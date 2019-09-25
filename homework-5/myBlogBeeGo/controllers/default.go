@@ -11,7 +11,6 @@ import (
 	"github.com/astaxie/beego"
 	"gopkg.in/russross/blackfriday.v2"
 	"html/template"
-	"log"
 	"net/http"
 )
 
@@ -24,16 +23,14 @@ const (
 )
 
 func (c *MainController) Get() {
-
-	posts := models.DBPosts{DB: models.DB}
-	posts, err := posts.GetPosts("")
-	//log.Println(posts.Posts)
+	posts := models.NewPosts()
+	err := posts.GetPosts("")
 	if err != nil {
-		log.Println(err)
+		posts.Lg.Error("error get all posts: %s", err)
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
+		c.Abort("500")
 		return
 	}
-
 	c.Data["BlogName"] = BLOGNAME
 	c.Data["Posts"] = &posts.Posts
 	c.TplName = "index.tpl"
@@ -44,15 +41,26 @@ func (c *MainController) GetPosts() {
 	if postNum == "" {
 		c.Redirect("/", http.StatusMovedPermanently)
 	}
-	posts := models.DBPosts{DB: models.DB}
-	posts, err := posts.GetPosts(postNum)
-	if err != nil || len(posts.Posts) == 0 {
-		log.Println(err)
+	posts := models.NewPosts()
+	err := posts.GetPosts(postNum)
+	if err != nil {
+		posts.Lg.Error("error get one post: %s", err)
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusNotFound)
-		c.Abort(http.StatusText(http.StatusNotFound))
+		c.Abort("404")
 	}
 	c.Data["BlogName"] = BLOGNAME
 	posts.Posts[0].Body = template.HTML(blackfriday.Run([]byte(posts.Posts[0].Body)))
 	c.Data["Post"] = &posts.Posts[0]
 	c.TplName = "post.tpl"
+}
+
+func (c *MainController) DeletePost() {
+	postNum := c.Ctx.Input.Param(":id")
+	posts := models.NewPosts()
+	err := posts.DeletePost(postNum)
+	if err != nil {
+		posts.Lg.Error("error delete post: %s", err)
+		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while delete post")
+	}
+	c.Ctx.ResponseWriter.WriteHeader(http.StatusOK)
 }

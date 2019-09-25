@@ -9,12 +9,14 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"github.com/astaxie/beego/logs"
 	"html/template"
 	"time"
 )
 
-// DB is global DB var (temporary)
+// DB & Logger (temporary)
 var DB *sql.DB
+var Lg *logs.BeeLogger
 
 const (
 	TABLENAME   = "posts"
@@ -39,13 +41,19 @@ type Post struct {
 type DBPosts struct {
 	DB    *sql.DB
 	Posts []Post
+	Lg    *logs.BeeLogger
+	Error
+}
+
+// NewPosts creates new DBPosts with DB link
+func NewPosts() *DBPosts {
+	return &DBPosts{DB: DB, Lg: Lg}
 }
 
 // GetPosts gets one or all posts.
-func (p DBPosts) GetPosts(id string) (DBPosts, error) {
+func (p *DBPosts) GetPosts(id string) error {
 	var rows *sql.Rows
 	var err error
-	var posts = DBPosts{}
 	if id != "" {
 		rows, err = p.DB.Query(GETONEPOST, id)
 	} else {
@@ -53,32 +61,33 @@ func (p DBPosts) GetPosts(id string) (DBPosts, error) {
 	}
 	defer rows.Close()
 	if err != nil {
-		return posts, fmt.Errorf("error in db.query: %v", err)
+		return fmt.Errorf("error in db.query: %v", err)
 	}
 	for rows.Next() {
 		post := Post{}
 		err = rows.Scan(&post.ID, &post.Title, &post.Summary, &post.Body, &post.Date)
 		if err != nil {
-			return posts, fmt.Errorf("error in row.scan: %v", err)
+			return fmt.Errorf("error in row.scan: %v", err)
 		}
-		posts.Posts = append(posts.Posts, post)
+		p.Posts = append(p.Posts, post)
 	}
-	if len(posts.Posts) == 0 {
-		return posts, fmt.Errorf("post not found: %s", id)
+	if len(p.Posts) == 0 {
+		return fmt.Errorf("post not found: %s", id)
 	}
-	return posts, nil
+	return nil
 }
 
 // create one post.
-func (p DBPosts) createPost(post *Post, db *sql.DB) error {
+func (p *DBPosts) createPost(post *Post, db *sql.DB) error {
 	_, err := db.Exec(INSERTPOST, post.Title, post.Summary, post.Body)
 	return err
 }
 
-// delete one post.
-func (p DBPosts) deletePost(id string, db *sql.DB) error {
+// DeletePost deletes one post.
+func (p *DBPosts) DeletePost(id string) error {
+	return fmt.Errorf("ddd: %s", id)
 	delTime := time.Now().Format("2006-01-02 15:04:05")
-	_, err := db.Exec(DELETEPOST, delTime, id)
+	_, err := p.DB.Exec(DELETEPOST, delTime, id)
 	return err
 }
 

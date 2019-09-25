@@ -11,6 +11,7 @@ import (
 	_ "GoBasic/homework-5/myBlogBeeGo/routers"
 	"database/sql"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/logs"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 )
@@ -22,6 +23,7 @@ const (
 
 func init() {
 	var err error
+	// connect to DB
 	models.DB, err = sql.Open("mysql", myCnf("client")+DSN)
 	if err != nil {
 		log.Fatalln("Can't open DB:", err)
@@ -30,9 +32,15 @@ func init() {
 	if err = models.DB.Ping(); err != nil {
 		log.Fatalln("Can't ping DB:", err)
 	}
+
+	// set logger
+	models.Lg = logs.NewLogger(10)
+	models.Lg.SetPrefix("[" + DBNAME + "]")
+	models.Lg.Info("Connected to DB: %s", DBNAME)
 }
 
 func main() {
+	defer models.Lg.Close()
 	defer models.DB.Close()
 	beego.Run()
 }
