@@ -14,20 +14,15 @@ import (
 	"time"
 )
 
+// Constatnts.
+const (
+	DELDATETMPL = "2006-01-02 15:04:05"
+)
+
 // DB & Logger (temporary)
 var (
 	DB *sql.DB
 	Lg *logs.BeeLogger
-)
-
-// Constatnts.
-const (
-	TABLENAME   = "posts"
-	GETALLPOSTS = "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + TABLENAME + " WHERE deleted IS NULL ORDER BY id DESC"
-	GETONEPOST  = "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + TABLENAME + " WHERE deleted IS NULL AND id = ?"
-	DELETEPOST  = "UPDATE " + TABLENAME + " SET deleted = ? WHERE id = ?"
-	INSERTPOST  = "INSERT INTO " + TABLENAME + " (title, summary, body) VALUES(?, ?, ?)"
-	UPDATEPOST  = "UPDATE " + TABLENAME + " SET title = ?, summary = ?, body = ? WHERE ID = ?"
 )
 
 // Post is the base post type.
@@ -41,7 +36,8 @@ type Post struct {
 
 //DBPosts is type dbPosts map[string]Post
 type DBPosts struct {
-	DB    *sql.DB
+	DB *sql.DB
+	DBQueries
 	Posts []Post
 	Lg    *logs.BeeLogger
 	Error
@@ -50,9 +46,10 @@ type DBPosts struct {
 // NewPosts creates new DBPosts with DB link
 func NewPosts() *DBPosts {
 	return &DBPosts{
-		DB:    DB,
-		Lg:    Lg,
-		Error: Error{Lg: Lg},
+		DB:        DB,
+		Lg:        Lg,
+		Error:     Error{Lg: Lg},
+		DBQueries: *NewDBQueries(),
 	}
 }
 
@@ -61,9 +58,9 @@ func (p *DBPosts) GetPosts(id string) error {
 	var rows *sql.Rows
 	var err error
 	if id != "" {
-		rows, err = p.DB.Query(GETONEPOST, id)
+		rows, err = p.DB.Query(p.QGetOnePost, id)
 	} else {
-		rows, err = p.DB.Query(GETALLPOSTS)
+		rows, err = p.DB.Query(p.QGetAllPosts)
 	}
 	defer rows.Close()
 	if err != nil {
@@ -85,19 +82,19 @@ func (p *DBPosts) GetPosts(id string) error {
 
 // CreatePost creates post.
 func (p *DBPosts) CreatePost() error {
-	_, err := p.DB.Exec(INSERTPOST, p.Posts[0].Title, p.Posts[0].Summary, p.Posts[0].Body)
+	_, err := p.DB.Exec(p.QInsertPost, p.Posts[0].Title, p.Posts[0].Summary, p.Posts[0].Body)
 	return err
 }
 
 // DeletePost deletes one post.
 func (p *DBPosts) DeletePost(id string) error {
-	delTime := time.Now().Format("2006-01-02 15:04:05")
-	_, err := p.DB.Exec(DELETEPOST, delTime, id)
+	delTime := time.Now().Format(DELDATETMPL)
+	_, err := p.DB.Exec(p.QDeletePost, delTime, id)
 	return err
 }
 
 // UpdatePost updates post.
 func (p *DBPosts) UpdatePost() error {
-	_, err := p.DB.Exec(UPDATEPOST, p.Posts[0].Title, p.Posts[0].Summary, p.Posts[0].Body, p.Posts[0].ID)
+	_, err := p.DB.Exec(p.QUpdatePost, p.Posts[0].Title, p.Posts[0].Summary, p.Posts[0].Body, p.Posts[0].ID)
 	return err
 }
