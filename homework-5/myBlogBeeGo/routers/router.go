@@ -8,10 +8,13 @@ import (
 const (
 	POSTSURL = "/posts"
 	APIURL   = "/api/v1"
+	EDITURL  = "/edit"
 )
 
 func init() {
-	beego.Router("/", &controllers.MainController{})
-	beego.Router(POSTSURL, &controllers.MainController{}, "get:GetPosts")
+	beego.Router("/", &controllers.MainController{}, "get:GetPosts")
+	beego.Router(POSTSURL, &controllers.MainController{}, "get:GetPost")
+	beego.Router(POSTSURL+EDITURL, &controllers.MainController{}, "get:EditPost")
 	beego.Router(APIURL+POSTSURL+"/:id([0-9]+", &controllers.MainController{}, "delete:DeletePost")
+	beego.Router(APIURL+POSTSURL+"/:id([0-9]+", &controllers.MainController{}, "put:UpdatePost")
 }

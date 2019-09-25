@@ -2,10 +2,10 @@
 <html lang="ru">
 <head>
     {{template "head.tpl"}}
-    <title>{{.Title}}</title>
+    <title>{{.Post.Title}}</title>
 </head>
 <body class="uk-background-muted">
-<form onsubmit="updatePost('{{.ID}}')">
+<form onsubmit="updatePost('{{.Post.ID}}')">
     <fieldset id="editPost" class="uk-fieldset">
         <div class="uk-margin-left uk-margin-right uk-margin-top" uk-grid>
             <div class="uk-card uk-card-default uk-card-hover uk-width-1-1">
@@ -13,22 +13,22 @@
                     <div class="uk-grid-small uk-flex-middle" uk-grid>
                         <div class="uk-width-auto">
                             <img class="uk-border-circle" width="40" height="40"
-                                 src="../static/img/avatar.png">
+                                 src="../../static/img/avatar.png">
                         </div>
                         <div class="uk-width-expand">
                             <h3><input required type="text" class="uk-input" name="title" id="title"
-                                       value="{{.Title}}"></h3>
+                                       value="{{.Post.Title}}"></h3>
                             <input required class="uk-text-meta" type="text" class="uk-input" name="date" id="date"
-                                   value="{{.Date}}" readonly>
+                                   value="{{.Post.Date}}" readonly>
                         </div>
                     </div>
                 </div>
                 <div class="uk-card-body">
                         <textarea required class="uk-textarea" rows="5" name="summary"
-                                  id="summary">{{.Summary}}</textarea>
+                                  id="summary">{{.Post.Summary}}</textarea>
                 </div>
                 <div class="uk-card-footer">
-                    <textarea required class="uk-textarea" rows="10" name="body" id="body">{{.Body}}</textarea>
+                    <textarea required class="uk-textarea" rows="10" name="body" id="body">{{.Post.Body}}</textarea>
                 </div>
                 <div class="uk-card-footer">
                     <a class="uk-link-heading uk-text-primary uk-button-text" href="/"><< Вернуться</a>

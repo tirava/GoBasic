@@ -22,10 +22,9 @@ const (
 	TABLENAME   = "posts"
 	GETALLPOSTS = "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + TABLENAME + " WHERE deleted IS NULL ORDER BY id DESC"
 	GETONEPOST  = "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + TABLENAME + " WHERE deleted IS NULL AND id = ?"
-	//DELETEPOST   = "DELETE FROM " + TABLENAME + " WHERE id = ?"
-	DELETEPOST = "UPDATE " + TABLENAME + " SET deleted = ? WHERE id = ?"
-	INSERTPOST = "INSERT INTO " + TABLENAME + " (title, summary, body) VALUES(?, ?, ?)"
-	UPDATEPOST = "UPDATE " + TABLENAME + " SET title = ?, summary = ?, body = ? WHERE ID = ?"
+	DELETEPOST  = "UPDATE " + TABLENAME + " SET deleted = ? WHERE id = ?"
+	INSERTPOST  = "INSERT INTO " + TABLENAME + " (title, summary, body) VALUES(?, ?, ?)"
+	UPDATEPOST  = "UPDATE " + TABLENAME + " SET title = ?, summary = ?, body = ? WHERE ID = ?"
 )
 
 // Post is the base post type.
@@ -81,10 +80,12 @@ func (p *DBPosts) GetPosts(id string) error {
 	return nil
 }
 
-// create one post.
-func (p *DBPosts) createPost(post *Post, db *sql.DB) error {
-	_, err := db.Exec(INSERTPOST, post.Title, post.Summary, post.Body)
-	return err
+// CreatePost creates post.
+func (p *DBPosts) CreatePost() error {
+	fmt.Println(p.Posts[0])
+	return nil
+	//_, err := db.Exec(INSERTPOST, post.Title, post.Summary, post.Body)
+	//return err
 }
 
 // DeletePost deletes one post.
@@ -94,8 +95,8 @@ func (p *DBPosts) DeletePost(id string) error {
 	return err
 }
 
-// update one post.
-func (p *DBPosts) updatePost(post *Post, db *sql.DB) error {
-	_, err := db.Exec(UPDATEPOST, post.Title, post.Summary, post.Body, post.ID)
+// UpdatePost updates post.
+func (p *DBPosts) UpdatePost() error {
+	_, err := p.DB.Exec(UPDATEPOST, p.Posts[0].Title, p.Posts[0].Summary, p.Posts[0].Body, p.Posts[0].ID)
 	return err
 }
