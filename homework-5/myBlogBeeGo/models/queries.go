@@ -11,7 +11,7 @@ const (
 	TABLENAME = "posts"
 )
 
-// Queries templates.
+// DBQueries templates.
 type DBQueries struct {
 	QGetAllPosts string
 	QGetOnePost  string

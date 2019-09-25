@@ -1,8 +1,8 @@
 package routers
 
 import (
-	"GoBasic/homework-5/myBlogBeeGo/controllers"
 	"github.com/astaxie/beego"
+	"myBlog/controllers"
 )
 
 // Constants.

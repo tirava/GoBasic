@@ -7,11 +7,11 @@
 package controllers
 
 import (
-	"GoBasic/homework-5/myBlogBeeGo/models"
 	"encoding/json"
 	"github.com/astaxie/beego"
-	"gopkg.in/russross/blackfriday.v2"
+	"github.com/russross/blackfriday/v2"
 	"html/template"
+	"myBlog/models"
 	"net/http"
 )
 

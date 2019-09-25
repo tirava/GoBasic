@@ -1,8 +1,6 @@
 package test
 
 import (
-	"GoBasic/homework-5/myBlogBeeGo/models"
-	_ "GoBasic/homework-5/myBlogBeeGo/routers"
 	"database/sql"
 	"fmt"
 	"github.com/astaxie/beego"
@@ -10,6 +8,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/smartystreets/goconvey/convey"
 	"log"
+	"myBlog/models"
+	_ "myBlog/routers"
 	"net/http"
 	"net/http/httptest"
 	"os"

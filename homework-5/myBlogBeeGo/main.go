@@ -7,13 +7,13 @@
 package main
 
 import (
-	"GoBasic/homework-5/myBlogBeeGo/models"
-	_ "GoBasic/homework-5/myBlogBeeGo/routers"
 	"database/sql"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"myBlog/models"
+	_ "myBlog/routers"
 )
 
 // Constants.
