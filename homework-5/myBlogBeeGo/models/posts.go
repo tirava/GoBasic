@@ -63,10 +63,6 @@ func (p *DBPosts) GetPosts(id string) error {
 	if id != "" {
 		rows, err = p.DB.Query(GETONEPOST, id)
 	} else {
-		if p.DB == nil { // todo: temporary for test passing
-			p.Posts = append(p.Posts, Post{})
-			return nil
-		}
 		rows, err = p.DB.Query(GETALLPOSTS)
 	}
 	defer rows.Close()
