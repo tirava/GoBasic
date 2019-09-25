@@ -10,6 +10,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/orm"
 	"html/template"
 	"time"
 )
@@ -19,15 +20,16 @@ const (
 	DELDATETMPL = "2006-01-02 15:04:05"
 )
 
-// DB & Logger global (it is normal for BeeGo)
+// DB, Logger, ORM are globals (it is normal for BeeGo)
 var (
-	DB *sql.DB
-	Lg *logs.BeeLogger
+	DB  *sql.DB
+	Lg  *logs.BeeLogger
+	ORM orm.Ormer
 )
 
 // Post is the base post type.
 type Post struct {
-	ID      string
+	ID      string        `orm:"column(id);pk"`
 	Title   string        `json:"title"`
 	Date    string        `json:"date"`
 	Summary string        `json:"summary"`
@@ -38,6 +40,7 @@ type Post struct {
 type DBPosts struct {
 	DB *sql.DB
 	DBQueries
+	ORM   *orm.Ormer
 	Posts []Post
 	Lg    *logs.BeeLogger
 	Error
@@ -50,6 +53,7 @@ func NewPosts() *DBPosts {
 		Lg:        Lg,
 		Error:     Error{Lg: Lg},
 		DBQueries: *NewDBQueries(),
+		ORM:       &ORM,
 	}
 }
 

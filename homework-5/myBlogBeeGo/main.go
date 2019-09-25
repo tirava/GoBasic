@@ -10,6 +10,7 @@ import (
 	"database/sql"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
+	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	"log"
 	"myBlog/models"
@@ -38,6 +39,14 @@ func main() {
 		log.Fatalln("Can't ping DB:", err)
 	}
 	models.DB.SetMaxOpenConns(25)
+
+	// BeeGo ORM
+	err = orm.RegisterDataBase("default", "mysql", myCnf("client")+"/"+dbName+dsn)
+	if err != nil {
+		log.Fatalln("Can't open BeeGo DB:", err)
+	}
+	orm.RegisterModel(new(models.Post))
+	models.ORM = orm.NewOrm()
 
 	// set logger
 	models.Lg = logs.NewLogger(10)
