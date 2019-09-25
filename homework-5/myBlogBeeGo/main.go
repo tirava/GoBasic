@@ -16,32 +16,34 @@ import (
 	_ "myBlog/routers"
 )
 
-// Constants.
-const (
-	DBNAME = "blog"
-	DSN    = "/" + DBNAME + "?charset=utf8&interpolateParams=true"
-)
-
-func init() {
+func main() {
 	var err error
+	dbName := beego.AppConfig.String("DBNAME")
+	if dbName == "" {
+		dbName = "blog"
+	}
+	dsn := beego.AppConfig.String("DSN")
+	if dsn == "" {
+		dsn = "?charset=utf8&interpolateParams=true"
+	}
+
 	// connect to DB
-	models.DB, err = sql.Open("mysql", myCnf("client")+DSN)
+	models.DB, err = sql.Open("mysql", myCnf("client")+"/"+dbName+dsn)
 	if err != nil {
 		log.Fatalln("Can't open DB:", err)
 	}
-	models.DB.SetMaxOpenConns(25)
+	defer models.DB.Close()
+
 	if err = models.DB.Ping(); err != nil {
 		log.Fatalln("Can't ping DB:", err)
 	}
+	models.DB.SetMaxOpenConns(25)
 
 	// set logger
 	models.Lg = logs.NewLogger(10)
-	models.Lg.SetPrefix("[" + DBNAME + "]")
-	models.Lg.Info("Connected to DB: %s", DBNAME)
-}
-
-func main() {
+	models.Lg.SetPrefix("[" + dbName + "]")
+	models.Lg.Info("Connected to DB: %s", dbName)
 	defer models.Lg.Close()
-	defer models.DB.Close()
+
 	beego.Run()
 }

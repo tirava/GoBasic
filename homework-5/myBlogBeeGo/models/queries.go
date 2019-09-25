@@ -6,10 +6,7 @@
 
 package models
 
-// Constatnts.
-const (
-	TABLENAME = "posts"
-)
+import "github.com/astaxie/beego"
 
 // DBQueries templates.
 type DBQueries struct {
@@ -22,11 +19,15 @@ type DBQueries struct {
 
 // NewDBQueries creates new queries.
 func NewDBQueries() *DBQueries {
+	table := beego.AppConfig.String("TABLENAME")
+	if table == "" {
+		table = "posts"
+	}
 	return &DBQueries{
-		QGetAllPosts: "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + TABLENAME + " WHERE deleted IS NULL ORDER BY id DESC",
-		QGetOnePost:  "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + TABLENAME + " WHERE deleted IS NULL AND id = ?",
-		QDeletePost:  "UPDATE " + TABLENAME + " SET deleted = ? WHERE id = ?",
-		QInsertPost:  "INSERT INTO " + TABLENAME + " (title, summary, body) VALUES(?, ?, ?)",
-		QUpdatePost:  "UPDATE " + TABLENAME + " SET title = ?, summary = ?, body = ? WHERE ID = ?",
+		QGetAllPosts: "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + table + " WHERE deleted IS NULL ORDER BY id DESC",
+		QGetOnePost:  "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + table + " WHERE deleted IS NULL AND id = ?",
+		QDeletePost:  "UPDATE " + table + " SET deleted = ? WHERE id = ?",
+		QInsertPost:  "INSERT INTO " + table + " (title, summary, body) VALUES(?, ?, ?)",
+		QUpdatePost:  "UPDATE " + table + " SET title = ?, summary = ?, body = ? WHERE ID = ?",
 	}
 }

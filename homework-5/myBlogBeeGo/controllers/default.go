@@ -20,22 +20,16 @@ type MainController struct {
 	beego.Controller
 }
 
-// Constants.
-const (
-	BLOGNAME = "Блог Евгения Климова"
-)
-
 // GetPosts shows all posts in main page.
 func (c *MainController) GetPosts() {
 	posts := models.NewPosts()
-	err := posts.GetPosts("")
-	if err != nil {
+	if err := posts.GetPosts(""); err != nil {
 		posts.Lg.Error("error get all posts: %s", err)
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
 		c.Abort("500")
 		return
 	}
-	c.Data["BlogName"] = BLOGNAME
+	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
 	c.Data["Posts"] = &posts.Posts
 	c.TplName = "index.tpl"
 }
@@ -47,13 +41,12 @@ func (c *MainController) GetPost() {
 		c.Redirect("/", http.StatusMovedPermanently)
 	}
 	posts := models.NewPosts()
-	err := posts.GetPosts(postNum)
-	if err != nil {
+	if err := posts.GetPosts(postNum); err != nil {
 		posts.Lg.Error("error get one post: %s", err)
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusNotFound)
 		c.Abort("404")
 	}
-	c.Data["BlogName"] = BLOGNAME
+	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
 	posts.Posts[0].Body = template.HTML(blackfriday.Run([]byte(posts.Posts[0].Body)))
 	c.Data["Post"] = &posts.Posts[0]
 	c.TplName = "post.tpl"
@@ -63,8 +56,7 @@ func (c *MainController) GetPost() {
 func (c *MainController) DeletePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
-	err := posts.DeletePost(postNum)
-	if err != nil {
+	if err := posts.DeletePost(postNum); err != nil {
 		posts.Lg.Error("error delete post: %s", err)
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while delete post")
 		return
@@ -79,13 +71,12 @@ func (c *MainController) GetEditPost() {
 		c.Redirect("/", http.StatusMovedPermanently)
 	}
 	posts := models.NewPosts()
-	err := posts.GetPosts(postNum)
-	if err != nil {
+	if err := posts.GetPosts(postNum); err != nil {
 		posts.Lg.Error("error get one post for edit: %s", err)
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusNotFound)
 		c.Abort("404")
 	}
-	c.Data["BlogName"] = BLOGNAME
+	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
 	c.Data["Post"] = &posts.Posts[0]
 	c.TplName = "edit.tpl"
 }
@@ -103,8 +94,7 @@ func (c *MainController) UpdatePost() {
 	}
 	post.ID = postNum
 	posts.Posts = append(posts.Posts, *post)
-	err = posts.UpdatePost()
-	if err != nil {
+	if err = posts.UpdatePost(); err != nil {
 		posts.Lg.Error("error edit post: %s", err)
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while edit post")
 		return
@@ -114,7 +104,7 @@ func (c *MainController) UpdatePost() {
 
 // GetCreatePost shows clean form for new post.
 func (c *MainController) GetCreatePost() {
-	c.Data["BlogName"] = BLOGNAME
+	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
 	c.TplName = "create.tpl"
 }
 
@@ -129,8 +119,7 @@ func (c *MainController) CreatePost() {
 		return
 	}
 	posts.Posts = append(posts.Posts, *post)
-	err = posts.CreatePost()
-	if err != nil {
+	if err = posts.CreatePost(); err != nil {
 		posts.Lg.Error("error create new post: %s", err)
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while create new post")
 		return
@@ -141,8 +130,7 @@ func (c *MainController) CreatePost() {
 // decodePost is JSON decoder helper
 func (c *MainController) decodePost() (*models.Post, error) {
 	post := &models.Post{}
-	err := json.NewDecoder(c.Ctx.Request.Body).Decode(post)
-	if err != nil {
+	if err := json.NewDecoder(c.Ctx.Request.Body).Decode(post); err != nil {
 		return nil, err
 	}
 	return post, nil

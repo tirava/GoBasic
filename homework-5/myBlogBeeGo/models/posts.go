@@ -19,7 +19,7 @@ const (
 	DELDATETMPL = "2006-01-02 15:04:05"
 )
 
-// DB & Logger (temporary)
+// DB & Logger global (it is normal for BeeGo)
 var (
 	DB *sql.DB
 	Lg *logs.BeeLogger

@@ -19,15 +19,18 @@ import (
 	"testing"
 )
 
-const (
-	DBNAME = "blog"
-	DSN    = "/" + DBNAME + "?charset=utf8&interpolateParams=true"
-)
-
 func init() {
 	var err error
+	dbName := beego.AppConfig.String("DBNAME")
+	if dbName == "" {
+		dbName = "blog"
+	}
+	dsn := beego.AppConfig.String("DSN")
+	if dsn == "" {
+		dsn = "?charset=utf8&interpolateParams=true"
+	}
 	// connect to DB
-	models.DB, err = sql.Open("mysql", myCnf("client")+DSN)
+	models.DB, err = sql.Open("mysql", myCnf("client")+"/"+dbName+dsn)
 	if err != nil {
 		log.Fatalln("Can't open DB:", err)
 	}
