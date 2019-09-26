@@ -72,13 +72,8 @@ func (p *Post) Date2Norm() string {
 
 // GetPosts gets one or all posts.
 func (d *DBPosts) GetPosts(id string) error {
-	ids, err := strconv.Atoi(id)
-	if err != nil {
-		d.Lg.Warning("error while converting post ID: %s", err)
-	}
-	post := Post{ID: ids}
 	if id == "" { // all posts
-		qs := d.ORM.QueryTable(&post)
+		qs := d.ORM.QueryTable(&Post{})
 		n, err := qs.Filter("deleted_at__isnull", true).OrderBy("-updated_at").All(&d.Posts)
 		if err != nil {
 			return fmt.Errorf("error in query all posts: %v", err)
@@ -88,6 +83,11 @@ func (d *DBPosts) GetPosts(id string) error {
 			return nil
 		}
 	} else { // one post
+		idn, err := strconv.Atoi(id)
+		if err != nil {
+			return fmt.Errorf("error while converting post ID: %s", id)
+		}
+		post := Post{ID: idn}
 		if err := d.ORM.Read(&post); err != nil {
 			return fmt.Errorf("post not found: %s", id)
 		}
@@ -98,19 +98,28 @@ func (d *DBPosts) GetPosts(id string) error {
 
 // CreatePost creates post.
 func (d *DBPosts) CreatePost() error {
-	_, err := d.ORM.Insert(&d.Posts[0])
+	n, err := d.ORM.Insert(&d.Posts[0])
+	if n == 0 {
+		return fmt.Errorf("post not created")
+	}
 	return err
 }
 
 // DeletePost deletes one post.
 func (d *DBPosts) DeletePost(id string) error {
 	qs := d.ORM.QueryTable(&Post{})
-	_, err := qs.Filter("id", id).Update(orm.Params{"deleted_at": time.Now().Local()})
+	n, err := qs.Filter("id", id).Update(orm.Params{"deleted_at": time.Now().Local()})
+	if n == 0 {
+		return fmt.Errorf("post not found: %s", id)
+	}
 	return err
 }
 
 // UpdatePost updates post.
 func (d *DBPosts) UpdatePost() error {
-	_, err := d.ORM.Update(&d.Posts[0])
+	n, err := d.ORM.Update(&d.Posts[0])
+	if n == 0 {
+		return fmt.Errorf("post not found: %d", d.Posts[0].ID)
+	}
 	return err
 }

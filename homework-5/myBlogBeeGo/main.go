@@ -7,6 +7,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -18,6 +19,26 @@ import (
 
 func main() {
 	var err error
+
+	// BeeGo ORM
+	err = orm.RegisterDataBase("default", "mysql", getDSN())
+	if err != nil {
+		log.Fatalln("Can't open BeeGo DB:", err)
+	}
+	orm.RegisterModel(new(models.Post))
+	models.ORM = orm.NewOrm()
+
+	// set logger
+	dbName := beego.AppConfig.String("DBNAME")
+	models.Lg = logs.NewLogger(10)
+	models.Lg.SetPrefix(fmt.Sprintf("[%s]", dbName))
+	models.Lg.Info("Connected to BeeGo DB: %s", dbName)
+	defer models.Lg.Close()
+
+	beego.Run()
+}
+
+func getDSN() string {
 	dbName := beego.AppConfig.String("DBNAME")
 	if dbName == "" {
 		dbName = "blog"
@@ -30,20 +51,21 @@ func main() {
 	if cnf == "" {
 		cnf = "client"
 	}
-
-	// BeeGo ORM
-	err = orm.RegisterDataBase("default", "mysql", myCnf("client")+"/"+dbName+dsn)
-	if err != nil {
-		log.Fatalln("Can't open BeeGo DB:", err)
+	host := beego.AppConfig.String("DBHOST")
+	if host == "" {
+		host = "klim.go"
 	}
-	orm.RegisterModel(new(models.Post))
-	models.ORM = orm.NewOrm()
-
-	// set logger
-	models.Lg = logs.NewLogger(10)
-	models.Lg.SetPrefix("[" + dbName + "]")
-	models.Lg.Info("Connected to BeeGo DB: %s", dbName)
-	defer models.Lg.Close()
-
-	beego.Run()
+	port := beego.AppConfig.String("DBPORT")
+	if port == "" {
+		port = "3306"
+	}
+	user := beego.AppConfig.String("DBUSER")
+	if user == "" {
+		user = "testuser"
+	}
+	pass := beego.AppConfig.String("DBPASS")
+	if pass == "" {
+		pass = "" //todo
+	}
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?%s", user, pass, host, port, dbName, dsn)
 }
