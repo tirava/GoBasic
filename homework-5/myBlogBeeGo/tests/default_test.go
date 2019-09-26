@@ -1,10 +1,8 @@
 package test
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-	"github.com/go-ini/ini"
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/smartystreets/goconvey/convey"
 	"log"
@@ -12,25 +10,16 @@ import (
 	_ "myBlog/routers"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 	"testing"
 )
 
 func init() {
-	var err error
-	dbName := beego.AppConfig.String("DBNAME")
-	if dbName == "" {
-		dbName = "blog"
-	}
-	dsn := beego.AppConfig.String("DSN")
-	if dsn == "" {
-		dsn = "?charset=utf8&interpolateParams=true"
-	}
-	// BeeGo ORM
-	err = orm.RegisterDataBase("default", "mysql", myCnf("client")+"/"+dbName+dsn)
+	// BeeGo ORM can't see config in tests, use hard dsn
+	dsn := "testuser:@tcp(klim.go:3306)/blog?charset=utf8&interpolateParams=true&loc=Europe%2FMoscow"
+	//dsn := conf.GetDSN()
+	err := orm.RegisterDataBase("default", "mysql", dsn)
 	if err != nil {
 		log.Fatalln("Can't open BeeGo DB:", err)
 	}
@@ -58,24 +47,4 @@ func TestBeego(t *testing.T) {
 			So(w.Body.Len(), ShouldBeGreaterThan, 0)
 		})
 	})
-}
-
-// myCnf reads MySQL parameters from .my.cnf
-func myCnf(profile string) string {
-	cnf := path.Join(os.Getenv("HOME"), ".my.cnf")
-	cfg, err := ini.LoadSources(ini.LoadOptions{AllowBooleanKeys: true}, cnf)
-	if err != nil {
-		return ""
-	}
-	for _, s := range cfg.Sections() {
-		if s.Name() != profile {
-			continue
-		}
-		user := s.Key("user")
-		password := s.Key("password")
-		host := s.Key("host")
-		port := s.Key("port")
-		return fmt.Sprintf("%s:%s@tcp(%s:%s)", user, password, host, port)
-	}
-	return ""
 }
