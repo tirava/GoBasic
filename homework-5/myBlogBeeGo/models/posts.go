@@ -36,7 +36,7 @@ type Post struct {
 	Date    time.Time     `json:"-" orm:"column(updated_at);auto_now"`
 	Summary string        `json:"summary"`
 	Body    template.HTML `json:"body"`
-	Created time.Time     `json:"-" orm:"column(created_at);auto_now"`
+	Created time.Time     `json:"-" orm:"column(created_at);auto_now_add"`
 	Deleted time.Time     `json:"-" orm:"column(deleted_at)"`
 }
 
@@ -99,13 +99,6 @@ func (p *DBPosts) CreatePost() error {
 	return err
 }
 
-//// DeletePost deletes one post.
-//func (p *DBPosts) DeletePost(id string) error {
-//	delTime := time.Now().Format(DELDATETMPL)
-//	_, err := p.DB.Exec(p.QDeletePost, delTime, id)
-//	return err
-//}
-
 // DeletePost deletes one post.
 func (p *DBPosts) DeletePost(id string) error {
 	qs := p.ORM.QueryTable(&Post{})
@@ -115,6 +108,6 @@ func (p *DBPosts) DeletePost(id string) error {
 
 // UpdatePost updates post.
 func (p *DBPosts) UpdatePost() error {
-	_, err := p.DB.Exec(p.QUpdatePost, p.Posts[0].Title, p.Posts[0].Summary, p.Posts[0].Body, p.Posts[0].ID)
+	_, err := p.ORM.Update(&p.Posts[0])
 	return err
 }
