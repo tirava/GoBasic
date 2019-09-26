@@ -1,9 +1,9 @@
 package test
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/orm"
 	"github.com/go-ini/ini"
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/smartystreets/goconvey/convey"
@@ -29,15 +29,14 @@ func init() {
 	if dsn == "" {
 		dsn = "?charset=utf8&interpolateParams=true"
 	}
-	// connect to DB
-	models.DB, err = sql.Open("mysql", myCnf("client")+"/"+dbName+dsn)
+	// BeeGo ORM
+	err = orm.RegisterDataBase("default", "mysql", myCnf("client")+"/"+dbName+dsn)
 	if err != nil {
-		log.Fatalln("Can't open DB:", err)
+		log.Fatalln("Can't open BeeGo DB:", err)
 	}
-	models.DB.SetMaxOpenConns(25)
-	if err = models.DB.Ping(); err != nil {
-		log.Fatalln("Can't ping DB:", err)
-	}
+	orm.RegisterModel(new(models.Post))
+	models.ORM = orm.NewOrm()
+
 	_, file, _, _ := runtime.Caller(0)
 	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
 	beego.TestBeegoInit(apppath)

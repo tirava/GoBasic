@@ -17,14 +17,8 @@ import (
 	"time"
 )
 
-//// Constatnts.
-//const (
-//	DELDATETMPL = "2006-01-02 15:04:05"
-//)
-
-// DB, Logger, ORM are globals (it is normal for BeeGo)
+// Logger & ORM are globals (it is normal for BeeGo)
 var (
-	DB  *sql.DB
 	Lg  *logs.BeeLogger
 	ORM orm.Ormer
 )
@@ -33,17 +27,16 @@ var (
 type Post struct {
 	ID      int           `orm:"column(id);pk;auto"`
 	Title   string        `json:"title"`
-	Date    time.Time     `json:"-" orm:"column(updated_at);auto_now"`
+	Date    time.Time     `json:"-" orm:"column(updated_at);auto_now;type(datetime)"`
 	Summary string        `json:"summary"`
 	Body    template.HTML `json:"body"`
-	Created time.Time     `json:"-" orm:"column(created_at);auto_now_add"`
-	Deleted time.Time     `json:"-" orm:"column(deleted_at)"`
+	Created time.Time     `json:"-" orm:"column(created_at);auto_now_add;type(datetime)"`
+	Deleted time.Time     `json:"-" orm:"column(deleted_at);type(datetime)"`
 }
 
 //DBPosts is type dbPosts map[string]Post
 type DBPosts struct {
-	DB *sql.DB
-	DBQueries
+	DB    *sql.DB
 	ORM   orm.Ormer
 	Posts []Post
 	Lg    *logs.BeeLogger
@@ -53,11 +46,9 @@ type DBPosts struct {
 // NewPosts creates new DBPosts with DB link
 func NewPosts() *DBPosts {
 	return &DBPosts{
-		DB:        DB,
-		Lg:        Lg,
-		Error:     Error{Lg: Lg},
-		DBQueries: *NewDBQueries(),
-		ORM:       ORM,
+		Lg:    Lg,
+		Error: Error{Lg: Lg},
+		ORM:   ORM,
 	}
 }
 
@@ -70,44 +61,56 @@ func (Post) TableName() string {
 	return table
 }
 
+// Date2Norm normalizes date to local format for view in browsers.
+func (p *Post) Date2Norm() string {
+	dt := beego.AppConfig.String("DATETIME")
+	if dt == "" {
+		dt = "02.01.2006 15:04:05"
+	}
+	return p.Date.Format(dt)
+}
+
 // GetPosts gets one or all posts.
-func (p *DBPosts) GetPosts(id string) error {
-	ids, _ := strconv.Atoi(id)
+func (d *DBPosts) GetPosts(id string) error {
+	ids, err := strconv.Atoi(id)
+	if err != nil {
+		d.Lg.Warning("error while converting post ID: %s", err)
+	}
 	post := Post{ID: ids}
 	if id == "" { // all posts
-		qs := p.ORM.QueryTable(&post)
-		n, err := qs.Filter("deleted_at__isnull", true).OrderBy("-updated_at").All(&p.Posts)
+		qs := d.ORM.QueryTable(&post)
+		n, err := qs.Filter("deleted_at__isnull", true).OrderBy("-updated_at").All(&d.Posts)
 		if err != nil {
 			return fmt.Errorf("error in query all posts: %v", err)
 		}
 		if n == 0 {
-			p.Lg.Error("no one posts found")
+			d.Lg.Error("no one posts found")
 			return nil
 		}
 	} else { // one post
-		if err := p.ORM.Read(&post); err != nil {
+		if err := d.ORM.Read(&post); err != nil {
 			return fmt.Errorf("post not found: %s", id)
 		}
-		p.Posts = append(p.Posts, post)
+		d.Posts = append(d.Posts, post)
 	}
 	return nil
 }
 
 // CreatePost creates post.
-func (p *DBPosts) CreatePost() error {
-	_, err := p.ORM.Insert(&p.Posts[0])
+func (d *DBPosts) CreatePost() error {
+	_, err := d.ORM.Insert(&d.Posts[0])
 	return err
 }
 
 // DeletePost deletes one post.
-func (p *DBPosts) DeletePost(id string) error {
-	qs := p.ORM.QueryTable(&Post{})
+func (d *DBPosts) DeletePost(id string) error {
+	qs := d.ORM.QueryTable(&Post{})
 	_, err := qs.Filter("id", id).Update(orm.Params{"deleted_at": time.Now().Local()})
 	return err
 }
 
 // UpdatePost updates post.
-func (p *DBPosts) UpdatePost() error {
-	_, err := p.ORM.Update(&p.Posts[0])
+func (d *DBPosts) UpdatePost() error {
+	_, err := d.ORM.Update(&d.Posts[0])
 	return err
 }

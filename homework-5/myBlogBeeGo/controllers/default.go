@@ -93,7 +93,10 @@ func (c *MainController) UpdatePost() {
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while decoding post body")
 		return
 	}
-	post.ID, _ = strconv.Atoi(postNum)
+	post.ID, err = strconv.Atoi(postNum)
+	if err != nil {
+		posts.Lg.Warning("error while converting post ID: %s", err)
+	}
 	posts.Posts = append(posts.Posts, *post)
 	if err = posts.UpdatePost(); err != nil {
 		posts.Lg.Error("error edit post: %s", err)
