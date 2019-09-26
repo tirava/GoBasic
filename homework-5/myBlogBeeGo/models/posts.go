@@ -12,6 +12,7 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
+	"go.mongodb.org/mongo-driver/mongo"
 	"html/template"
 	"strconv"
 	"time"
@@ -21,6 +22,7 @@ import (
 var (
 	Lg  *logs.BeeLogger
 	ORM orm.Ormer
+	MDB *mongo.Client
 )
 
 // Post is the base post type.
@@ -37,6 +39,7 @@ type Post struct {
 //DBPosts is type dbPosts map[string]Post
 type DBPosts struct {
 	DB    *sql.DB
+	MDB   *mongo.Client
 	ORM   orm.Ormer
 	Posts []Post
 	Lg    *logs.BeeLogger
@@ -49,6 +52,7 @@ func NewPosts() *DBPosts {
 		Lg:    Lg,
 		Error: Error{Lg: Lg},
 		ORM:   ORM,
+		MDB:   MDB,
 	}
 }
 
