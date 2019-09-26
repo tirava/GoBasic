@@ -13,6 +13,7 @@ import (
 	"html/template"
 	"myBlog/models"
 	"net/http"
+	"strconv"
 )
 
 // MainController is.
@@ -92,7 +93,7 @@ func (c *MainController) UpdatePost() {
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while decoding post body")
 		return
 	}
-	post.ID = postNum
+	post.ID, _ = strconv.Atoi(postNum)
 	posts.Posts = append(posts.Posts, *post)
 	if err = posts.UpdatePost(); err != nil {
 		posts.Lg.Error("error edit post: %s", err)

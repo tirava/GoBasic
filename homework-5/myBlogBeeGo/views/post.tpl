@@ -18,7 +18,7 @@
                 </div>
                 <div class="uk-width-expand">
                     <h2 class="uk-card-title ">{{.Post.Title}}</h2>
-                    <p class="uk-text-meta">{{.Post.Updated_at}}</p>
+                    <p class="uk-text-meta">{{.Post.Date}}</p>
                 </div>
             </div>
         </div>

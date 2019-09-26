@@ -29,7 +29,7 @@
                     </div>
                     <div class="uk-width-expand">
                         <h2 class="uk-card-title ">{{.Title}}</h2>
-                        <p class="uk-text-meta">{{.Updated_at}}</p>
+                        <p class="uk-text-meta">{{.Date}}</p>
                     </div>
                 </div>
             </div>

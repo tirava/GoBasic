@@ -13,13 +13,14 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"html/template"
+	"strconv"
 	"time"
 )
 
-// Constatnts.
-const (
-	DELDATETMPL = "2006-01-02 15:04:05"
-)
+//// Constatnts.
+//const (
+//	DELDATETMPL = "2006-01-02 15:04:05"
+//)
 
 // DB, Logger, ORM are globals (it is normal for BeeGo)
 var (
@@ -30,12 +31,13 @@ var (
 
 // Post is the base post type.
 type Post struct {
-	ID         string        `orm:"column(id);pk"`
-	Title      string        `json:"title"`
-	Updated_at string        `json:"-"`
-	Summary    string        `json:"summary"`
-	Body       template.HTML `json:"body"`
-	Deleted_at string        `json:"-"`
+	ID      int           `orm:"column(id);pk;auto"`
+	Title   string        `json:"title"`
+	Date    time.Time     `json:"-" orm:"column(updated_at);auto_now"`
+	Summary string        `json:"summary"`
+	Body    template.HTML `json:"body"`
+	Created time.Time     `json:"-" orm:"column(created_at);auto_now"`
+	Deleted time.Time     `json:"-" orm:"column(deleted_at)"`
 }
 
 //DBPosts is type dbPosts map[string]Post
@@ -70,7 +72,8 @@ func (Post) TableName() string {
 
 // GetPosts gets one or all posts.
 func (p *DBPosts) GetPosts(id string) error {
-	post := Post{ID: id}
+	ids, _ := strconv.Atoi(id)
+	post := Post{ID: ids}
 	if id == "" { // all posts
 		qs := p.ORM.QueryTable(&post)
 		n, err := qs.Filter("deleted_at__isnull", true).OrderBy("-updated_at").All(&p.Posts)
@@ -92,14 +95,21 @@ func (p *DBPosts) GetPosts(id string) error {
 
 // CreatePost creates post.
 func (p *DBPosts) CreatePost() error {
-	_, err := p.DB.Exec(p.QInsertPost, p.Posts[0].Title, p.Posts[0].Summary, p.Posts[0].Body)
+	_, err := p.ORM.Insert(&p.Posts[0])
 	return err
 }
 
+//// DeletePost deletes one post.
+//func (p *DBPosts) DeletePost(id string) error {
+//	delTime := time.Now().Format(DELDATETMPL)
+//	_, err := p.DB.Exec(p.QDeletePost, delTime, id)
+//	return err
+//}
+
 // DeletePost deletes one post.
 func (p *DBPosts) DeletePost(id string) error {
-	delTime := time.Now().Format(DELDATETMPL)
-	_, err := p.DB.Exec(p.QDeletePost, delTime, id)
+	qs := p.ORM.QueryTable(&Post{})
+	_, err := qs.Filter("id", id).Update(orm.Params{"deleted_at": time.Now().Local()})
 	return err
 }
 
