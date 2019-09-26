@@ -39,6 +39,10 @@ func main() {
 	if err = models.MDB.Connect(context.TODO()); err != nil {
 		log.Fatalln("Can't connect to MongoDB server:", err)
 	}
+	if err = models.MDB.Ping(context.TODO(), nil); err != nil {
+		log.Fatalln("Can't ping MongoDB server:", err)
+	}
+	defer models.MDB.Disconnect(context.TODO())
 
 	// set logger
 	dbName := beego.AppConfig.String("DBNAME")

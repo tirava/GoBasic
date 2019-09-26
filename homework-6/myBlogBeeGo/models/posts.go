@@ -7,6 +7,7 @@
 package models
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/astaxie/beego"
@@ -18,7 +19,7 @@ import (
 	"time"
 )
 
-// Logger & ORM are globals (it is normal for BeeGo)
+// MDB & Logger & ORM are globals (it is normal for BeeGo)
 var (
 	Lg  *logs.BeeLogger
 	ORM orm.Ormer
@@ -30,6 +31,7 @@ type Post struct {
 	ID      int           `orm:"column(id);pk;auto"`
 	Title   string        `json:"title"`
 	Date    time.Time     `json:"-" orm:"column(updated_at);auto_now;type(datetime)"`
+	DateM   string        `orm:"-"`
 	Summary string        `json:"summary"`
 	Body    template.HTML `json:"body"`
 	Created time.Time     `json:"-" orm:"column(created_at);auto_now_add;type(datetime)"`
@@ -100,12 +102,24 @@ func (d *DBPosts) GetPosts(id string) error {
 	return nil
 }
 
+//// CreatePost creates post.
+//func (d *DBPosts) CreatePost() error {
+//	n, err := d.ORM.Insert(&d.Posts[0])
+//	if n == 0 {
+//		return fmt.Errorf("post not created")
+//	}
+//	return err
+//}
+
 // CreatePost creates post.
 func (d *DBPosts) CreatePost() error {
-	n, err := d.ORM.Insert(&d.Posts[0])
-	if n == 0 {
-		return fmt.Errorf("post not created")
+	dbName := beego.AppConfig.String("DBNAME")
+	if dbName == "" {
+		dbName = "blog"
 	}
+	d.Posts[0].DateM = time.Now().String()
+	c := d.MDB.Database(dbName).Collection("posts")
+	_, err := c.InsertOne(context.TODO(), d.Posts[0])
 	return err
 }
 
