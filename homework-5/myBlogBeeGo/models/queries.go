@@ -24,9 +24,9 @@ func NewDBQueries() *DBQueries {
 		table = "posts"
 	}
 	return &DBQueries{
-		QGetAllPosts: "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + table + " WHERE deleted IS NULL ORDER BY id DESC",
-		QGetOnePost:  "SELECT id, title, summary, body, DATE_FORMAT(updated, '%d.%m.%Y %H:%i') FROM " + table + " WHERE deleted IS NULL AND id = ?",
-		QDeletePost:  "UPDATE " + table + " SET deleted = ? WHERE id = ?",
+		QGetAllPosts: "SELECT id, title, summary, body, DATE_FORMAT(updated_at, '%d.%m.%Y %H:%i') FROM " + table + " WHERE deleted_at IS NULL ORDER BY id DESC",
+		QGetOnePost:  "SELECT id, title, summary, body, DATE_FORMAT(updated_at, '%d.%m.%Y %H:%i') FROM " + table + " WHERE deleted_at IS NULL AND id = ?",
+		QDeletePost:  "UPDATE " + table + " SET deleted_at = ? WHERE id = ?",
 		QInsertPost:  "INSERT INTO " + table + " (title, summary, body) VALUES(?, ?, ?)",
 		QUpdatePost:  "UPDATE " + table + " SET title = ?, summary = ?, body = ? WHERE ID = ?",
 	}

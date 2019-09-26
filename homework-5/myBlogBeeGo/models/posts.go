@@ -9,6 +9,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"html/template"
@@ -29,18 +30,19 @@ var (
 
 // Post is the base post type.
 type Post struct {
-	ID      string        `orm:"column(id);pk"`
-	Title   string        `json:"title"`
-	Date    string        `json:"date"`
-	Summary string        `json:"summary"`
-	Body    template.HTML `json:"body"`
+	ID         string        `orm:"column(id);pk"`
+	Title      string        `json:"title"`
+	Updated_at string        `json:"-"`
+	Summary    string        `json:"summary"`
+	Body       template.HTML `json:"body"`
+	Deleted_at string        `json:"-"`
 }
 
 //DBPosts is type dbPosts map[string]Post
 type DBPosts struct {
 	DB *sql.DB
 	DBQueries
-	ORM   *orm.Ormer
+	ORM   orm.Ormer
 	Posts []Post
 	Lg    *logs.BeeLogger
 	Error
@@ -53,33 +55,37 @@ func NewPosts() *DBPosts {
 		Lg:        Lg,
 		Error:     Error{Lg: Lg},
 		DBQueries: *NewDBQueries(),
-		ORM:       &ORM,
+		ORM:       ORM,
 	}
+}
+
+// TableName returns name for post's table (need for ORM).
+func (Post) TableName() string {
+	table := beego.AppConfig.String("TABLENAME")
+	if table == "" {
+		return "posts"
+	}
+	return table
 }
 
 // GetPosts gets one or all posts.
 func (p *DBPosts) GetPosts(id string) error {
-	var rows *sql.Rows
-	var err error
-	if id != "" {
-		rows, err = p.DB.Query(p.QGetOnePost, id)
-	} else {
-		rows, err = p.DB.Query(p.QGetAllPosts)
-	}
-	defer rows.Close()
-	if err != nil {
-		return fmt.Errorf("error in db.query: %v", err)
-	}
-	for rows.Next() {
-		post := Post{}
-		err = rows.Scan(&post.ID, &post.Title, &post.Summary, &post.Body, &post.Date)
+	post := Post{ID: id}
+	if id == "" { // all posts
+		qs := p.ORM.QueryTable(&post)
+		n, err := qs.Filter("deleted_at__isnull", true).OrderBy("-updated_at").All(&p.Posts)
 		if err != nil {
-			return fmt.Errorf("error in row.scan: %v", err)
+			return fmt.Errorf("error in query all posts: %v", err)
+		}
+		if n == 0 {
+			p.Lg.Error("no one posts found")
+			return nil
+		}
+	} else { // one post
+		if err := p.ORM.Read(&post); err != nil {
+			return fmt.Errorf("post not found: %s", id)
 		}
 		p.Posts = append(p.Posts, post)
-	}
-	if len(p.Posts) == 0 {
-		return fmt.Errorf("post not found: %s", id)
 	}
 	return nil
 }

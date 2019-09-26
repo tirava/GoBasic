@@ -19,7 +19,7 @@
                             <h3><input required type="text" class="uk-input" name="title" id="title"
                                        value="{{.Post.Title}}"></h3>
                             <input required class="uk-text-meta" type="text" class="uk-input" name="date" id="date"
-                                   value="{{.Post.Date}}" readonly>
+                                   value="{{.Post.Updated_at}}" readonly>
                         </div>
                     </div>
                 </div>

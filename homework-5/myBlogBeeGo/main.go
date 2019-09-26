@@ -27,9 +27,13 @@ func main() {
 	if dsn == "" {
 		dsn = "?charset=utf8&interpolateParams=true"
 	}
+	cnf := beego.AppConfig.String("MYCNFPROFILE")
+	if cnf == "" {
+		cnf = "client"
+	}
 
 	// connect to DB
-	models.DB, err = sql.Open("mysql", myCnf("client")+"/"+dbName+dsn)
+	models.DB, err = sql.Open("mysql", myCnf(cnf)+"/"+dbName+dsn)
 	if err != nil {
 		log.Fatalln("Can't open DB:", err)
 	}
@@ -52,7 +56,9 @@ func main() {
 	models.Lg = logs.NewLogger(10)
 	models.Lg.SetPrefix("[" + dbName + "]")
 	models.Lg.Info("Connected to DB: %s", dbName)
+	models.Lg.Info("Connected to BeeGo DB: %s", dbName)
 	defer models.Lg.Close()
 
+	orm.Debug = true
 	beego.Run()
 }
