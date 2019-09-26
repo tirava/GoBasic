@@ -7,9 +7,9 @@ CREATE TABLE posts (
 	title TEXT,
 	summary TEXT,
 	body TEXT,
-	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	deleted_at DATETIME DEFAULT NULL
+	created_at DATETIME,
+	updated_at DATETIME,
+	deleted_at DATETIME
 ) COLLATE='utf8_general_ci';
 
 INSERT INTO posts (title, summary, body) VALUES(
