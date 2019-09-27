@@ -32,30 +32,29 @@ type Post struct {
 	OID     primitive.ObjectID `json:"-" bson:"_id"`
 	ID      string             `json:"-" bson:"-"`
 	Title   string             `json:"title"`
-	Date    time.Time          `json:"-"`
+	Date    time.Time          `json:"-" bson:"updated_at"`
 	Summary string             `json:"summary"`
 	Body    template.HTML      `json:"body"`
-	Created time.Time          `json:"-"`
-	Deleted time.Time          `json:"-"`
+	Created time.Time          `json:"-" bson:"created_at"`
+	Deleted time.Time          `json:"-" bson:"deleted_at"`
 }
 
 //DBPosts is type dbPosts map[string]Post
 type DBPosts struct {
-	MDB    *mongo.Client
-	DBName string
-	Posts  []Post
-	Lg     *logs.BeeLogger
+	Collection *mongo.Collection
+	Posts      []Post
+	Lg         *logs.BeeLogger
 	Error
 }
 
 // NewPosts creates new DBPosts with DB link
 func NewPosts() *DBPosts {
+	dbName := beego.AppConfig.String("DBNAME")
+	col := MDB.Database(dbName).Collection(Post{}.TableName())
 	return &DBPosts{
-		//Posts: []Post{},
-		Lg:     Lg,
-		Error:  Error{Lg: Lg},
-		MDB:    MDB,
-		DBName: beego.AppConfig.String("DBNAME"),
+		Collection: col,
+		Lg:         Lg,
+		Error:      Error{Lg: Lg},
 	}
 }
 
@@ -81,11 +80,10 @@ func (p *Post) Date2Norm() string {
 // GetPosts gets one or all posts.
 func (d *DBPosts) GetPosts(id string) error {
 	post := Post{}
-	c := d.MDB.Database(d.DBName).Collection(post.TableName())
 	if id == "" { // all posts
 		opts := options.Find()
-		opts.SetSort(bson.D{{"date", -1}})
-		cur, err := c.Find(context.TODO(), bson.M{}, opts)
+		opts.SetSort(bson.D{{"updated_at", -1}})
+		cur, err := d.Collection.Find(context.TODO(), bson.M{}, opts)
 		if err != nil {
 			return fmt.Errorf("error find all posts: %v", err)
 		}
@@ -101,7 +99,7 @@ func (d *DBPosts) GetPosts(id string) error {
 		if err != nil {
 			return fmt.Errorf("error converting post ID to objectID: %v", err)
 		}
-		err = c.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&post)
+		err = d.Collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&post)
 		if err != nil {
 			return fmt.Errorf("post not found: %s", id)
 		}
@@ -116,8 +114,7 @@ func (d *DBPosts) CreatePost() error {
 	d.Posts[0].Date = time.Now()
 	d.Posts[0].Created = time.Now()
 	d.Posts[0].Deleted = time.Unix(0, 0)
-	c := d.MDB.Database(d.DBName).Collection(d.Posts[0].TableName())
-	_, err := c.InsertOne(context.TODO(), d.Posts[0])
+	_, err := d.Collection.InsertOne(context.TODO(), d.Posts[0])
 	if err != nil {
 		return fmt.Errorf("error insert one post: %v", err)
 	}
@@ -126,21 +123,37 @@ func (d *DBPosts) CreatePost() error {
 
 // DeletePost deletes one post.
 func (d *DBPosts) DeletePost(id string) error {
+
 	//qs := d.ORM.QueryTable(&Post{})
 	//n, err := qs.Filter("id", id).Update(orm.Params{"deleted_at": time.Now().Local()})
 	//if n == 0 {
 	//	return fmt.Errorf("post not found: %s", id)
 	//}
-	//return err
 	return nil
 }
 
 // UpdatePost updates post.
-func (d *DBPosts) UpdatePost() error {
-	//n, err := d.ORM.Update(&d.Posts[0])
-	//if n == 0 {
-	//	return fmt.Errorf("post not found: %d", d.Posts[0].ID)
-	//}
-	//return err
+func (d *DBPosts) UpdatePost(id string) error {
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		d.Lg.Error("error converting post ID to objectID: %s", err)
+	}
+	d.Posts[0].OID = objID
+	d.Posts[0].Date = time.Now()
+	update := bson.D{
+		{"$set", bson.D{
+			{"title", d.Posts[0].Title},
+			{"summary", d.Posts[0].Summary},
+			{"body", d.Posts[0].Body},
+			{"updated_at", d.Posts[0].Date},
+		}},
+	}
+	res, err := d.Collection.UpdateOne(context.TODO(), bson.M{"_id": objID}, update)
+	if err != nil {
+		return fmt.Errorf("error update post: %v", err)
+	}
+	if res.ModifiedCount == 0 {
+		d.Lg.Warning("post not found: %s", id)
+	}
 	return nil
 }

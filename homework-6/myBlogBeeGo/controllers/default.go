@@ -48,6 +48,7 @@ func (c *MainController) GetOnePost() {
 	}
 	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
 	posts.Posts[0].Body = template.HTML(blackfriday.Run([]byte(posts.Posts[0].Body)))
+	posts.Posts[0].ID = posts.Posts[0].OID.Hex()
 	c.Data["Post"] = &posts.Posts[0]
 	c.TplName = "post.tpl"
 }
@@ -77,33 +78,23 @@ func (c *MainController) GetEditPost() {
 		c.Abort("404")
 	}
 	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
+	posts.Posts[0].ID = posts.Posts[0].OID.Hex()
 	c.Data["Post"] = &posts.Posts[0]
 	c.TplName = "edit.tpl"
 }
 
 // UpdatePost updates post in DB.
 func (c *MainController) UpdatePost() {
-	//postNum := c.Ctx.Input.Param(":id")
+	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
-
 	post, err := c.decodePost()
 	if err != nil {
 		posts.Lg.Error("error while decoding post body: %s", err)
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while decoding post body")
 		return
 	}
-	//post.ID, err = strconv.Atoi(postNum)
-	//post.ID = bson.ObjectId(postNum)
-	///////////post.OID, err = primitive.ObjectIDFromHex(postNum)
-	//post.ID = postNum
-	//if err != nil {
-	//	posts.Lg.Error("error converting post ID to objectID: %s", err)
-	//}
-	//if err != nil {
-	//	posts.Lg.Warning("error while converting post ID: %s", err)
-	//}
 	posts.Posts = append(posts.Posts, *post)
-	if err = posts.UpdatePost(); err != nil {
+	if err = posts.UpdatePost(postNum); err != nil {
 		posts.Lg.Error("error edit post: %s", err)
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while edit post")
 		return

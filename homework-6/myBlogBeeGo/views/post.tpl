@@ -5,7 +5,6 @@
     <title>{{.Post.Title}}</title>
 </head>
 <body class="uk-background-muted">
-
 <div class="uk-margin-left uk-margin-right uk-margin-top">
     <div class="uk-card uk-card-default uk-card-hover uk-width-1-1 uk-margin-bottom">
         <div class="uk-card-header">
