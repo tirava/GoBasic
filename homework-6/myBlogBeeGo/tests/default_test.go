@@ -1,3 +1,9 @@
+/*
+ * HomeWork-6: Mongo in BeeGo
+ * Created on 28.09.19 22:22
+ * Copyright (c) 2019 - Eugene Klimov
+ */
+
 package test
 
 import (

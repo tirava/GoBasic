@@ -1,6 +1,6 @@
 /*
- * HomeWork-5: Start BeeGo
- * Created on 25.09.19 23:05
+ * HomeWork-6: Mongo in BeeGo
+ * Created on 28.09.19 22:17
  * Copyright (c) 2019 - Eugene Klimov
  */
 
@@ -13,7 +13,6 @@ import (
 	"html/template"
 	"myBlog/models"
 	"net/http"
-	"strconv"
 )
 
 // MainController is.
@@ -93,10 +92,12 @@ func (c *MainController) UpdatePost() {
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while decoding post body")
 		return
 	}
-	post.ID, err = strconv.Atoi(postNum)
-	if err != nil {
-		posts.Lg.Warning("error while converting post ID: %s", err)
-	}
+	//post.ID, err = strconv.Atoi(postNum)
+	//post.ID = bson.ObjectId(postNum)
+	post.ID = postNum
+	//if err != nil {
+	//	posts.Lg.Warning("error while converting post ID: %s", err)
+	//}
 	posts.Posts = append(posts.Posts, *post)
 	if err = posts.UpdatePost(); err != nil {
 		posts.Lg.Error("error edit post: %s", err)

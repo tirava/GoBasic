@@ -1,6 +1,6 @@
 /*
- * HomeWork-4: Simple blog - MySQL
- * Created on 23.09.2019 20:22
+ * HomeWork-6: Mongo in BeeGo
+ * Created on 28.09.19 22:20
  * Copyright (c) 2019 - Eugene Klimov
  */
 
