@@ -12,8 +12,8 @@ import (
 )
 
 func init() {
-	beego.Router("/", &controllers.MainController{}, "get:GetPosts")
-	beego.Router("/posts", &controllers.MainController{}, "get:GetPost")
+	beego.Router("/", &controllers.MainController{}, "get:GetAllPosts")
+	beego.Router("/posts", &controllers.MainController{}, "get:GetOnePost")
 	beego.Router("/posts/edit", &controllers.MainController{}, "get:GetEditPost")
 	beego.Router("/posts/create", &controllers.MainController{}, "get:GetCreatePost")
 

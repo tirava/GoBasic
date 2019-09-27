@@ -13,6 +13,7 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"html/template"
 	"time"
@@ -27,33 +28,31 @@ var (
 
 // Post is the base post type.
 type Post struct {
-	ID string `json:"-" bson:"_id,omitempty"`
-	//ID      int           `orm:"column(id);pk;auto"`
-	Title   string        `json:"title"`
-	Date    time.Time     `json:"-" orm:"column(updated_at);auto_now;type(datetime)"`
-	Summary string        `json:"summary"`
-	Body    template.HTML `json:"body"`
-	Created time.Time     `json:"-" orm:"column(created_at);auto_now_add;type(datetime)"`
-	Deleted time.Time     `json:"-" orm:"column(deleted_at);type(datetime)"`
+	OID     primitive.ObjectID `json:"-" bson:"_id"`
+	ID      string             `json:"-" bson:"-"`
+	Title   string             `json:"title"`
+	Date    time.Time          `json:"-"`
+	Summary string             `json:"summary"`
+	Body    template.HTML      `json:"body"`
+	Created time.Time          `json:"-"`
+	Deleted time.Time          `json:"-"`
 }
 
 //DBPosts is type dbPosts map[string]Post
 type DBPosts struct {
-	//DB     *sql.DB
 	MDB    *mongo.Client
 	DBName string
-	//ORM    orm.Ormer
-	Posts []Post
-	Lg    *logs.BeeLogger
+	Posts  []Post
+	Lg     *logs.BeeLogger
 	Error
 }
 
 // NewPosts creates new DBPosts with DB link
 func NewPosts() *DBPosts {
 	return &DBPosts{
-		Lg:    Lg,
-		Error: Error{Lg: Lg},
-		//ORM:    ORM,
+		//Posts: []Post{},
+		Lg:     Lg,
+		Error:  Error{Lg: Lg},
 		MDB:    MDB,
 		DBName: beego.AppConfig.String("DBNAME"),
 	}
@@ -77,44 +76,28 @@ func (p *Post) Date2Norm() string {
 	return p.Date.Format(dt)
 }
 
-//// GetPosts gets one or all posts.
-//func (d *DBPosts) GetPosts(id string) error {
-//	if id == "" { // all posts
-//		qs := d.ORM.QueryTable(&Post{})
-//		n, err := qs.Filter("deleted_at__isnull", true).OrderBy("-updated_at").All(&d.Posts)
-//		if err != nil {
-//			return fmt.Errorf("error in query all posts: %v", err)
-//		}
-//		if n == 0 {
-//			d.Lg.Error("no one posts found")
-//			return nil
-//		}
-//	} else { // one post
-//		idn, err := strconv.Atoi(id)
-//		if err != nil {
-//			return fmt.Errorf("error while converting post ID: %s", id)
-//		}
-//		post := Post{ID: idn}
-//		if err := d.ORM.Read(&post); err != nil {
-//			return fmt.Errorf("post not found: %s", id)
-//		}
-//		d.Posts = append(d.Posts, post)
-//	}
-//	return nil
-//}
-
 // GetPosts gets one or all posts.
 func (d *DBPosts) GetPosts(id string) error {
 	post := Post{}
 	c := d.MDB.Database(d.DBName).Collection(post.TableName())
 	if id == "" { // all posts
-		cur, err := c.Find(context.TODO(), bson.D{})
+		cur, err := c.Find(context.TODO(), bson.M{})
 		if err != nil {
-			return fmt.Errorf("error in query all posts: %v", err)
+			return fmt.Errorf("error find all posts: %v", err)
 		}
 		err = cur.All(context.TODO(), &d.Posts)
+		if err != nil {
+			return fmt.Errorf("error fill post's slice from find results: %v", err)
+		}
+		for i := range d.Posts {
+			d.Posts[i].ID = d.Posts[i].OID.Hex()
+		}
 	} else { // one post
-		err := c.FindOne(context.TODO(), bson.D{{"_id", id}}).Decode(&post)
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return fmt.Errorf("error converting post ID to objectID: %v", err)
+		}
+		err = c.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&post)
 		if err != nil {
 			return fmt.Errorf("post not found: %s", id)
 		}
@@ -123,23 +106,18 @@ func (d *DBPosts) GetPosts(id string) error {
 	return nil
 }
 
-//// CreatePost creates post.
-//func (d *DBPosts) CreatePost() error {
-//	n, err := d.ORM.Insert(&d.Posts[0])
-//	if n == 0 {
-//		return fmt.Errorf("post not created")
-//	}
-//	return err
-//}
-
 // CreatePost creates post.
 func (d *DBPosts) CreatePost() error {
+	d.Posts[0].OID = primitive.NewObjectID()
 	d.Posts[0].Date = time.Now()
 	d.Posts[0].Created = time.Now()
 	d.Posts[0].Deleted = time.Unix(0, 0)
 	c := d.MDB.Database(d.DBName).Collection(d.Posts[0].TableName())
 	_, err := c.InsertOne(context.TODO(), d.Posts[0])
-	return err
+	if err != nil {
+		return fmt.Errorf("error insert one post: %v", err)
+	}
+	return nil
 }
 
 // DeletePost deletes one post.

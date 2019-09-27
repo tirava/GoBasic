@@ -16,3 +16,6 @@
 
 ## homework-5
 Перенос блога на BeeGo
+
+## homework-6
+Перенос БД MySQL на MongoDB

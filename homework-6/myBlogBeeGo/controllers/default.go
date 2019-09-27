@@ -21,7 +21,7 @@ type MainController struct {
 }
 
 // GetPosts shows all posts in main page.
-func (c *MainController) GetPosts() {
+func (c *MainController) GetAllPosts() {
 	posts := models.NewPosts()
 	if err := posts.GetPosts(""); err != nil {
 		posts.Lg.Error("error get all posts: %s", err)
@@ -35,7 +35,7 @@ func (c *MainController) GetPosts() {
 }
 
 // GetPost shows one posts with full content.
-func (c *MainController) GetPost() {
+func (c *MainController) GetOnePost() {
 	postNum := c.Ctx.Request.URL.Query().Get("id")
 	if postNum == "" {
 		c.Redirect("/", http.StatusMovedPermanently)
@@ -83,7 +83,7 @@ func (c *MainController) GetEditPost() {
 
 // UpdatePost updates post in DB.
 func (c *MainController) UpdatePost() {
-	postNum := c.Ctx.Input.Param(":id")
+	//postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
 
 	post, err := c.decodePost()
@@ -94,7 +94,11 @@ func (c *MainController) UpdatePost() {
 	}
 	//post.ID, err = strconv.Atoi(postNum)
 	//post.ID = bson.ObjectId(postNum)
-	post.ID = postNum
+	///////////post.OID, err = primitive.ObjectIDFromHex(postNum)
+	//post.ID = postNum
+	//if err != nil {
+	//	posts.Lg.Error("error converting post ID to objectID: %s", err)
+	//}
 	//if err != nil {
 	//	posts.Lg.Warning("error while converting post ID: %s", err)
 	//}
