@@ -14,13 +14,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"myBlog/conf"
 	"myBlog/models"
 	_ "myBlog/routers"
 )
 
 func main() {
 	// connect to Mongo
-	mdb, err := mongo.NewClient(options.Client().ApplyURI("mongodb://Klim.Go:27017"))
+	mdb, err := mongo.NewClient(options.Client().ApplyURI(conf.GetURI()))
 	if err != nil {
 		log.Fatalln("Can't create MongoDB client:", err)
 	}
@@ -31,7 +32,6 @@ func main() {
 	if err = models.MDB.Ping(context.TODO(), nil); err != nil {
 		log.Fatalln("Can't ping MongoDB server:", err)
 	}
-	defer models.MDB.Disconnect(context.TODO())
 
 	// set logger
 	dbName := beego.AppConfig.String("DBNAME")
@@ -41,4 +41,8 @@ func main() {
 	defer models.Lg.Close()
 
 	beego.Run()
+
+	if err = models.MDB.Disconnect(context.TODO()); err != nil {
+		log.Fatalln("error disconnect from MongoDB", err)
+	}
 }

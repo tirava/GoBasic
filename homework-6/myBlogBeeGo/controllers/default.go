@@ -20,7 +20,7 @@ type MainController struct {
 	beego.Controller
 }
 
-// GetPosts shows all posts in main page.
+// GetAllPosts shows all posts in main page.
 func (c *MainController) GetAllPosts() {
 	posts := models.NewPosts()
 	if err := posts.GetPosts(""); err != nil {
@@ -34,7 +34,7 @@ func (c *MainController) GetAllPosts() {
 	c.TplName = "index.tpl"
 }
 
-// GetPost shows one posts with full content.
+// GetOnePost shows one posts with full content.
 func (c *MainController) GetOnePost() {
 	postNum := c.Ctx.Request.URL.Query().Get("id")
 	if postNum == "" {

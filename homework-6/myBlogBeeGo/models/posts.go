@@ -132,15 +132,15 @@ func (d *DBPosts) UpdatePost(id string, isDelete bool) error {
 	if err != nil {
 		return fmt.Errorf("error converting post ID to objectID: %v", err)
 	}
-	update := bson.D{}
+	var upd bson.D
 	if isDelete {
-		update = bson.D{
+		upd = bson.D{
 			{"$set", bson.D{
 				{"deleted_at", time.Now()},
 			}},
 		}
 	} else {
-		update = bson.D{
+		upd = bson.D{
 			{"$set", bson.D{
 				{"title", d.Posts[0].Title},
 				{"summary", d.Posts[0].Summary},
@@ -149,7 +149,7 @@ func (d *DBPosts) UpdatePost(id string, isDelete bool) error {
 			}},
 		}
 	}
-	res, err := d.Collection.UpdateOne(context.TODO(), bson.M{"_id": objID}, update)
+	res, err := d.Collection.UpdateOne(context.TODO(), bson.M{"_id": objID}, upd)
 	if err != nil {
 		return fmt.Errorf("error update post: %v", err)
 	}
