@@ -25,7 +25,7 @@ var (
 
 // Post is the base post type.
 type Post struct {
-	ID      int           `orm:"column(id);pk;auto"`
+	ID      int           `json:"-" orm:"column(id);pk;auto"`
 	Title   string        `json:"title"`
 	Date    time.Time     `json:"-" orm:"column(updated_at);auto_now;type(datetime)"`
 	Summary string        `json:"summary"`
@@ -46,9 +46,9 @@ type DBPosts struct {
 // NewPosts creates new DBPosts with DB link
 func NewPosts() *DBPosts {
 	return &DBPosts{
+		ORM:   ORM,
 		Lg:    Lg,
 		Error: Error{Lg: Lg},
-		ORM:   ORM,
 	}
 }
 
@@ -85,7 +85,7 @@ func (d *DBPosts) GetPosts(id string) error {
 	} else { // one post
 		idn, err := strconv.Atoi(id)
 		if err != nil {
-			return fmt.Errorf("error while converting post ID: %s", id)
+			return fmt.Errorf("error while converting post ID: %s %v", id, err)
 		}
 		post := Post{ID: idn}
 		if err := d.ORM.Read(&post); err != nil {
@@ -108,7 +108,7 @@ func (d *DBPosts) CreatePost() error {
 // DeletePost deletes one post.
 func (d *DBPosts) DeletePost(id string) error {
 	qs := d.ORM.QueryTable(&Post{})
-	n, err := qs.Filter("id", id).Update(orm.Params{"deleted_at": time.Now().Local()})
+	n, err := qs.Filter("id", id).Update(orm.Params{"deleted_at": time.Now()})
 	if n == 0 {
 		return fmt.Errorf("post not found: %s", id)
 	}
@@ -116,10 +116,15 @@ func (d *DBPosts) DeletePost(id string) error {
 }
 
 // UpdatePost updates post.
-func (d *DBPosts) UpdatePost() error {
+func (d *DBPosts) UpdatePost(id string) error {
+	var err error
+	d.Posts[0].ID, err = strconv.Atoi(id)
+	if err != nil {
+		return fmt.Errorf("error while converting post ID: %s %v", id, err)
+	}
 	n, err := d.ORM.Update(&d.Posts[0])
 	if n == 0 {
-		return fmt.Errorf("post not found: %d", d.Posts[0].ID)
+		return fmt.Errorf("post not found: %s", id)
 	}
 	return err
 }

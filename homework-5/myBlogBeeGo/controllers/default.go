@@ -13,7 +13,6 @@ import (
 	"html/template"
 	"myBlog/models"
 	"net/http"
-	"strconv"
 )
 
 // MainController is.
@@ -21,8 +20,8 @@ type MainController struct {
 	beego.Controller
 }
 
-// GetPosts shows all posts in main page.
-func (c *MainController) GetPosts() {
+// GetAllPosts shows all posts in main page.
+func (c *MainController) GetAllPosts() {
 	posts := models.NewPosts()
 	if err := posts.GetPosts(""); err != nil {
 		posts.Lg.Error("error get all posts: %s", err)
@@ -35,8 +34,8 @@ func (c *MainController) GetPosts() {
 	c.TplName = "index.tpl"
 }
 
-// GetPost shows one posts with full content.
-func (c *MainController) GetPost() {
+// GetOnePost shows one posts with full content.
+func (c *MainController) GetOnePost() {
 	postNum := c.Ctx.Request.URL.Query().Get("id")
 	if postNum == "" {
 		c.Redirect("/", http.StatusMovedPermanently)
@@ -93,12 +92,12 @@ func (c *MainController) UpdatePost() {
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while decoding post body")
 		return
 	}
-	post.ID, err = strconv.Atoi(postNum)
-	if err != nil {
-		posts.Lg.Warning("error while converting post ID: %s", err)
-	}
+	//post.ID, err = strconv.Atoi(postNum)
+	//if err != nil {
+	//	posts.Lg.Warning("error while converting post ID: %s", err)
+	//}
 	posts.Posts = append(posts.Posts, *post)
-	if err = posts.UpdatePost(); err != nil {
+	if err = posts.UpdatePost(postNum); err != nil {
 		posts.Lg.Error("error edit post: %s", err)
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while edit post")
 		return

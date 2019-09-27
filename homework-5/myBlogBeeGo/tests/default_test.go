@@ -1,3 +1,9 @@
+/*
+ * HomeWork-5: Start BeeGo
+ * Created on 27.09.19 23:01
+ * Copyright (c) 2019 - Eugene Klimov
+ */
+
 package test
 
 import (
