@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"github.com/astaxie/beego/orm"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -20,11 +19,10 @@ import (
 	"time"
 )
 
-// MDB & Logger & ORM are globals (it is normal for BeeGo)
+// MDB & Logger globals (it is normal for BeeGo)
 var (
-	Lg  *logs.BeeLogger
-	ORM orm.Ormer
 	MDB *mongo.Client
+	Lg  *logs.BeeLogger
 )
 
 // Post is the base post type.
@@ -125,39 +123,31 @@ func (d *DBPosts) CreatePost() error {
 
 // DeletePost deletes one post.
 func (d *DBPosts) DeletePost(id string) error {
-	objID, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return fmt.Errorf("error converting post ID to objectID: %v", err)
-	}
-	//res, err := d.Collection.DeleteOne(context.TODO(), bson.M{"_id": objID})
-	update := bson.D{
-		{"$set", bson.D{
-			{"deleted_at", time.Now()},
-		}},
-	}
-	res, err := d.Collection.UpdateOne(context.TODO(), bson.M{"_id": objID}, update)
-	if err != nil {
-		return fmt.Errorf("error delete post: %v", err)
-	}
-	if res.ModifiedCount == 0 {
-		d.Lg.Warning("post not found: %s", id)
-	}
-	return nil
+	return d.UpdatePost(id, true)
 }
 
 // UpdatePost updates post.
-func (d *DBPosts) UpdatePost(id string) error {
+func (d *DBPosts) UpdatePost(id string, isDelete bool) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return fmt.Errorf("error converting post ID to objectID: %v", err)
 	}
-	update := bson.D{
-		{"$set", bson.D{
-			{"title", d.Posts[0].Title},
-			{"summary", d.Posts[0].Summary},
-			{"body", d.Posts[0].Body},
-			{"updated_at", time.Now()},
-		}},
+	update := bson.D{}
+	if isDelete {
+		update = bson.D{
+			{"$set", bson.D{
+				{"deleted_at", time.Now()},
+			}},
+		}
+	} else {
+		update = bson.D{
+			{"$set", bson.D{
+				{"title", d.Posts[0].Title},
+				{"summary", d.Posts[0].Summary},
+				{"body", d.Posts[0].Body},
+				{"updated_at", time.Now()},
+			}},
+		}
 	}
 	res, err := d.Collection.UpdateOne(context.TODO(), bson.M{"_id": objID}, update)
 	if err != nil {

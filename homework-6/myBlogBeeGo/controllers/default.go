@@ -94,7 +94,7 @@ func (c *MainController) UpdatePost() {
 		return
 	}
 	posts.Posts = append(posts.Posts, *post)
-	if err = posts.UpdatePost(postNum); err != nil {
+	if err = posts.UpdatePost(postNum, false); err != nil {
 		posts.Lg.Error("error edit post: %s", err)
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while edit post")
 		return

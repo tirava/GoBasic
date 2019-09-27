@@ -7,10 +7,12 @@
 package test
 
 import (
+	"context"
 	"github.com/astaxie/beego"
-	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/smartystreets/goconvey/convey"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"myBlog/models"
 	_ "myBlog/routers"
@@ -22,15 +24,18 @@ import (
 )
 
 func init() {
-	// BeeGo ORM can't see config in tests, use hard dsn
-	dsn := "testuser:@tcp(klim.go:3306)/blog?charset=utf8&interpolateParams=true&loc=Europe%2FMoscow"
-	//dsn := conf.GetDSN()
-	err := orm.RegisterDataBase("default", "mysql", dsn)
+	// connect to Mongo
+	mdb, err := mongo.NewClient(options.Client().ApplyURI("mongodb://Klim.Go:27017"))
 	if err != nil {
-		log.Fatalln("Can't open BeeGo DB:", err)
+		log.Fatalln("Can't create MongoDB client:", err)
 	}
-	orm.RegisterModel(new(models.Post))
-	models.ORM = orm.NewOrm()
+	models.MDB = mdb
+	if err = models.MDB.Connect(context.TODO()); err != nil {
+		log.Fatalln("Can't connect to MongoDB server:", err)
+	}
+	if err = models.MDB.Ping(context.TODO(), nil); err != nil {
+		log.Fatalln("Can't ping MongoDB server:", err)
+	}
 
 	_, file, _, _ := runtime.Caller(0)
 	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
