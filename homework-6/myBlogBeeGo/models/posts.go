@@ -83,7 +83,7 @@ func (d *DBPosts) GetPosts(id string) error {
 	if id == "" { // all posts
 		opts := options.Find()
 		opts.SetSort(bson.D{{"updated_at", -1}})
-		cur, err := d.Collection.Find(context.TODO(), bson.M{}, opts)
+		cur, err := d.Collection.Find(context.TODO(), bson.M{"deleted_at": time.Unix(0, 0)}, opts)
 		if err != nil {
 			return fmt.Errorf("error find all posts: %v", err)
 		}
@@ -99,7 +99,9 @@ func (d *DBPosts) GetPosts(id string) error {
 		if err != nil {
 			return fmt.Errorf("error converting post ID to objectID: %v", err)
 		}
-		err = d.Collection.FindOne(context.TODO(), bson.M{"_id": objID}).Decode(&post)
+		err = d.Collection.FindOne(context.TODO(), bson.M{
+			"_id": objID, "deleted_at": time.Unix(0, 0),
+		}).Decode(&post)
 		if err != nil {
 			return fmt.Errorf("post not found: %s", id)
 		}
@@ -123,12 +125,23 @@ func (d *DBPosts) CreatePost() error {
 
 // DeletePost deletes one post.
 func (d *DBPosts) DeletePost(id string) error {
-
-	//qs := d.ORM.QueryTable(&Post{})
-	//n, err := qs.Filter("id", id).Update(orm.Params{"deleted_at": time.Now().Local()})
-	//if n == 0 {
-	//	return fmt.Errorf("post not found: %s", id)
-	//}
+	objID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return fmt.Errorf("error converting post ID to objectID: %v", err)
+	}
+	//res, err := d.Collection.DeleteOne(context.TODO(), bson.M{"_id": objID})
+	update := bson.D{
+		{"$set", bson.D{
+			{"deleted_at", time.Now()},
+		}},
+	}
+	res, err := d.Collection.UpdateOne(context.TODO(), bson.M{"_id": objID}, update)
+	if err != nil {
+		return fmt.Errorf("error delete post: %v", err)
+	}
+	if res.ModifiedCount == 0 {
+		d.Lg.Warning("post not found: %s", id)
+	}
 	return nil
 }
 
@@ -136,16 +149,14 @@ func (d *DBPosts) DeletePost(id string) error {
 func (d *DBPosts) UpdatePost(id string) error {
 	objID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		d.Lg.Error("error converting post ID to objectID: %s", err)
+		return fmt.Errorf("error converting post ID to objectID: %v", err)
 	}
-	d.Posts[0].OID = objID
-	d.Posts[0].Date = time.Now()
 	update := bson.D{
 		{"$set", bson.D{
 			{"title", d.Posts[0].Title},
 			{"summary", d.Posts[0].Summary},
 			{"body", d.Posts[0].Body},
-			{"updated_at", d.Posts[0].Date},
+			{"updated_at", time.Now()},
 		}},
 	}
 	res, err := d.Collection.UpdateOne(context.TODO(), bson.M{"_id": objID}, update)
