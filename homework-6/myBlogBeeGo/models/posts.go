@@ -15,6 +15,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"html/template"
 	"time"
 )
@@ -73,7 +74,8 @@ func (p *Post) Date2Norm() string {
 	if dt == "" {
 		dt = "02.01.2006 15:04:05"
 	}
-	return p.Date.Format(dt)
+	s, off := time.Now().Zone()
+	return p.Date.Add(time.Second * time.Duration(off)).Format(fmt.Sprintf("%s %s", dt, s))
 }
 
 // GetPosts gets one or all posts.
@@ -81,7 +83,9 @@ func (d *DBPosts) GetPosts(id string) error {
 	post := Post{}
 	c := d.MDB.Database(d.DBName).Collection(post.TableName())
 	if id == "" { // all posts
-		cur, err := c.Find(context.TODO(), bson.M{})
+		opts := options.Find()
+		opts.SetSort(bson.D{{"date", -1}})
+		cur, err := c.Find(context.TODO(), bson.M{}, opts)
 		if err != nil {
 			return fmt.Errorf("error find all posts: %v", err)
 		}
