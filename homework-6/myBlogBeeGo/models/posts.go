@@ -27,7 +27,7 @@ var (
 
 // Post is the base post type.
 type Post struct {
-	OID     primitive.ObjectID `json:"-" bson:"_id"`
+	OID     primitive.ObjectID `json:"-" bson:"_id,omitempty"`
 	ID      string             `json:"-" bson:"-"`
 	Title   string             `json:"title"`
 	Date    time.Time          `json:"-" bson:"updated_at"`
@@ -112,7 +112,7 @@ func (d *DBPosts) GetPosts(id string) error {
 
 // CreatePost creates post.
 func (d *DBPosts) CreatePost() error {
-	d.Posts[0].OID = primitive.NewObjectID()
+	//d.Posts[0].OID = primitive.NewObjectID() // or omitempty in Post
 	d.Posts[0].Date = time.Now()
 	d.Posts[0].Created = time.Now()
 	d.Posts[0].Deleted = time.Unix(0, 0)
