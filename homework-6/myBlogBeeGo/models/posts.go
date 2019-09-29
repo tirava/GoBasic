@@ -40,6 +40,7 @@ type Post struct {
 //DBPosts is type dbPosts map[string]Post
 type DBPosts struct {
 	Collection *mongo.Collection
+	ctx        context.Context
 	Posts      []Post
 	Lg         *logs.BeeLogger
 	Error
@@ -51,6 +52,7 @@ func NewPosts() *DBPosts {
 	col := MDB.Database(dbName).Collection(Post{}.TableName())
 	return &DBPosts{
 		Collection: col,
+		ctx:        context.TODO(),
 		Lg:         Lg,
 		Error:      Error{Lg: Lg},
 	}
@@ -81,11 +83,11 @@ func (d *DBPosts) GetPosts(id string) error {
 	if id == "" { // all posts
 		opts := options.Find()
 		opts.SetSort(bson.D{{"updated_at", -1}})
-		cur, err := d.Collection.Find(context.TODO(), bson.M{"deleted_at": time.Unix(0, 0)}, opts)
+		cur, err := d.Collection.Find(d.ctx, bson.M{"deleted_at": time.Unix(0, 0)}, opts)
 		if err != nil {
 			return fmt.Errorf("error find all posts: %v", err)
 		}
-		err = cur.All(context.TODO(), &d.Posts)
+		err = cur.All(d.ctx, &d.Posts)
 		if err != nil {
 			return fmt.Errorf("error fill post's slice from find results: %v", err)
 		}
@@ -97,7 +99,7 @@ func (d *DBPosts) GetPosts(id string) error {
 		if err != nil {
 			return fmt.Errorf("error converting post ID to objectID: %v", err)
 		}
-		err = d.Collection.FindOne(context.TODO(), bson.M{
+		err = d.Collection.FindOne(d.ctx, bson.M{
 			"_id": objID, "deleted_at": time.Unix(0, 0),
 		}).Decode(&post)
 		if err != nil {
@@ -114,7 +116,7 @@ func (d *DBPosts) CreatePost() error {
 	d.Posts[0].Date = time.Now()
 	d.Posts[0].Created = time.Now()
 	d.Posts[0].Deleted = time.Unix(0, 0)
-	_, err := d.Collection.InsertOne(context.TODO(), d.Posts[0])
+	_, err := d.Collection.InsertOne(d.ctx, d.Posts[0])
 	if err != nil {
 		return fmt.Errorf("error insert one post: %v", err)
 	}
@@ -149,7 +151,7 @@ func (d *DBPosts) UpdatePost(id string, isDelete bool) error {
 			}},
 		}
 	}
-	res, err := d.Collection.UpdateOne(context.TODO(), bson.M{"_id": objID}, upd)
+	res, err := d.Collection.UpdateOne(d.ctx, bson.M{"_id": objID}, upd)
 	if err != nil {
 		return fmt.Errorf("error update post: %v", err)
 	}
