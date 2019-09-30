@@ -8,6 +8,7 @@ package test
 
 import (
 	"context"
+	"encoding/hex"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	_ "github.com/go-sql-driver/mysql"
@@ -16,6 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
+	"math/rand"
 	"myBlog/models"
 	_ "myBlog/routers"
 	"net/http"
@@ -39,6 +41,8 @@ var post = models.Post{
 }
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
+
 	// connect to Mongo
 	mdb, err := mongo.NewClient(options.Client().ApplyURI("mongodb://Klim.Go:27017"))
 	if err != nil {
@@ -185,9 +189,10 @@ func TestDeletePost(t *testing.T) {
 
 func TestPostCreatePost(t *testing.T) {
 	posts := models.NewPosts()
+	post.ID = randomHex(12)
 	body := `
 {
-    "id":"112233445566778899aabbcc",
+    "id":"` + post.ID + `",
 	"title":"qqq",
 	"summary":"www",
 	"body":"**eee**"
@@ -204,7 +209,7 @@ func TestPostCreatePost(t *testing.T) {
 
 func TestDeleteDeletePost(t *testing.T) {
 	posts := models.NewPosts()
-	r, _ := http.NewRequest("DELETE", "/api/v1/posts/112233445566778899aabbcc", nil)
+	r, _ := http.NewRequest("DELETE", "/api/v1/posts/"+post.ID, nil)
 	w := httptest.NewRecorder()
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 	if w.Code != http.StatusOK {
@@ -212,4 +217,12 @@ func TestDeleteDeletePost(t *testing.T) {
 		return
 	}
 	posts.Lg.Informational("PASS: DELETE /api/v1/posts")
+}
+
+func randomHex(n int) string {
+	bytes := make([]byte, n)
+	if _, err := rand.Read(bytes); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(bytes)
 }
