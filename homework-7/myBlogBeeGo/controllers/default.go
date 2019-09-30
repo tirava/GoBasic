@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"github.com/astaxie/beego"
 	"github.com/russross/blackfriday/v2"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"html/template"
 	"myBlog/models"
 	"net/http"
@@ -132,6 +133,9 @@ func (c *MainController) decodePost() (*models.Post, error) {
 	post := &models.Post{}
 	if err := json.NewDecoder(c.Ctx.Request.Body).Decode(post); err != nil {
 		return nil, err
+	}
+	if post.ID != "" {
+		post.OID, _ = primitive.ObjectIDFromHex(post.ID)
 	}
 	return post, nil
 }

@@ -22,6 +22,7 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 	"time"
 )
@@ -77,53 +78,138 @@ func TestBeego(t *testing.T) {
 	})
 }
 
-func TestCreatePost(t *testing.T) {
+func TestDBCreatePost(t *testing.T) {
 	posts := models.NewPosts()
 	posts.Posts = append(posts.Posts, post)
 	if err := posts.CreatePost(); err != nil {
-		posts.Lg.Error("Error create new post: %s", err)
+		posts.Lg.Error("Error create new post in DB: %s", err)
 		return
 	}
 	post.ID = post.OID.Hex()
-	posts.Lg.Informational("PASS: Create post")
+	posts.Lg.Informational("PASS: Create post in DB")
 }
 
-func TestGetAllPosts(t *testing.T) {
+func TestDBGetAllPosts(t *testing.T) {
 	posts := models.NewPosts()
 	if err := posts.GetPosts(""); err != nil {
-		posts.Lg.Error("Error get all posts: %s", err)
+		posts.Lg.Error("Error get all posts from DB: %s", err)
 		return
 	}
-	posts.Lg.Informational("PASS: Get all posts")
+	posts.Lg.Informational("PASS: Get all posts from DB")
 }
 
-func TestGetOnePost(t *testing.T) {
+func TestDBGetOnePost(t *testing.T) {
 	posts := models.NewPosts()
 	if err := posts.GetPosts(post.ID); err != nil {
-		posts.Lg.Error("Error get one post: %s", err)
+		posts.Lg.Error("Error get one post from DB: %s", err)
 		return
 	}
-	posts.Lg.Informational("PASS: Get one post")
+	posts.Lg.Informational("PASS: Get one post from DB")
 }
 
-func TestUpdatePost(t *testing.T) {
+func TestDBUpdatePost(t *testing.T) {
 	posts := models.NewPosts()
 	post.Title = post.Title + "_Updated"
 	post.Summary = post.Summary + "_Updated"
 	post.Body = post.Body + "_Updated"
 	posts.Posts = append(posts.Posts, post)
 	if err := posts.UpdatePost(post.ID, false); err != nil {
-		posts.Lg.Error("Error update post: %s", err)
+		posts.Lg.Error("Error update post in DB: %s", err)
 		return
 	}
-	posts.Lg.Informational("PASS: Update post")
+	posts.Lg.Informational("PASS: Update post in DB")
+}
+
+func TestGetPost(t *testing.T) {
+	posts := models.NewPosts()
+	r, _ := http.NewRequest("GET", "/posts/?id="+post.ID, nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		posts.Lg.Error("Error GET /posts, code[%d]", w.Code)
+		return
+	}
+	posts.Lg.Informational("PASS: GET /posts")
+}
+
+func TestGetEditPost(t *testing.T) {
+	posts := models.NewPosts()
+	r, _ := http.NewRequest("GET", "/posts/edit/?id="+post.ID, nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		posts.Lg.Error("Error GET /posts/edit, code[%d]", w.Code)
+		return
+	}
+	posts.Lg.Informational("PASS: GET /posts/edit")
+}
+
+func TestGetCreatePost(t *testing.T) {
+	posts := models.NewPosts()
+	r, _ := http.NewRequest("GET", "/posts/create", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		posts.Lg.Error("Error GET /posts/create, code[%d]", w.Code)
+		return
+	}
+	posts.Lg.Informational("PASS: GET /posts/create")
+}
+
+func TestPutUpdatePost(t *testing.T) {
+	posts := models.NewPosts()
+	body := `
+{
+	"title":"111",
+	"summary":"222",
+	"body":"*333*"
+}`
+	r, _ := http.NewRequest("PUT", "/api/v1/posts/"+post.ID, strings.NewReader(body))
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		posts.Lg.Error("Error PUT /api/v1/posts, code[%d]", w.Code)
+		return
+	}
+	posts.Lg.Informational("PASS: PUT //api/v1/posts/")
 }
 
 func TestDeletePost(t *testing.T) {
 	posts := models.NewPosts()
 	if err := posts.DeletePost(post.ID); err != nil {
-		posts.Lg.Error("Error delete post: %s", err)
+		posts.Lg.Error("Error Delete post in DB: %s", err)
 		return
 	}
-	posts.Lg.Informational("PASS: Delete post")
+	posts.Lg.Informational("PASS: Delete post in DB")
+}
+
+func TestPostCreatePost(t *testing.T) {
+	posts := models.NewPosts()
+	body := `
+{
+    "id":"112233445566778899aabbcc",
+	"title":"qqq",
+	"summary":"www",
+	"body":"**eee**"
+}`
+	r, _ := http.NewRequest("POST", "/api/v1/posts/create", strings.NewReader(body))
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	if w.Code != http.StatusCreated {
+		posts.Lg.Error("Error POST /api/v1/posts/create, code[%d]", w.Code)
+		return
+	}
+	posts.Lg.Informational("PASS: POST /api/v1/posts/create")
+}
+
+func TestDeleteDeletePost(t *testing.T) {
+	posts := models.NewPosts()
+	r, _ := http.NewRequest("DELETE", "/api/v1/posts/112233445566778899aabbcc", nil)
+	w := httptest.NewRecorder()
+	beego.BeeApp.Handlers.ServeHTTP(w, r)
+	if w.Code != http.StatusOK {
+		posts.Lg.Error("Error DELETE /api/v1/posts, code[%d]", w.Code)
+		return
+	}
+	posts.Lg.Informational("PASS: DELETE /api/v1/posts")
 }

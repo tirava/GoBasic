@@ -28,7 +28,7 @@ var (
 // Post is the base post type.
 type Post struct {
 	OID     primitive.ObjectID `json:"-" bson:"_id,omitempty"`
-	ID      string             `json:"-" bson:"-"`
+	ID      string             `json:"id,omitempty" bson:"-"`
 	Title   string             `json:"title"`
 	Date    time.Time          `json:"-" bson:"updated_at"`
 	Summary string             `json:"summary"`
@@ -156,7 +156,7 @@ func (d *DBPosts) UpdatePost(id string, isDelete bool) error {
 		return fmt.Errorf("error update post: %v", err)
 	}
 	if res.ModifiedCount == 0 {
-		d.Lg.Warning("post not found: %s", id)
+		return fmt.Errorf("post not found: %s", id)
 	}
 	return nil
 }
