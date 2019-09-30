@@ -12,6 +12,7 @@ import (
 	"github.com/astaxie/beego/logs"
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/smartystreets/goconvey/convey"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -24,6 +25,17 @@ import (
 	"testing"
 	"time"
 )
+
+var post = models.Post{
+	ID:      "fake",
+	OID:     primitive.NewObjectID(),
+	Title:   "Test",
+	Date:    time.Now(),
+	Summary: "Test from tests",
+	Body:    "### Testik",
+	Created: time.Now(),
+	Deleted: time.Unix(0, 0),
+}
 
 func init() {
 	// connect to Mongo
@@ -39,6 +51,8 @@ func init() {
 		log.Fatalln("Can't ping MongoDB server:", err)
 	}
 
+	models.Lg = logs.NewLogger(10)
+
 	_, file, _, _ := runtime.Caller(0)
 	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
 	beego.TestBeegoInit(apppath)
@@ -51,7 +65,7 @@ func TestBeego(t *testing.T) {
 	beego.BeeApp.Handlers.ServeHTTP(w, r)
 
 	lg := logs.NewLogger(10)
-	lg.Trace("Testing myBlog, code[%d]\n", w.Code)
+	lg.Trace("Testing myBlog endpoint, code[%d]", w.Code)
 
 	Convey("Subject: Test Station Endpoint\n", t, func() {
 		Convey("Status Code Should Be 200", func() {
@@ -65,17 +79,51 @@ func TestBeego(t *testing.T) {
 
 func TestCreatePost(t *testing.T) {
 	posts := models.NewPosts()
-	post := models.Post{
-		Title:   "Test",
-		Date:    time.Now(),
-		Summary: "Test from tests",
-		Body:    "### Testik",
-		Created: time.Now(),
-		Deleted: time.Unix(0, 0),
-	}
 	posts.Posts = append(posts.Posts, post)
 	if err := posts.CreatePost(); err != nil {
-		t.Errorf("Eror create new post: %s\n", err)
+		posts.Lg.Error("Error create new post: %s", err)
+		return
 	}
-	t.Logf("PASS: Create post")
+	post.ID = post.OID.Hex()
+	posts.Lg.Informational("PASS: Create post")
+}
+
+func TestGetAllPosts(t *testing.T) {
+	posts := models.NewPosts()
+	if err := posts.GetPosts(""); err != nil {
+		posts.Lg.Error("Error get all posts: %s", err)
+		return
+	}
+	posts.Lg.Informational("PASS: Get all posts")
+}
+
+func TestGetOnePost(t *testing.T) {
+	posts := models.NewPosts()
+	if err := posts.GetPosts(post.ID); err != nil {
+		posts.Lg.Error("Error get one post: %s", err)
+		return
+	}
+	posts.Lg.Informational("PASS: Get one post")
+}
+
+func TestUpdatePost(t *testing.T) {
+	posts := models.NewPosts()
+	post.Title = post.Title + "_Updated"
+	post.Summary = post.Summary + "_Updated"
+	post.Body = post.Body + "_Updated"
+	posts.Posts = append(posts.Posts, post)
+	if err := posts.UpdatePost(post.ID, false); err != nil {
+		posts.Lg.Error("Error update post: %s", err)
+		return
+	}
+	posts.Lg.Informational("PASS: Update post")
+}
+
+func TestDeletePost(t *testing.T) {
+	posts := models.NewPosts()
+	if err := posts.DeletePost(post.ID); err != nil {
+		posts.Lg.Error("Error delete post: %s", err)
+		return
+	}
+	posts.Lg.Informational("PASS: Delete post")
 }
