@@ -176,17 +176,16 @@ func TestDB(t *testing.T) {
 		}
 
 		if err != nil {
-			posts.Lg.Error("Error %s in DB: %s", test.description, err)
+			t.Errorf("Error %s in DB: %s", test.description, err)
 			return
 		}
-		posts.Lg.Informational("PASS: %s in DB", test.description)
+		t.Logf("PASS: %s in DB", test.description)
 	}
 }
 
 func TestMethods(t *testing.T) {
 	for _, test := range testMethodsCases {
 		var r *http.Request
-		posts := models.NewPosts()
 
 		switch test.action {
 		case "PostCreatePost":
@@ -206,10 +205,10 @@ func TestMethods(t *testing.T) {
 		w := httptest.NewRecorder()
 		beego.BeeApp.Handlers.ServeHTTP(w, r)
 		if w.Code != test.code {
-			posts.Lg.Error("Error %s %s, code[%d]", test.method, test.api, w.Code)
+			t.Errorf("Error %s %s, code[%d]", test.method, test.api, w.Code)
 			return
 		}
-		posts.Lg.Informational("PASS: %s %s", test.method, test.api)
+		t.Logf("PASS: %s %s", test.method, test.api)
 	}
 }
 
