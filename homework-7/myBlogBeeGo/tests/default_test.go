@@ -97,13 +97,22 @@ var testMethodsCases = []struct {
 	method string
 	api    string
 	action string
+	body   string
 	code   int
 }{
 	{
 		action: "PostCreatePost",
 		method: "POST",
 		api:    "/api/v1/posts/create",
-		code:   http.StatusCreated},
+		code:   http.StatusCreated,
+		body: `
+			{
+				"id":"randomHex",
+				"title":"qqq",
+				"summary":"www",
+				"body":"**eee**"
+			}`,
+	},
 	{
 		action: "GetPost",
 		method: "GET",
@@ -115,6 +124,12 @@ var testMethodsCases = []struct {
 		method: "PUT",
 		api:    "/api/v1/posts",
 		code:   http.StatusOK,
+		body: `
+			{
+				"title":"111",
+				"summary":"222",
+				"body":"*333*"
+			}`,
 	},
 	{
 		action: "GetEditPost",
@@ -136,37 +151,37 @@ var testMethodsCases = []struct {
 	},
 }
 
-//func TestDB(t *testing.T) {
-//	for _, test := range testDBCases {
-//		var err error
-//		posts := models.NewPosts()
-//
-//		switch test.action {
-//		case "CreatePost":
-//			posts.Posts = append(posts.Posts, post)
-//			err = posts.CreatePost()
-//			post.ID = post.OID.Hex()
-//		case "GetAllPosts":
-//			err = posts.GetPosts("")
-//		case "GetOnePost":
-//			err = posts.GetPosts(post.ID)
-//		case "UpdatePost":
-//			post.Title = post.Title + "_Updated"
-//			post.Summary = post.Summary + "_Updated"
-//			post.Body = post.Body + "_Updated"
-//			posts.Posts = append(posts.Posts, post)
-//			err = posts.UpdatePost(post.ID, false)
-//		case "DeletePost":
-//			err = posts.DeletePost(post.ID)
-//		}
-//
-//		if err != nil {
-//			posts.Lg.Error("Error %s in DB: %s", test.description, err)
-//			return
-//		}
-//		posts.Lg.Informational("PASS: %s in DB", test.description)
-//	}
-//}
+func TestDB(t *testing.T) {
+	for _, test := range testDBCases {
+		var err error
+		posts := models.NewPosts()
+
+		switch test.action {
+		case "CreatePost":
+			posts.Posts = append(posts.Posts, post)
+			err = posts.CreatePost()
+			post.ID = post.OID.Hex()
+		case "GetAllPosts":
+			err = posts.GetPosts("")
+		case "GetOnePost":
+			err = posts.GetPosts(post.ID)
+		case "UpdatePost":
+			post.Title = post.Title + "_Updated"
+			post.Summary = post.Summary + "_Updated"
+			post.Body = post.Body + "_Updated"
+			posts.Posts = append(posts.Posts, post)
+			err = posts.UpdatePost(post.ID, false)
+		case "DeletePost":
+			err = posts.DeletePost(post.ID)
+		}
+
+		if err != nil {
+			posts.Lg.Error("Error %s in DB: %s", test.description, err)
+			return
+		}
+		posts.Lg.Informational("PASS: %s in DB", test.description)
+	}
+}
 
 func TestMethods(t *testing.T) {
 	for _, test := range testMethodsCases {
@@ -176,24 +191,12 @@ func TestMethods(t *testing.T) {
 		switch test.action {
 		case "PostCreatePost":
 			post.ID = randomHex(12)
-			body := `
-			{
-			   "id":"` + post.ID + `",
-				"title":"qqq",
-				"summary":"www",
-				"body":"**eee**"
-			}`
-			r, _ = http.NewRequest(test.method, test.api, strings.NewReader(body))
+			test.body = strings.Replace(test.body, "randomHex", post.ID, 1)
+			r, _ = http.NewRequest(test.method, test.api, strings.NewReader(test.body))
 		case "GetPost", "GetEditPost":
 			r, _ = http.NewRequest(test.method, test.api+"/?id="+post.ID, nil)
 		case "PutUpdatePost":
-			body := `
-			{
-				"title":"111",
-				"summary":"222",
-				"body":"*333*"
-			}`
-			r, _ = http.NewRequest(test.method, test.api+"/"+post.ID, strings.NewReader(body))
+			r, _ = http.NewRequest(test.method, test.api+"/"+post.ID, strings.NewReader(test.body))
 		case "DeleteDeletePost":
 			r, _ = http.NewRequest(test.method, test.api+"/"+post.ID, nil)
 		case "GetCreatePost":
