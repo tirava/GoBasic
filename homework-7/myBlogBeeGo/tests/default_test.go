@@ -29,17 +29,6 @@ import (
 	"time"
 )
 
-var post = models.Post{
-	ID:      "fake",
-	OID:     primitive.NewObjectID(),
-	Title:   "Test",
-	Date:    time.Now(),
-	Summary: "Test from tests",
-	Body:    "### Testik",
-	Created: time.Now(),
-	Deleted: time.Unix(0, 0),
-}
-
 func init() {
 	rand.Seed(time.Now().UnixNano())
 
@@ -82,141 +71,143 @@ func TestBeego(t *testing.T) {
 	})
 }
 
-func TestDBCreatePost(t *testing.T) {
-	posts := models.NewPosts()
-	posts.Posts = append(posts.Posts, post)
-	if err := posts.CreatePost(); err != nil {
-		posts.Lg.Error("Error create new post in DB: %s", err)
-		return
-	}
-	post.ID = post.OID.Hex()
-	posts.Lg.Informational("PASS: Create post in DB")
+var post = models.Post{
+	ID:      "fake",
+	OID:     primitive.NewObjectID(),
+	Title:   "Test",
+	Date:    time.Now(),
+	Summary: "Test from tests",
+	Body:    "### Testik",
+	Created: time.Now(),
+	Deleted: time.Unix(0, 0),
 }
 
-func TestDBGetAllPosts(t *testing.T) {
-	posts := models.NewPosts()
-	if err := posts.GetPosts(""); err != nil {
-		posts.Lg.Error("Error get all posts from DB: %s", err)
-		return
-	}
-	posts.Lg.Informational("PASS: Get all posts from DB")
+var testDBCases = []struct {
+	action      string
+	description string
+}{
+	{action: "CreatePost", description: "create new post"},
+	{action: "GetAllPosts", description: "get all posts"},
+	{action: "GetOnePost", description: "get one post"},
+	{action: "UpdatePost", description: "update post"},
+	{action: "DeletePost", description: "delete post"},
 }
 
-func TestDBGetOnePost(t *testing.T) {
-	posts := models.NewPosts()
-	if err := posts.GetPosts(post.ID); err != nil {
-		posts.Lg.Error("Error get one post from DB: %s", err)
-		return
-	}
-	posts.Lg.Informational("PASS: Get one post from DB")
+var testMethodsCases = []struct {
+	method string
+	api    string
+	action string
+	code   int
+}{
+	{
+		action: "PostCreatePost",
+		method: "POST",
+		api:    "/api/v1/posts/create",
+		code:   http.StatusCreated},
+	{
+		action: "GetPost",
+		method: "GET",
+		api:    "/posts",
+		code:   http.StatusOK,
+	},
+	{
+		action: "PutUpdatePost",
+		method: "PUT",
+		api:    "/api/v1/posts",
+		code:   http.StatusOK,
+	},
+	{
+		action: "GetEditPost",
+		method: "GET",
+		api:    "/posts/edit",
+		code:   http.StatusOK,
+	},
+	{
+		action: "GetCreatePost",
+		method: "GET",
+		api:    "/posts/create",
+		code:   http.StatusOK,
+	},
+	{
+		action: "DeleteDeletePost",
+		method: "DELETE",
+		api:    "/api/v1/posts",
+		code:   http.StatusOK,
+	},
 }
 
-func TestDBUpdatePost(t *testing.T) {
-	posts := models.NewPosts()
-	post.Title = post.Title + "_Updated"
-	post.Summary = post.Summary + "_Updated"
-	post.Body = post.Body + "_Updated"
-	posts.Posts = append(posts.Posts, post)
-	if err := posts.UpdatePost(post.ID, false); err != nil {
-		posts.Lg.Error("Error update post in DB: %s", err)
-		return
-	}
-	posts.Lg.Informational("PASS: Update post in DB")
-}
+//func TestDB(t *testing.T) {
+//	for _, test := range testDBCases {
+//		var err error
+//		posts := models.NewPosts()
+//
+//		switch test.action {
+//		case "CreatePost":
+//			posts.Posts = append(posts.Posts, post)
+//			err = posts.CreatePost()
+//			post.ID = post.OID.Hex()
+//		case "GetAllPosts":
+//			err = posts.GetPosts("")
+//		case "GetOnePost":
+//			err = posts.GetPosts(post.ID)
+//		case "UpdatePost":
+//			post.Title = post.Title + "_Updated"
+//			post.Summary = post.Summary + "_Updated"
+//			post.Body = post.Body + "_Updated"
+//			posts.Posts = append(posts.Posts, post)
+//			err = posts.UpdatePost(post.ID, false)
+//		case "DeletePost":
+//			err = posts.DeletePost(post.ID)
+//		}
+//
+//		if err != nil {
+//			posts.Lg.Error("Error %s in DB: %s", test.description, err)
+//			return
+//		}
+//		posts.Lg.Informational("PASS: %s in DB", test.description)
+//	}
+//}
 
-func TestGetPost(t *testing.T) {
-	posts := models.NewPosts()
-	r, _ := http.NewRequest("GET", "/posts/?id="+post.ID, nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-	if w.Code != http.StatusOK {
-		posts.Lg.Error("Error GET /posts, code[%d]", w.Code)
-		return
-	}
-	posts.Lg.Informational("PASS: GET /posts")
-}
+func TestMethods(t *testing.T) {
+	for _, test := range testMethodsCases {
+		var r *http.Request
+		posts := models.NewPosts()
 
-func TestGetEditPost(t *testing.T) {
-	posts := models.NewPosts()
-	r, _ := http.NewRequest("GET", "/posts/edit/?id="+post.ID, nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-	if w.Code != http.StatusOK {
-		posts.Lg.Error("Error GET /posts/edit, code[%d]", w.Code)
-		return
-	}
-	posts.Lg.Informational("PASS: GET /posts/edit")
-}
+		switch test.action {
+		case "PostCreatePost":
+			post.ID = randomHex(12)
+			body := `
+			{
+			   "id":"` + post.ID + `",
+				"title":"qqq",
+				"summary":"www",
+				"body":"**eee**"
+			}`
+			r, _ = http.NewRequest(test.method, test.api, strings.NewReader(body))
+		case "GetPost", "GetEditPost":
+			r, _ = http.NewRequest(test.method, test.api+"/?id="+post.ID, nil)
+		case "PutUpdatePost":
+			body := `
+			{
+				"title":"111",
+				"summary":"222",
+				"body":"*333*"
+			}`
+			r, _ = http.NewRequest(test.method, test.api+"/"+post.ID, strings.NewReader(body))
+		case "DeleteDeletePost":
+			r, _ = http.NewRequest(test.method, test.api+"/"+post.ID, nil)
+		case "GetCreatePost":
+			r, _ = http.NewRequest(test.method, test.api, nil)
+		}
 
-func TestGetCreatePost(t *testing.T) {
-	posts := models.NewPosts()
-	r, _ := http.NewRequest("GET", "/posts/create", nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-	if w.Code != http.StatusOK {
-		posts.Lg.Error("Error GET /posts/create, code[%d]", w.Code)
-		return
+		w := httptest.NewRecorder()
+		beego.BeeApp.Handlers.ServeHTTP(w, r)
+		if w.Code != test.code {
+			posts.Lg.Error("Error %s %s, code[%d]", test.method, test.api, w.Code)
+			return
+		}
+		posts.Lg.Informational("PASS: %s %s", test.method, test.api)
 	}
-	posts.Lg.Informational("PASS: GET /posts/create")
-}
-
-func TestPutUpdatePost(t *testing.T) {
-	posts := models.NewPosts()
-	body := `
-{
-	"title":"111",
-	"summary":"222",
-	"body":"*333*"
-}`
-	r, _ := http.NewRequest("PUT", "/api/v1/posts/"+post.ID, strings.NewReader(body))
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-	if w.Code != http.StatusOK {
-		posts.Lg.Error("Error PUT /api/v1/posts, code[%d]", w.Code)
-		return
-	}
-	posts.Lg.Informational("PASS: PUT //api/v1/posts/")
-}
-
-func TestDeletePost(t *testing.T) {
-	posts := models.NewPosts()
-	if err := posts.DeletePost(post.ID); err != nil {
-		posts.Lg.Error("Error Delete post in DB: %s", err)
-		return
-	}
-	posts.Lg.Informational("PASS: Delete post in DB")
-}
-
-func TestPostCreatePost(t *testing.T) {
-	posts := models.NewPosts()
-	post.ID = randomHex(12)
-	body := `
-{
-    "id":"` + post.ID + `",
-	"title":"qqq",
-	"summary":"www",
-	"body":"**eee**"
-}`
-	r, _ := http.NewRequest("POST", "/api/v1/posts/create", strings.NewReader(body))
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-	if w.Code != http.StatusCreated {
-		posts.Lg.Error("Error POST /api/v1/posts/create, code[%d]", w.Code)
-		return
-	}
-	posts.Lg.Informational("PASS: POST /api/v1/posts/create")
-}
-
-func TestDeleteDeletePost(t *testing.T) {
-	posts := models.NewPosts()
-	r, _ := http.NewRequest("DELETE", "/api/v1/posts/"+post.ID, nil)
-	w := httptest.NewRecorder()
-	beego.BeeApp.Handlers.ServeHTTP(w, r)
-	if w.Code != http.StatusOK {
-		posts.Lg.Error("Error DELETE /api/v1/posts, code[%d]", w.Code)
-		return
-	}
-	posts.Lg.Informational("PASS: DELETE /api/v1/posts")
 }
 
 func randomHex(n int) string {
