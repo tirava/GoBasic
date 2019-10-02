@@ -18,7 +18,7 @@
     }
 
     function createPost() {
-        commonCreateUpdatePost("", `/api/v1/posts/create`, 'POST')
+        commonCreateUpdatePost("", `/api/v1/posts`, 'POST')
     }
 
     function commonCreateUpdatePost(id, api, method) {

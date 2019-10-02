@@ -1,5 +1,5 @@
 /*
- * HomeWork-6: Mongo in BeeGo
+ * HomeWork-7: Testing & Docs in BeeGo
  * Created on 28.09.19 22:21
  * Copyright (c) 2019 - Eugene Klimov
  */
@@ -19,5 +19,10 @@ func init() {
 
 	beego.Router("/api/v1/posts/:id([0-9a-h]+", &controllers.MainController{}, "delete:DeletePost")
 	beego.Router("/api/v1/posts/:id([0-9a-h]+", &controllers.MainController{}, "put:UpdatePost")
-	beego.Router("/api/v1/posts/create", &controllers.MainController{}, "post:CreatePost")
+	//beego.Router("/api/v1/posts", &controllers.MainController{}, "post:CreatePost")
+
+	ns := beego.NewNamespace("api/v1/posts",
+		beego.NSRouter("", &controllers.MainController{}, "post:CreatePost"))
+
+	beego.AddNamespace(ns)
 }

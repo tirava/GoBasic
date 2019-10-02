@@ -1,5 +1,5 @@
 /*
- * HomeWork-6: Mongo in BeeGo
+ * HomeWork-7: Testing & Docs in BeeGo
  * Created on 28.09.19 22:17
  * Copyright (c) 2019 - Eugene Klimov
  */
@@ -110,6 +110,13 @@ func (c *MainController) GetCreatePost() {
 }
 
 // CreatePost create new post in DB.
+// @Title CreateList
+// @Description Создвание нового листа
+// @Param name path string true "Имя листа"
+// @Param desc path string true "Описание листа"
+// @Success 200 body is empty
+// @Failure 500 body is empty
+// @router /[post]
 func (c *MainController) CreatePost() {
 	posts := models.NewPosts()
 

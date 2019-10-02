@@ -1,5 +1,5 @@
 /*
- * HomeWork-6: Mongo in BeeGo
+ * HomeWork-7: Testing & Docs in BeeGo
  * Created on 28.09.19 22:18
  * Copyright (c) 2019 - Eugene Klimov
  */
@@ -40,6 +40,7 @@ func main() {
 	models.Lg.Info("Connected to MongoDB")
 	defer models.Lg.Close()
 
+	beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	beego.Run()
 
 	if err = models.MDB.Disconnect(context.TODO()); err != nil {

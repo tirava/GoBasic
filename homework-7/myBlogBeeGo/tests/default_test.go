@@ -1,5 +1,5 @@
 /*
- * HomeWork-6: Mongo in BeeGo
+ * HomeWork-7: Testing & Docs in BeeGo
  * Created on 28.09.19 22:22
  * Copyright (c) 2019 - Eugene Klimov
  */
@@ -44,8 +44,6 @@ func init() {
 	if err = models.MDB.Ping(context.TODO(), nil); err != nil {
 		log.Fatalln("Can't ping MongoDB server:", err)
 	}
-
-	models.Lg = logs.NewLogger(10)
 
 	_, file, _, _ := runtime.Caller(0)
 	apppath, _ := filepath.Abs(filepath.Dir(filepath.Join(file, ".."+string(filepath.Separator))))
@@ -103,7 +101,7 @@ var testMethodsCases = []struct {
 	{
 		action: "PostCreatePost",
 		method: "POST",
-		api:    "/api/v1/posts/create",
+		api:    "/api/v1/posts",
 		code:   http.StatusCreated,
 		body: `
 			{
