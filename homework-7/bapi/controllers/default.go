@@ -55,6 +55,14 @@ func (c *MainController) GetOnePost() {
 }
 
 // DeletePost removes post from DB.
+// @Title DeletePost
+// @Description delete post
+// @Tags posts
+// @Param	id	path string	true	"ID of the post"
+// @Success 200 body is empty
+// @Failure 500 body is empty
+// @Failure 404 not found
+// @router /:id([0-9a-h]+) [delete]
 func (c *MainController) DeletePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
@@ -109,9 +117,13 @@ func (c *MainController) GetCreatePost() {
 	c.TplName = "create.tpl"
 }
 
+// CreatePost creates new post.
 // @Title CreatePost
-// @Description create users
-// @Success 200 {int} models.User.Id
+// @Description create new post
+// @Tags posts
+// @Param	body	body models.Post	true	"json post body"
+// @Success 201 body is empty
+// @Failure 500 body is empty
 // @router / [post]
 func (c *MainController) CreatePost() {
 	posts := models.NewPosts()
