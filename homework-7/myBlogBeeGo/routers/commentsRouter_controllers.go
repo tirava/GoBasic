@@ -7,7 +7,7 @@ import (
 
 func init() {
 
-    beego.GlobalControllerRouter["myBlogBeeGo/controllers:MainController"] = append(beego.GlobalControllerRouter["myBlogBeeGo/controllers:MainController"],
+    beego.GlobalControllerRouter["myBlogBeeGo/controllers:ApiController"] = append(beego.GlobalControllerRouter["myBlogBeeGo/controllers:ApiController"],
         beego.ControllerComments{
             Method: "CreatePost",
             Router: `/`,
@@ -16,7 +16,16 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["myBlogBeeGo/controllers:MainController"] = append(beego.GlobalControllerRouter["myBlogBeeGo/controllers:MainController"],
+    beego.GlobalControllerRouter["myBlogBeeGo/controllers:ApiController"] = append(beego.GlobalControllerRouter["myBlogBeeGo/controllers:ApiController"],
+        beego.ControllerComments{
+            Method: "GetOnePost",
+            Router: `/:id([0-9a-h]+)`,
+            AllowHTTPMethods: []string{"get"},
+            MethodParams: param.Make(),
+            Filters: nil,
+            Params: nil})
+
+    beego.GlobalControllerRouter["myBlogBeeGo/controllers:ApiController"] = append(beego.GlobalControllerRouter["myBlogBeeGo/controllers:ApiController"],
         beego.ControllerComments{
             Method: "DeletePost",
             Router: `/:id([0-9a-h]+)`,
@@ -25,7 +34,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["myBlogBeeGo/controllers:MainController"] = append(beego.GlobalControllerRouter["myBlogBeeGo/controllers:MainController"],
+    beego.GlobalControllerRouter["myBlogBeeGo/controllers:ApiController"] = append(beego.GlobalControllerRouter["myBlogBeeGo/controllers:ApiController"],
         beego.ControllerComments{
             Method: "UpdatePost",
             Router: `/:id([0-9a-h]+)`,

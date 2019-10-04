@@ -1,7 +1,7 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "Blog API",
+        "title": "myBlog API",
         "description": "My Blog has a very cool swagger for API",
         "version": "1.0.0",
         "contact": {
@@ -17,15 +17,15 @@
         "/": {
             "post": {
                 "tags": [
-                    "myBlogBeeGo/controllersMainController"
+                    "myBlogBeeGo/controllersApiController"
                 ],
                 "description": "create new post",
-                "operationId": "MainController.CreatePost",
+                "operationId": "ApiController.CreatePost",
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "json post body",
+                        "description": "json post body, use html body in double quotes instead {}",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/models.Post"
@@ -43,12 +43,39 @@
             }
         },
         "/{id}": {
+            "get": {
+                "tags": [
+                    "myBlogBeeGo/controllersApiController"
+                ],
+                "description": "get one post",
+                "operationId": "ApiController.GetOnePost",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the post",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "body is empty"
+                    },
+                    "404": {
+                        "description": "not found"
+                    },
+                    "500": {
+                        "description": "body is empty"
+                    }
+                }
+            },
             "put": {
                 "tags": [
-                    "myBlogBeeGo/controllersMainController"
+                    "myBlogBeeGo/controllersApiController"
                 ],
                 "description": "update post",
-                "operationId": "MainController.UpdatePost",
+                "operationId": "ApiController.UpdatePost",
                 "parameters": [
                     {
                         "in": "path",
@@ -60,7 +87,7 @@
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "json post body",
+                        "description": "json post body, use html body in double quotes instead {}",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/models.Post"
@@ -81,10 +108,10 @@
             },
             "delete": {
                 "tags": [
-                    "myBlogBeeGo/controllersMainController"
+                    "myBlogBeeGo/controllersApiController"
                 ],
                 "description": "delete post",
-                "operationId": "MainController.DeletePost",
+                "operationId": "ApiController.DeletePost",
                 "parameters": [
                     {
                         "in": "path",
@@ -114,8 +141,7 @@
             "type": "object",
             "properties": {
                 "body": {
-                    "$ref": "#/definitions/template.HTML",
-                    "description": "use html body in double quotes"
+                    "$ref": "#/definitions/template.HTML"
                 },
                 "id": {
                     "description": "custom post id for create",
@@ -140,8 +166,8 @@
     },
     "tags": [
         {
-            "name": "myBlogBeeGo/controllersMainController",
-            "description": "MainController is.\n"
+            "name": "myBlogBeeGo/controllersApiController",
+            "description": "ApiController for operations with posts via API.\n"
         }
     ]
 }

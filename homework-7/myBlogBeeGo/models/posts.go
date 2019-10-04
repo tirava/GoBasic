@@ -32,7 +32,7 @@ type Post struct {
 	Title   string             `json:"title"`
 	Date    time.Time          `json:"-" bson:"updated_at"`
 	Summary string             `json:"summary"`
-	Body    template.HTML      `json:"body" description:"use html body in double quotes"`
+	Body    template.HTML      `json:"body"`
 	Created time.Time          `json:"-" bson:"created_at"`
 	Deleted time.Time          `json:"-" bson:"deleted_at"`
 }

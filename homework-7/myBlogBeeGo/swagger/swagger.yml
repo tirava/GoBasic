@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  title: Blog API
+  title: myBlog API
   description: My Blog has a very cool swagger for API
   version: 1.0.0
   contact:
@@ -13,13 +13,13 @@ paths:
   /:
     post:
       tags:
-      - myBlogBeeGo/controllersMainController
+      - myBlogBeeGo/controllersApiController
       description: create new post
-      operationId: MainController.CreatePost
+      operationId: ApiController.CreatePost
       parameters:
       - in: body
         name: body
-        description: json post body
+        description: json post body, use html body in double quotes instead {}
         required: true
         schema:
           $ref: '#/definitions/models.Post'
@@ -29,11 +29,29 @@ paths:
         "500":
           description: body is empty
   /{id}:
+    get:
+      tags:
+      - myBlogBeeGo/controllersApiController
+      description: get one post
+      operationId: ApiController.GetOnePost
+      parameters:
+      - in: path
+        name: id
+        description: ID of the post
+        required: true
+        type: string
+      responses:
+        "200":
+          description: body is empty
+        "404":
+          description: not found
+        "500":
+          description: body is empty
     put:
       tags:
-      - myBlogBeeGo/controllersMainController
+      - myBlogBeeGo/controllersApiController
       description: update post
-      operationId: MainController.UpdatePost
+      operationId: ApiController.UpdatePost
       parameters:
       - in: path
         name: id
@@ -42,7 +60,7 @@ paths:
         type: string
       - in: body
         name: body
-        description: json post body
+        description: json post body, use html body in double quotes instead {}
         required: true
         schema:
           $ref: '#/definitions/models.Post'
@@ -55,9 +73,9 @@ paths:
           description: body is empty
     delete:
       tags:
-      - myBlogBeeGo/controllersMainController
+      - myBlogBeeGo/controllersApiController
       description: delete post
-      operationId: MainController.DeletePost
+      operationId: ApiController.DeletePost
       parameters:
       - in: path
         name: id
@@ -78,7 +96,6 @@ definitions:
     properties:
       body:
         $ref: '#/definitions/template.HTML'
-        description: use html body in double quotes
       id:
         description: custom post id for create
         type: string
@@ -93,6 +110,6 @@ definitions:
     title: HTML
     type: object
 tags:
-- name: myBlogBeeGo/controllersMainController
+- name: myBlogBeeGo/controllersApiController
   description: |
-    MainController is.
+    ApiController for operations with posts via API.

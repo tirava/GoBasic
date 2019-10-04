@@ -4,7 +4,7 @@
  * Copyright (c) 2019 - Eugene Klimov
  */
 // @APIVersion 1.0.0
-// @Title Blog API
+// @Title myBlog API
 // @Description My Blog has a very cool swagger for API
 // @Contact kirk@gmail.com
 // @License Apache 2.0
@@ -12,22 +12,23 @@
 package routers
 
 import (
-	"github.com/astaxie/beego"
 	"myBlogBeeGo/controllers"
+
+	"github.com/astaxie/beego"
 )
 
 func init() {
-	beego.Router("/", &controllers.MainController{}, "get:GetAllPosts")
-	beego.Router("/posts", &controllers.MainController{}, "get:GetOnePost")
-	beego.Router("/posts/edit", &controllers.MainController{}, "get:GetEditPost")
-	beego.Router("/posts/create", &controllers.MainController{}, "get:GetCreatePost")
+	beego.Router("/", &controllers.FormsController{}, "get:GetAllPosts")
+	beego.Router("/posts", &controllers.FormsController{}, "get:GetOnePost")
+	beego.Router("/posts/edit", &controllers.FormsController{}, "get:GetEditPost")
+	beego.Router("/posts/create", &controllers.FormsController{}, "get:GetCreatePost")
 
-	//beego.Router("/api/v1/posts/:id([0-9a-h]+", &controllers.MainController{}, "delete:DeletePost")
-	//beego.Router("/api/v1/posts/:id([0-9a-h]+", &controllers.MainController{}, "put:UpdatePost")
-	//beego.Router("/api/v1/posts", &controllers.MainController{}, "post:CreatePost")
+	//beego.Router("/api/v1/posts/:id([0-9a-h]+", &controllers.ApiController{}, "delete:DeletePost")
+	//beego.Router("/api/v1/posts/:id([0-9a-h]+", &controllers.ApiController{}, "put:UpdatePost")
+	//beego.Router("/api/v1/posts", &controllers.ApiController{}, "post:CreatePost")
 
 	ns := beego.NewNamespace("/api/v1/posts",
-		beego.NSInclude(&controllers.MainController{}),
+		beego.NSInclude(&controllers.ApiController{}),
 	)
 
 	beego.AddNamespace(ns)
