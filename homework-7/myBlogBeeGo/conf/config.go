@@ -1,5 +1,5 @@
 /*
- * HomeWork-6: Mongo in BeeGo
+ * HomeWork-7: Testing & Docs in BeeGo
  * Created on 28.09.19 22:19
  * Copyright (c) 2019 - Eugene Klimov
  */

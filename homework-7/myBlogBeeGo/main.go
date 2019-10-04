@@ -14,9 +14,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
-	"myBlog/conf"
-	"myBlog/models"
-	_ "myBlog/routers"
+	"myBlogBeeGo/conf"
+	"myBlogBeeGo/models"
+	_ "myBlogBeeGo/routers"
 )
 
 func main() {

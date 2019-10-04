@@ -1,0 +1,147 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Blog API",
+        "description": "My Blog has a very cool swagger for API",
+        "version": "1.0.0",
+        "contact": {
+            "email": "kirk@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "basePath": "/api/v1/posts",
+    "paths": {
+        "/": {
+            "post": {
+                "tags": [
+                    "myBlogBeeGo/controllersMainController"
+                ],
+                "description": "create new post",
+                "operationId": "MainController.CreatePost",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "json post body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Post"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "body is empty"
+                    },
+                    "500": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/{id}": {
+            "put": {
+                "tags": [
+                    "myBlogBeeGo/controllersMainController"
+                ],
+                "description": "update post",
+                "operationId": "MainController.UpdatePost",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the post",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "json post body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Post"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "body is empty"
+                    },
+                    "404": {
+                        "description": "not found"
+                    },
+                    "500": {
+                        "description": "body is empty"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "myBlogBeeGo/controllersMainController"
+                ],
+                "description": "delete post",
+                "operationId": "MainController.DeletePost",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "ID of the post",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "body is empty"
+                    },
+                    "404": {
+                        "description": "not found"
+                    },
+                    "500": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.Post": {
+            "title": "Post",
+            "type": "object",
+            "properties": {
+                "body": {
+                    "$ref": "#/definitions/template.HTML",
+                    "description": "use html body in double quotes"
+                },
+                "id": {
+                    "description": "custom post id for create",
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "primitive.ObjectID": {
+            "title": "ObjectID",
+            "type": "object"
+        },
+        "template.HTML": {
+            "title": "HTML",
+            "type": "object"
+        }
+    },
+    "tags": [
+        {
+            "name": "myBlogBeeGo/controllersMainController",
+            "description": "MainController is.\n"
+        }
+    ]
+}

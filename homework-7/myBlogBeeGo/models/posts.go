@@ -28,11 +28,11 @@ var (
 // Post is the base post type.
 type Post struct {
 	OID     primitive.ObjectID `json:"-" bson:"_id,omitempty"`
-	ID      string             `json:"id,omitempty" bson:"-"`
+	ID      string             `json:"id,omitempty" bson:"-" description:"custom post id for create"`
 	Title   string             `json:"title"`
 	Date    time.Time          `json:"-" bson:"updated_at"`
 	Summary string             `json:"summary"`
-	Body    template.HTML      `json:"body"`
+	Body    template.HTML      `json:"body" description:"use html body in double quotes"`
 	Created time.Time          `json:"-" bson:"created_at"`
 	Deleted time.Time          `json:"-" bson:"deleted_at"`
 }

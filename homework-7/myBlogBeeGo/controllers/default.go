@@ -9,10 +9,10 @@ package controllers
 import (
 	"encoding/json"
 	"github.com/astaxie/beego"
-	"github.com/russross/blackfriday/v2"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"gopkg.in/russross/blackfriday.v2"
 	"html/template"
-	"myBlog/models"
+	"myBlogBeeGo/models"
 	"net/http"
 )
 
@@ -55,6 +55,14 @@ func (c *MainController) GetOnePost() {
 }
 
 // DeletePost removes post from DB.
+// @Title DeletePost
+// @Description delete post
+// @Tags posts
+// @Param	id	path string	true	"ID of the post"
+// @Success 200 body is empty
+// @Failure 500 body is empty
+// @Failure 404 not found
+// @router /:id([0-9a-h]+) [delete]
 func (c *MainController) DeletePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
@@ -85,6 +93,15 @@ func (c *MainController) GetEditPost() {
 }
 
 // UpdatePost updates post in DB.
+// @Title UpdatePost
+// @Description update post
+// @Tags posts
+// @Param	id	path string	true	"ID of the post"
+// @Param	body	body models.Post	true	"json post body"
+// @Success 200 body is empty
+// @Failure 500 body is empty
+// @Failure 404 not found
+// @router /:id([0-9a-h]+) [put]
 func (c *MainController) UpdatePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
@@ -109,14 +126,14 @@ func (c *MainController) GetCreatePost() {
 	c.TplName = "create.tpl"
 }
 
-// CreatePost create new post in DB.
-// @Title CreateList
-// @Description Создвание нового листа
-// @Param name path string true "Имя листа"
-// @Param desc path string true "Описание листа"
-// @Success 200 body is empty
+// CreatePost creates new post.
+// @Title CreatePost
+// @Description create new post
+// @Tags posts
+// @Param	body	body models.Post	true	"json post body"
+// @Success 201 body is empty
 // @Failure 500 body is empty
-// @router /[post]
+// @router / [post]
 func (c *MainController) CreatePost() {
 	posts := models.NewPosts()
 
