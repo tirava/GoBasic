@@ -6,6 +6,39 @@
         });
     }
 
+    function createUser() {
+        let userData = document.querySelector(`div[id="form-login"]`);
+        let uname = userData.querySelector('input[id="username"]').value;
+        let upass = userData.querySelector('input[id="password"]').value;
+        fetch(`/api/v1/users`, {
+            method: 'POST',
+            body: JSON.stringify({
+                uname,
+                upass,
+            })
+        })
+        alert("Отлично, теперь можно заходить!")
+            // .then(resp => {
+            //     window.location = "/"
+            // })
+    }
+
+    function getUser() {
+        let userData = document.querySelector(`div[id="form-login"]`);
+        let uname = userData.querySelector('input[id="username"]').value;
+        let upass = userData.querySelector('input[id="password"]').value;
+        fetch(`/api/v1/users/`+uname, {
+            method: 'POST',
+            body: JSON.stringify({
+                uname,
+                upass,
+            })
+        })
+        .then(resp => {
+            window.location = "/"
+        })
+    }
+
     function deletePost(id) {
         fetch(`/api/v1/posts/${id}`, {method: 'DELETE'})
             .then(resp => {

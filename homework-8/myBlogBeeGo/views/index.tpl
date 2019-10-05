@@ -27,22 +27,21 @@
                                 <div class="uk-margin">
                                     <div class="uk-inline uk-width-1-1">
                                         <span class="uk-form-icon" uk-icon="icon: mail"></span>
-                                        <input class="uk-input uk-form-large" type="text" placeholder="user">
+                                        <input id="username" class="uk-input uk-form-large" type="text" placeholder="user">
                                     </div>
                                 </div>
                                 <div class="uk-margin">
                                     <div class="uk-inline uk-width-1-1">
                                         <span class="uk-form-icon" uk-icon="icon: lock"></span>
-                                        <input class="uk-input uk-form-large" type="password" placeholder="123">
+                                        <input id="password" class="uk-input uk-form-large" type="password" placeholder="123">
                                     </div>
                                 </div>
                                 <div class="uk-margin">
-                                    <button class="uk-button uk-button-primary uk-button-large uk-width-1-1">Войти
+                                    <button onclick="getUser()" class="uk-button uk-button-primary uk-button-large uk-width-1-1 uk-modal-close">Войти
                                     </button>
                                 </div>
                                 <div class="uk-text-small uk-text-center">
-{{/*                                    Не зарегистрированы? <a href="#">Создать эккаунт</a>*/}}
-                                    При отстутствии эккаунта, он будет создан автоматически!
+                                    Не зарегистрированы? <a onclick="createUser()" href="#">Создать эккаунт</a>
                                 </div>
                             </form>
                         </div>

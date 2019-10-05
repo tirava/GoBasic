@@ -160,7 +160,7 @@
             }
         },
         "/users/{id}": {
-            "get": {
+            "post": {
                 "tags": [
                     "users"
                 ],
@@ -170,9 +170,18 @@
                     {
                         "in": "path",
                         "name": "id",
-                        "description": "ID of the post",
+                        "description": "name of user",
                         "required": true,
                         "type": "string"
+                    },
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "json user body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.User"
+                        }
                     }
                 ],
                 "responses": {
@@ -186,7 +195,7 @@
                         "description": "not found"
                     },
                     "500": {
-                        "description": "body is empty"
+                        "description": "server error"
                     }
                 }
             }
@@ -216,10 +225,10 @@
             "title": "User",
             "type": "object",
             "properties": {
-                "Name": {
+                "uname": {
                     "type": "string"
                 },
-                "Pass": {
+                "upass": {
                     "type": "string"
                 }
             }

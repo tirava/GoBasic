@@ -8,6 +8,7 @@ package models
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/astaxie/beego/logs"
 	"net/http"
 )
@@ -22,6 +23,9 @@ type Error struct {
 
 // SendError is errors helper
 func (e *Error) SendError(w http.ResponseWriter, code int, err error, descr string) {
+	if err == nil {
+		err = errors.New(descr)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	errMsg := Error{

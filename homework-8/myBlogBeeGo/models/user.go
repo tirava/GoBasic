@@ -12,12 +12,13 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"go.mongodb.org/mongo-driver/mongo"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // User base struct
 type User struct {
-	Name string
-	Pass string
+	Name string `json:"uname"`
+	Pass string `json:"upass"`
 }
 
 //DBUsers is the base type for posts
@@ -52,14 +53,24 @@ func NewUser() *DBUsers {
 
 // CreateUser creates user.
 func (d *DBUsers) CreateUser() error {
-	fmt.Println(d.User)
-	//d.Posts[0].OID = primitive.NewObjectID() // or omitempty in Post
-	//d.Posts[0].Date = time.Now()
-	//d.Posts[0].Created = time.Now()
-	//d.Posts[0].Deleted = time.Unix(0, 0)
-	//_, err := d.Collection.InsertOne(d.ctx, d.Posts[0])
-	//if err != nil {
-	//	return fmt.Errorf("error insert one post: %v", err)
-	//}
+	user := User{}
+	err := d.Collection.FindOne(d.ctx, bson.M{"name": d.User.Name}).Decode(&user)
+	if err == nil {
+		return fmt.Errorf("user %s already exists", d.User.Name)
+	}
+	_, err = d.Collection.InsertOne(d.ctx, d.User)
+	if err != nil {
+		return fmt.Errorf("error create user: %v", err)
+	}
+	return nil
+}
+
+// GetUser read user data.
+func (d *DBUsers) GetUser() error {
+	user := User{}
+	err := d.Collection.FindOne(d.ctx, bson.M{"name": d.User.Name, "pass": d.User.Pass}).Decode(&user)
+	if err != nil {
+		return fmt.Errorf("user %s not found", d.User.Name)
+	}
 	return nil
 }

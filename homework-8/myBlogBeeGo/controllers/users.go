@@ -8,7 +8,6 @@ package controllers
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/astaxie/beego"
 	"myBlogBeeGo/models"
 	"net/http"
@@ -19,18 +18,38 @@ type UsersController struct {
 	beego.Controller
 }
 
-//GetUser check user is exists.
-//@Title GetUser
-//@Description get user
-//@Tags users
-//@Param	id	path string	true	"ID of the post"
-//@Success 200 {object} models.User
-//@Failure 500 body is empty
-//@Failure 404 not found
-//@router /:id([0-9a-zA-Z]+) [get]
+// GetUser check user is exists.
+// @Title GetUser
+// @Description get user
+// @Tags users
+// @Param	id	path string	true	"name of user"
+// @Param	body	body models.User	true	"json user body"
+// @Success 200 {object} models.User
+// @Failure 500 server error
+// @Failure 404 not found
+// @router /:id([0-9a-zA-Z]+) [post]
 func (c *UsersController) GetUser() {
 	userID := c.Ctx.Input.Param(":id")
-	fmt.Println(userID)
+	users := models.NewUser()
+	user, err := c.decodeUser()
+	if err != nil {
+		users.Lg.Error("error while decoding new user body: %s", err)
+		users.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error while decoding new user body")
+		return
+	}
+	if userID != user.Name {
+		users.Lg.Error("userID: %s not equal userName: %s", userID, user.Name)
+		users.SendError(c.Ctx.ResponseWriter, http.StatusNotFound, nil, "sorry, userID not equal userName")
+		return
+	}
+	users.User = *user
+	if err = users.GetUser(); err != nil {
+		users.Lg.Error("error find user: %s", err)
+		users.SendError(c.Ctx.ResponseWriter, http.StatusNotFound, err, "sorry, error find user")
+		return
+	}
+	c.Ctx.ResponseWriter.WriteHeader(http.StatusOK)
+	//c.isAuth = true
 }
 
 // CreateUser creates new user.

@@ -19,15 +19,15 @@ type APIController struct {
 	beego.Controller
 }
 
-//GetOnePost shows one posts with full content.
-//@Title GetOnePost
-//@Description get one post
-//@Tags posts
-//@Param	id	path string	true	"ID of the post"
-//@Success 200 {object} models.Post
-//@Failure 500 server error
-//@Failure 404 not found
-//@router /:id([0-9a-h]+) [get]
+// GetOnePost shows one posts with full content.
+// @Title GetOnePost
+// @Description get one post
+// @Tags posts
+// @Param	id	path string	true	"ID of the post"
+// @Success 200 {object} models.Post
+// @Failure 500 server error
+// @Failure 404 not found
+// @router /:id([0-9a-h]+) [get]
 func (c *APIController) GetOnePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
