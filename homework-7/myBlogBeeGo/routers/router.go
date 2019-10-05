@@ -4,11 +4,12 @@
  * Copyright (c) 2019 - Eugene Klimov
  */
 // @APIVersion 1.0.0
-// @Title myBlog API
-// @Description My Blog has a very cool swagger for API
+// @Title myBlog swagger API
+// @Description My Blog has a cool swagger for API
 // @Contact kirk@gmail.com
 // @License Apache 2.0
 // @LicenseUrl http://www.apache.org/licenses/LICENSE-2.0.html
+
 package routers
 
 import (
@@ -28,7 +29,7 @@ func init() {
 	//beego.Router("/api/v1/posts", &controllers.ApiController{}, "post:CreatePost")
 
 	ns := beego.NewNamespace("/api/v1/posts",
-		beego.NSInclude(&controllers.ApiController{}),
+		beego.NSInclude(&controllers.APIController{}),
 	)
 
 	beego.AddNamespace(ns)

@@ -1,8 +1,8 @@
 {
     "swagger": "2.0",
     "info": {
-        "title": "myBlog API",
-        "description": "My Blog has a very cool swagger for API",
+        "title": "myBlog swagger API",
+        "description": "My Blog has a cool swagger for API",
         "version": "1.0.0",
         "contact": {
             "email": "kirk@gmail.com"
@@ -17,10 +17,10 @@
         "/": {
             "post": {
                 "tags": [
-                    "myBlogBeeGo/controllersApiController"
+                    "myBlogBeeGo/controllersAPIController"
                 ],
                 "description": "create new post",
-                "operationId": "ApiController.CreatePost",
+                "operationId": "APIController.CreatePost",
                 "parameters": [
                     {
                         "in": "body",
@@ -45,10 +45,10 @@
         "/{id}": {
             "get": {
                 "tags": [
-                    "myBlogBeeGo/controllersApiController"
+                    "myBlogBeeGo/controllersAPIController"
                 ],
                 "description": "get one post",
-                "operationId": "ApiController.GetOnePost",
+                "operationId": "APIController.GetOnePost",
                 "parameters": [
                     {
                         "in": "path",
@@ -72,10 +72,10 @@
             },
             "put": {
                 "tags": [
-                    "myBlogBeeGo/controllersApiController"
+                    "myBlogBeeGo/controllersAPIController"
                 ],
                 "description": "update post",
-                "operationId": "ApiController.UpdatePost",
+                "operationId": "APIController.UpdatePost",
                 "parameters": [
                     {
                         "in": "path",
@@ -108,10 +108,10 @@
             },
             "delete": {
                 "tags": [
-                    "myBlogBeeGo/controllersApiController"
+                    "myBlogBeeGo/controllersAPIController"
                 ],
                 "description": "delete post",
-                "operationId": "ApiController.DeletePost",
+                "operationId": "APIController.DeletePost",
                 "parameters": [
                     {
                         "in": "path",
@@ -166,8 +166,8 @@
     },
     "tags": [
         {
-            "name": "myBlogBeeGo/controllersApiController",
-            "description": "ApiController for operations with posts via API.\n"
+            "name": "myBlogBeeGo/controllersAPIController",
+            "description": "APIController for operations with posts via API.\n"
         }
     ]
 }

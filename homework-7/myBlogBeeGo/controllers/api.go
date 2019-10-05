@@ -14,8 +14,8 @@ import (
 	"net/http"
 )
 
-// ApiController for operations with posts via API.
-type ApiController struct {
+// APIController for operations with posts via API.
+type APIController struct {
 	beego.Controller
 }
 
@@ -28,7 +28,7 @@ type ApiController struct {
 //@Failure 500 body is empty
 //@Failure 404 not found
 //@router /:id([0-9a-h]+) [get]
-func (c *ApiController) GetOnePost() {
+func (c *APIController) GetOnePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
 	if err := posts.GetPosts(postNum); err != nil {
@@ -59,7 +59,7 @@ func (c *ApiController) GetOnePost() {
 // @Failure 500 body is empty
 // @Failure 404 not found
 // @router /:id([0-9a-h]+) [delete]
-func (c *ApiController) DeletePost() {
+func (c *APIController) DeletePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
 	if err := posts.DeletePost(postNum); err != nil {
@@ -80,7 +80,7 @@ func (c *ApiController) DeletePost() {
 // @Failure 500 body is empty
 // @Failure 404 not found
 // @router /:id([0-9a-h]+) [put]
-func (c *ApiController) UpdatePost() {
+func (c *APIController) UpdatePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
 	post, err := c.decodePost()
@@ -106,7 +106,7 @@ func (c *ApiController) UpdatePost() {
 // @Success 201 body is empty
 // @Failure 500 body is empty
 // @router / [post]
-func (c *ApiController) CreatePost() {
+func (c *APIController) CreatePost() {
 	posts := models.NewPosts()
 
 	post, err := c.decodePost()
@@ -125,7 +125,7 @@ func (c *ApiController) CreatePost() {
 }
 
 // decodePost is JSON decoder helper
-func (c *ApiController) decodePost() (*models.Post, error) {
+func (c *APIController) decodePost() (*models.Post, error) {
 	post := &models.Post{}
 	if err := json.NewDecoder(c.Ctx.Request.Body).Decode(post); err != nil {
 		return nil, err

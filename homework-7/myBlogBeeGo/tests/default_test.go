@@ -99,7 +99,7 @@ var testMethodsCases = []struct {
 	code   int
 }{
 	{
-		action: "PostCreatePost",
+		action: "APIPostCreatePost",
 		method: "POST",
 		api:    "/api/v1/posts",
 		code:   http.StatusCreated,
@@ -112,13 +112,19 @@ var testMethodsCases = []struct {
 			}`,
 	},
 	{
-		action: "GetPost",
+		action: "FormGetPost",
 		method: "GET",
 		api:    "/posts",
 		code:   http.StatusOK,
 	},
 	{
-		action: "PutUpdatePost",
+		action: "APIGetPost",
+		method: "GET",
+		api:    "/api/v1/posts",
+		code:   http.StatusOK,
+	},
+	{
+		action: "APIPutUpdatePost",
 		method: "PUT",
 		api:    "/api/v1/posts",
 		code:   http.StatusOK,
@@ -130,19 +136,19 @@ var testMethodsCases = []struct {
 			}`,
 	},
 	{
-		action: "GetEditPost",
+		action: "FormGetEditPost",
 		method: "GET",
 		api:    "/posts/edit",
 		code:   http.StatusOK,
 	},
 	{
-		action: "GetCreatePost",
+		action: "FormGetCreatePost",
 		method: "GET",
 		api:    "/posts/create",
 		code:   http.StatusOK,
 	},
 	{
-		action: "DeleteDeletePost",
+		action: "APIDeleteDeletePost",
 		method: "DELETE",
 		api:    "/api/v1/posts",
 		code:   http.StatusOK,
@@ -186,17 +192,17 @@ func TestMethods(t *testing.T) {
 		var r *http.Request
 
 		switch test.action {
-		case "PostCreatePost":
+		case "APIPostCreatePost":
 			post.ID = randomHex(12)
 			test.body = strings.Replace(test.body, "randomHex", post.ID, 1)
 			r, _ = http.NewRequest(test.method, test.api, strings.NewReader(test.body))
-		case "GetPost", "GetEditPost":
+		case "FormGetPost", "FormGetEditPost":
 			r, _ = http.NewRequest(test.method, test.api+"/?id="+post.ID, nil)
-		case "PutUpdatePost":
+		case "APIPutUpdatePost":
 			r, _ = http.NewRequest(test.method, test.api+"/"+post.ID, strings.NewReader(test.body))
-		case "DeleteDeletePost":
+		case "APIGetPost", "APIDeleteDeletePost":
 			r, _ = http.NewRequest(test.method, test.api+"/"+post.ID, nil)
-		case "GetCreatePost":
+		case "FormGetCreatePost":
 			r, _ = http.NewRequest(test.method, test.api, nil)
 		}
 
@@ -206,7 +212,7 @@ func TestMethods(t *testing.T) {
 			t.Errorf("Error %s %s, code[%d]", test.method, test.api, w.Code)
 			return
 		}
-		t.Logf("PASS: %s %s", test.method, test.api)
+		t.Logf("PASS: %s %s %s", test.action, test.method, test.api)
 	}
 }
 
