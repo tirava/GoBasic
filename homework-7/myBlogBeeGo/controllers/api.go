@@ -24,7 +24,7 @@ type APIController struct {
 //@Description get one post
 //@Tags posts
 //@Param	id	path string	true	"ID of the post"
-//@Success 200 body is empty
+//@Success 200 {object} models.Post
 //@Failure 500 body is empty
 //@Failure 404 not found
 //@router /:id([0-9a-h]+) [get]
@@ -47,7 +47,6 @@ func (c *APIController) GetOnePost() {
 		posts.Lg.Error("Can't write to ResponseWriter: %s", err)
 		return
 	}
-	c.Ctx.ResponseWriter.WriteHeader(http.StatusOK)
 }
 
 // DeletePost removes post from DB.

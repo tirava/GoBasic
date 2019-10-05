@@ -60,7 +60,10 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "body is empty"
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/models.Post"
+                        }
                     },
                     "404": {
                         "description": "not found"
