@@ -7,35 +7,36 @@
     }
 
     function createUser() {
-        let userData = document.querySelector(`div[id="form-login"]`);
-        let uname = userData.querySelector('input[id="username"]').value;
-        let upass = userData.querySelector('input[id="password"]').value;
-        fetch(`/api/v1/users`, {
-            method: 'POST',
-            body: JSON.stringify({
-                uname,
-                upass,
-            })
-        })
-        alert("Отлично, теперь можно заходить!")
-            // .then(resp => {
-            //     window.location = "/"
-            // })
+        commonCreateGetUser()
     }
 
     function getUser() {
+        commonCreateGetUser("/")
+        // .then(resp => {
+        //     window.location = "/"
+        // })
+    }
+
+    function commonCreateGetUser(id) {
         let userData = document.querySelector(`div[id="form-login"]`);
         let uname = userData.querySelector('input[id="username"]').value;
         let upass = userData.querySelector('input[id="password"]').value;
-        fetch(`/api/v1/users/`+uname, {
+        if (uname === "" || upass === "") {
+            alert("Заполните все поля!")
+            return
+        }
+        let suffix = "";
+        if (id === "/") {
+            suffix = id + uname
+        } else {
+            alert("Отлично, теперь можно заходить!")
+        }
+        fetch(`/api/v1/users` + suffix, {
             method: 'POST',
             body: JSON.stringify({
                 uname,
                 upass,
             })
-        })
-        .then(resp => {
-            window.location = "/"
         })
     }
 

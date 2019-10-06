@@ -40,6 +40,7 @@ func main() {
 	models.Lg.Info("Connected to MongoDB")
 	defer models.Lg.Close()
 
+	beego.BConfig.Listen.Graceful = true
 	beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
 	beego.Run()
 

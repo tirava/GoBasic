@@ -17,8 +17,9 @@ import (
 
 // User base struct
 type User struct {
-	Name string `json:"uname"`
-	Pass string `json:"upass"`
+	Name    string `json:"uname"`
+	Pass    string `json:"upass"`
+	Session string `json:"-"`
 }
 
 //DBUsers is the base type for posts
@@ -73,4 +74,27 @@ func (d *DBUsers) GetUser() error {
 		return fmt.Errorf("user %s not found", d.User.Name)
 	}
 	return nil
+}
+
+// UpdatePost updates post.
+func (d *DBUsers) SaveCookie() error {
+	filter := bson.M{"name": d.User.Name}
+	update := bson.M{"$set": bson.M{"session": d.User.Session}}
+	res, err := d.Collection.UpdateOne(d.ctx, filter, update)
+	if err != nil {
+		return fmt.Errorf("error update user session: %v", err)
+	}
+	if res.ModifiedCount == 0 {
+		return fmt.Errorf("user not found: %s", d.User.Name)
+	}
+	return nil
+}
+
+func (d *DBUsers) WhoAmI(cookie string) string {
+	user := User{}
+	err := d.Collection.FindOne(d.ctx, bson.M{"session": cookie}).Decode(&user)
+	if err != nil {
+		return ""
+	}
+	return user.Name
 }

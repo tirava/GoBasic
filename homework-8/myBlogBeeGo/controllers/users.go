@@ -8,7 +8,9 @@ package controllers
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/astaxie/beego"
+	"math/rand"
 	"myBlogBeeGo/models"
 	"net/http"
 )
@@ -18,8 +20,8 @@ type UsersController struct {
 	beego.Controller
 }
 
-// GetUser check user is exists.
-// @Title GetUser
+// AuthUser check user is exists.
+// @Title AuthUser
 // @Description get user
 // @Tags users
 // @Param	id	path string	true	"name of user"
@@ -28,7 +30,7 @@ type UsersController struct {
 // @Failure 500 server error
 // @Failure 404 not found
 // @router /:id([0-9a-zA-Z]+) [post]
-func (c *UsersController) GetUser() {
+func (c *UsersController) AuthUser() {
 	userID := c.Ctx.Input.Param(":id")
 	users := models.NewUser()
 	user, err := c.decodeUser()
@@ -48,8 +50,20 @@ func (c *UsersController) GetUser() {
 		users.SendError(c.Ctx.ResponseWriter, http.StatusNotFound, err, "sorry, error find user")
 		return
 	}
+	guid, err := getRandomGUID()
+	if err != nil {
+		users.Lg.Error("error generating guid: %s", err)
+		users.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error generating guid")
+		return
+	}
+	users.User.Session = guid
+	if err = users.SaveCookie(); err != nil {
+		users.Lg.Error("error save user cookie to DB: %s", err)
+		users.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error save user cookie to DB")
+		return
+	}
+	c.Ctx.SetCookie(beego.AppConfig.String("appname"), users.User.Session)
 	c.Ctx.ResponseWriter.WriteHeader(http.StatusOK)
-	//c.isAuth = true
 }
 
 // CreateUser creates new user.
@@ -84,4 +98,14 @@ func (c *UsersController) decodeUser() (*models.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func getRandomGUID() (string, error) {
+	b := make([]byte, 16)
+	_, err := rand.Read(b)
+	if err != nil {
+		return "", fmt.Errorf("error random generatot")
+	}
+	uuid := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+	return uuid, nil
 }

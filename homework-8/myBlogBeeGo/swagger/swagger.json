@@ -165,7 +165,7 @@
                     "users"
                 ],
                 "description": "get user",
-                "operationId": "UsersController.GetUser",
+                "operationId": "UsersController.AuthUser",
                 "parameters": [
                     {
                         "in": "path",

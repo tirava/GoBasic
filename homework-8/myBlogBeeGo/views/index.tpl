@@ -11,10 +11,20 @@
 </div>
 
 <div class="uk-flex uk-flex-right">
+    {{if .UserName}}
+        <div class="uk-margin-top uk-margin-right uk-flex uk-flex-middle">
+            Вы вошли как:&nbsp<strong>{{.UserName}}</strong>
+        </div>
+    {{end}}
     <button class="uk-button uk-button-default uk-margin-small-right uk-margin-top" type="button"
-            uk-toggle="target: #form-login">Войти
+            {{if .UserName}}
+                         onclick="document.cookie = 'myBlogBeeGo=; expires=Thu, 01 Jan 1970 00:00:00 UTC'; location.reload(true);">
+        Выйти
+        {{else}}
+            uk-toggle="target: #form-login">
+            Войти
+        {{end}}
     </button>
-    {{/*    <div id="form-login" class="uk-section uk-section-muted uk-flex uk-flex-middle uk-animation-fade" uk-height-viewport>*/}}
     <div id="form-login" uk-modal>
         <div class="uk-width-1-1">
             <div class="uk-container">
@@ -27,17 +37,21 @@
                                 <div class="uk-margin">
                                     <div class="uk-inline uk-width-1-1">
                                         <span class="uk-form-icon" uk-icon="icon: mail"></span>
-                                        <input id="username" class="uk-input uk-form-large" type="text" placeholder="user">
+                                        <input id="username" class="uk-input uk-form-large" type="text"
+                                               placeholder="user">
                                     </div>
                                 </div>
                                 <div class="uk-margin">
                                     <div class="uk-inline uk-width-1-1">
                                         <span class="uk-form-icon" uk-icon="icon: lock"></span>
-                                        <input id="password" class="uk-input uk-form-large" type="password" placeholder="123">
+                                        <input id="password" class="uk-input uk-form-large" type="password"
+                                               placeholder="123">
                                     </div>
                                 </div>
                                 <div class="uk-margin">
-                                    <button onclick="getUser()" class="uk-button uk-button-primary uk-button-large uk-width-1-1 uk-modal-close">Войти
+                                    <button onclick="getUser(); location.reload(true);"
+                                            class="uk-button uk-button-primary uk-button-large uk-width-1-1 uk-modal-close">
+                                        Войти
                                     </button>
                                 </div>
                                 <div class="uk-text-small uk-text-center">

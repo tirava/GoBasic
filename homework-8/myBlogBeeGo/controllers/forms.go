@@ -23,12 +23,14 @@ type FormsController struct {
 // GetAllPosts shows all posts in main page.
 func (c *FormsController) GetAllPosts() {
 	posts := models.NewPosts()
+	users := models.NewUser()
 	if err := posts.GetPosts(""); err != nil {
 		posts.Lg.Error("error get all posts: %s", err)
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusInternalServerError)
 		c.Abort("500")
 		return
 	}
+	c.Data["UserName"] = users.WhoAmI(c.Ctx.GetCookie(beego.AppConfig.String("appname")))
 	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
 	c.Data["Posts"] = &posts.Posts
 	c.TplName = "index.tpl"
