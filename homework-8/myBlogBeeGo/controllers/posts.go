@@ -56,10 +56,17 @@ func (c *APIController) GetOnePost() {
 // @Param	id	path string	true	"ID of the post"
 // @Success 200 body is empty
 // @Failure 500 server error
+// @Failure 401 not authorized
 // @router /:id([0-9a-h]+) [delete]
 func (c *APIController) DeletePost() {
-	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
+	users := models.NewUser()
+	if users.WhoAmI(c.Ctx.GetCookie(beego.AppConfig.String("appname"))) == "" {
+		posts.Lg.Error("error delete post, user not authorized")
+		posts.SendError(c.Ctx.ResponseWriter, http.StatusUnauthorized, nil, "sorry, user not authorized")
+		return
+	}
+	postNum := c.Ctx.Input.Param(":id")
 	if err := posts.DeletePost(postNum); err != nil {
 		posts.Lg.Error("error delete post: %s", err)
 		posts.SendError(c.Ctx.ResponseWriter, http.StatusInternalServerError, err, "sorry, error deleting post")
@@ -76,10 +83,17 @@ func (c *APIController) DeletePost() {
 // @Param	body	body models.Post	true	"json post body, use html body in double quotes instead {}"
 // @Success 200 body is empty
 // @Failure 500 server error
+// @Failure 401 not authorized
 // @router /:id([0-9a-h]+) [put]
 func (c *APIController) UpdatePost() {
 	postNum := c.Ctx.Input.Param(":id")
 	posts := models.NewPosts()
+	users := models.NewUser()
+	if users.WhoAmI(c.Ctx.GetCookie(beego.AppConfig.String("appname"))) == "" {
+		posts.Lg.Error("error update post, user not authorized")
+		posts.SendError(c.Ctx.ResponseWriter, http.StatusUnauthorized, nil, "sorry, user not authorized")
+		return
+	}
 	post, err := c.decodePost()
 	if err != nil {
 		posts.Lg.Error("error while decoding post body: %s", err)
@@ -102,10 +116,16 @@ func (c *APIController) UpdatePost() {
 // @Param	body	body models.Post	true	"json post body, use html body in double quotes instead {}"
 // @Success 201 body is empty
 // @Failure 500 server error
+// @Failure 401 not authorized
 // @router / [post]
 func (c *APIController) CreatePost() {
 	posts := models.NewPosts()
-
+	users := models.NewUser()
+	if users.WhoAmI(c.Ctx.GetCookie(beego.AppConfig.String("appname"))) == "" {
+		posts.Lg.Error("error create post, user not authorized")
+		posts.SendError(c.Ctx.ResponseWriter, http.StatusUnauthorized, nil, "sorry, user not authorized")
+		return
+	}
 	post, err := c.decodePost()
 	if err != nil {
 		posts.Lg.Error("error while decoding new post body: %s", err)

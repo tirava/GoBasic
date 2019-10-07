@@ -37,10 +37,12 @@
             </div>
         </div>
     </fieldset>
-    <div class="uk-flex uk-flex-right uk-margin-small-top uk-margin-right uk-margin-small-bottom">
-        <button type="submit" class="uk-button uk-button-primary" style="background: forestgreen;">Сохранить
-        </button>
-    </div>
+    {{if .UserName}}
+        <div class="uk-flex uk-flex-right uk-margin-small-top uk-margin-right uk-margin-small-bottom">
+            <button type="submit" class="uk-button uk-button-primary" style="background: forestgreen;">Сохранить
+            </button>
+        </div>
+    {{end}}
 </form>
 
 {{template "footer.tpl"}}

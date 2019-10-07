@@ -15,14 +15,14 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// User base struct
+// User base struct.
 type User struct {
 	Name    string `json:"uname"`
 	Pass    string `json:"upass"`
 	Session string `json:"-"`
 }
 
-//DBUsers is the base type for posts
+//DBUsers is the base type for posts.
 type DBUsers struct {
 	Collection *mongo.Collection
 	ctx        context.Context
@@ -30,6 +30,9 @@ type DBUsers struct {
 	Lg         *logs.BeeLogger
 	Error
 }
+
+// TestMode need for pass auth while testing.
+var TestMode bool
 
 // TableName returns name for user's table (need for ORM & Mongo).
 func (User) TableName() string {
@@ -76,7 +79,7 @@ func (d *DBUsers) GetUser() error {
 	return nil
 }
 
-// UpdatePost updates post.
+// SaveCookie saves cookie in DB.
 func (d *DBUsers) SaveCookie() error {
 	filter := bson.M{"name": d.User.Name}
 	update := bson.M{"$set": bson.M{"session": d.User.Session}}
@@ -90,10 +93,14 @@ func (d *DBUsers) SaveCookie() error {
 	return nil
 }
 
+// WhoAmI returns username via cookie from DB.
 func (d *DBUsers) WhoAmI(cookie string) string {
+	if TestMode {
+		return "Testik"
+	}
 	user := User{}
 	err := d.Collection.FindOne(d.ctx, bson.M{"session": cookie}).Decode(&user)
-	if err != nil {
+	if err != nil || cookie == "" {
 		return ""
 	}
 	return user.Name

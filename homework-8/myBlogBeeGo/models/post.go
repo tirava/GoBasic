@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-// MDB & Logger globals (it is normal for BeeGo)
+// MDB & Logger globals (it is normal for BeeGo).
 var (
 	MDB *mongo.Client
 	Lg  *logs.BeeLogger
@@ -37,7 +37,7 @@ type Post struct {
 	Deleted time.Time          `json:"-" bson:"deleted_at"`
 }
 
-//DBPosts is the base type for posts
+//DBPosts is the base type for posts.
 type DBPosts struct {
 	Collection *mongo.Collection
 	ctx        context.Context
@@ -46,7 +46,7 @@ type DBPosts struct {
 	Error
 }
 
-// NewPosts creates new DBPosts with DB link
+// NewPosts creates new DBPosts with DB link.
 func NewPosts() *DBPosts {
 	dbName := beego.AppConfig.String("DBNAME")
 	col := MDB.Database(dbName).Collection(Post{}.TableName())

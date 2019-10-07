@@ -21,7 +21,7 @@ type Error struct {
 	Lg       *logs.BeeLogger `json:"-"`
 }
 
-// SendError is errors helper
+// SendError is errors helper.
 func (e *Error) SendError(w http.ResponseWriter, code int, err error, descr string) {
 	if err == nil {
 		err = errors.New(descr)

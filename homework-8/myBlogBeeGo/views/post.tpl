@@ -9,7 +9,9 @@
     <div class="uk-card uk-card-default uk-card-hover uk-width-1-1 uk-margin-bottom">
         <div class="uk-card-header">
             <div class="uk-flex uk-flex-right">
-                {{template "tools.tpl" .Post}}
+                {{if .UserName}}
+                    {{template "tools.tpl" .Post}}
+                {{end}}
             </div>
             <div class="uk-grid-small uk-flex-middle" uk-grid>
                 <div class="uk-width-auto">

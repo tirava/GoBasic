@@ -38,6 +38,7 @@ func (c *FormsController) GetAllPosts() {
 
 // GetOnePost shows one posts with full content.
 func (c *FormsController) GetOnePost() {
+	users := models.NewUser()
 	postNum := c.Ctx.Request.URL.Query().Get("id")
 	if postNum == "" {
 		c.Redirect("/", http.StatusMovedPermanently)
@@ -48,6 +49,7 @@ func (c *FormsController) GetOnePost() {
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusNotFound)
 		c.Abort("404")
 	}
+	c.Data["UserName"] = users.WhoAmI(c.Ctx.GetCookie(beego.AppConfig.String("appname")))
 	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
 	posts.Posts[0].Body = template.HTML(blackfriday.Run([]byte(posts.Posts[0].Body)))
 	posts.Posts[0].ID = posts.Posts[0].OID.Hex()
@@ -57,6 +59,7 @@ func (c *FormsController) GetOnePost() {
 
 // GetEditPost shows edit form for edit post.
 func (c *FormsController) GetEditPost() {
+	users := models.NewUser()
 	postNum := c.Ctx.Request.URL.Query().Get("id")
 	if postNum == "" {
 		c.Redirect("/", http.StatusMovedPermanently)
@@ -67,6 +70,7 @@ func (c *FormsController) GetEditPost() {
 		c.Ctx.ResponseWriter.WriteHeader(http.StatusNotFound)
 		c.Abort("404")
 	}
+	c.Data["UserName"] = users.WhoAmI(c.Ctx.GetCookie(beego.AppConfig.String("appname")))
 	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
 	posts.Posts[0].ID = posts.Posts[0].OID.Hex()
 	c.Data["Post"] = &posts.Posts[0]
@@ -75,6 +79,8 @@ func (c *FormsController) GetEditPost() {
 
 // GetCreatePost shows clean form for new post.
 func (c *FormsController) GetCreatePost() {
+	users := models.NewUser()
+	c.Data["UserName"] = users.WhoAmI(c.Ctx.GetCookie(beego.AppConfig.String("appname")))
 	c.Data["BlogName"] = beego.AppConfig.String("BLOGNAME")
 	c.TplName = "create.tpl"
 }

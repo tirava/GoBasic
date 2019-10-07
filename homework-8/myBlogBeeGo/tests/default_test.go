@@ -31,6 +31,7 @@ import (
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
+	models.TestMode = true
 
 	// connect to Mongo
 	mdb, err := mongo.NewClient(options.Client().ApplyURI("mongodb://Klim.Go:27017"))
@@ -154,6 +155,25 @@ var testMethodsCases = []struct {
 		code:   http.StatusOK,
 	},
 }
+
+// uncomment after release api DeleteUsers
+//func TestCreateUser(t *testing.T) {
+//	body := `
+//			{
+//				"uname":"qqq",
+//				"upass":"www"
+//			}`
+//	method := "POST"
+//	api := "/api/v1/users"
+//	r, _ := http.NewRequest("POST", "/api/v1/users", strings.NewReader(body))
+//	w := httptest.NewRecorder()
+//	beego.BeeApp.Handlers.ServeHTTP(w, r)
+//	if w.Code != http.StatusCreated {
+//		t.Errorf("Error %s %s, code[%d]", method, api, w.Code)
+//		return
+//	}
+//	t.Logf("PASS: %s %s %s", "Create User", method, api)
+//}
 
 func TestDB(t *testing.T) {
 	for _, test := range testDBCases {

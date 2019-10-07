@@ -38,6 +38,13 @@ func main() {
 	models.Lg = logs.NewLogger(10)
 	models.Lg.SetPrefix(fmt.Sprintf("[%s]", dbName))
 	models.Lg.Info("Connected to MongoDB")
+	logFile := beego.AppConfig.String("LOGFILE")
+	logParam := fmt.Sprintf(`{"filename":"%s"}`, logFile)
+	err = models.Lg.SetLogger(logs.AdapterConsole)
+	err = models.Lg.SetLogger(logs.AdapterFile, logParam)
+	if err != nil {
+		log.Printf("can't set logger write to file: %s\n", logFile)
+	}
 	defer models.Lg.Close()
 
 	beego.BConfig.Listen.Graceful = true

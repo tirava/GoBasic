@@ -36,6 +36,9 @@
                     "201": {
                         "description": "body is empty"
                     },
+                    "401": {
+                        "description": "not authorized"
+                    },
                     "500": {
                         "description": "server error"
                     }
@@ -101,6 +104,9 @@
                     "200": {
                         "description": "body is empty"
                     },
+                    "401": {
+                        "description": "not authorized"
+                    },
                     "500": {
                         "description": "server error"
                     }
@@ -124,6 +130,9 @@
                 "responses": {
                     "200": {
                         "description": "body is empty"
+                    },
+                    "401": {
+                        "description": "not authorized"
                     },
                     "500": {
                         "description": "server error"
@@ -164,7 +173,7 @@
                 "tags": [
                     "users"
                 ],
-                "description": "get user",
+                "description": "auth user",
                 "operationId": "UsersController.AuthUser",
                 "parameters": [
                     {

@@ -9,16 +9,16 @@
      data-src="static/img/backheader.jpg" uk-img>
     <h1 class="uk-heading-divider uk-heading-line uk-text-center uk-text-primary">{{.BlogName}}</h1>
 </div>
-
+{{$uname:=.UserName}}
 <div class="uk-flex uk-flex-right">
-    {{if .UserName}}
+    {{if $uname}}
         <div class="uk-margin-top uk-margin-right uk-flex uk-flex-middle">
-            Вы вошли как:&nbsp<strong>{{.UserName}}</strong>
+            Вы вошли как:&nbsp<strong>{{$uname}}</strong>
         </div>
     {{end}}
-    <button class="uk-button uk-button-default uk-margin-small-right uk-margin-top" type="button"
-            {{if .UserName}}
-                         onclick="document.cookie = 'myBlogBeeGo=; expires=Thu, 01 Jan 1970 00:00:00 UTC'; location.reload(true);">
+    <button class="uk-button uk-button-default uk-margin-right uk-margin-top" type="button"
+            {{if $uname}}
+            onclick="document.cookie = 'myBlogBeeGo=; expires=Thu, 01 Jan 1970 00:00:00 UTC'; history.go(0)">
         Выйти
         {{else}}
             uk-toggle="target: #form-login">
@@ -36,7 +36,7 @@
                             <form>
                                 <div class="uk-margin">
                                     <div class="uk-inline uk-width-1-1">
-                                        <span class="uk-form-icon" uk-icon="icon: mail"></span>
+                                        <span class="uk-form-icon" uk-icon="icon: user"></span>
                                         <input id="username" class="uk-input uk-form-large" type="text"
                                                placeholder="user">
                                     </div>
@@ -49,7 +49,7 @@
                                     </div>
                                 </div>
                                 <div class="uk-margin">
-                                    <button onclick="getUser(); location.reload(true);"
+                                    <button onclick="getUser();"
                                             class="uk-button uk-button-primary uk-button-large uk-width-1-1 uk-modal-close">
                                         Войти
                                     </button>
@@ -64,8 +64,10 @@
             </div>
         </div>
     </div>
-    <a uk-tooltip="title: Добавить новый; pos: left" class="uk-icon-button uk-margin-top uk-margin-right"
-       href="/posts/create" uk-icon="icon: plus" style="background: forestgreen; color: white;"></a>
+    {{if $uname}}
+        <a uk-tooltip="title: Добавить новый; pos: left" class="uk-icon-button uk-margin-top uk-margin-right"
+           href="/posts/create" uk-icon="icon: plus" style="background: forestgreen; color: white;"></a>
+    {{end}}
 </div>
 
 <div class="uk-margin-top uk-margin-right uk-margin-left uk-child-width-1-1 uk-grid-collapse"
@@ -74,7 +76,9 @@
         <div class="uk-card uk-card-default uk-card-hover uk-margin-bottom ">
             <div class="uk-card-header">
                 <div class="uk-flex uk-flex-right">
-                    {{template "tools.tpl" .}}
+                    {{if $uname}}
+                        {{template "tools.tpl" .}}
+                    {{end}}
                 </div>
                 <div class="uk-grid-small uk-flex-middle" uk-grid>
                     <div class="uk-width-auto">

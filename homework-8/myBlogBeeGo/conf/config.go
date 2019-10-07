@@ -11,7 +11,7 @@ import (
 	"github.com/astaxie/beego"
 )
 
-// GetURI returns DSN from config or defaults
+// GetURI returns DSN from config or defaults.
 func GetURI() string {
 	host := beego.AppConfig.String("DBHOST")
 	if host == "" {

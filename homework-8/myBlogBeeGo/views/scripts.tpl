@@ -12,9 +12,8 @@
 
     function getUser() {
         commonCreateGetUser("/")
-        // .then(resp => {
-        //     window.location = "/"
-        // })
+        // window.location.href = window.location.href;
+        window.location.replace("/posts");
     }
 
     function commonCreateGetUser(id) {

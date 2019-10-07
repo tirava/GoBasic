@@ -26,6 +26,8 @@ paths:
       responses:
         "201":
           description: body is empty
+        "401":
+          description: not authorized
         "500":
           description: server error
   /posts/{id}:
@@ -69,6 +71,8 @@ paths:
       responses:
         "200":
           description: body is empty
+        "401":
+          description: not authorized
         "500":
           description: server error
     delete:
@@ -85,6 +89,8 @@ paths:
       responses:
         "200":
           description: body is empty
+        "401":
+          description: not authorized
         "500":
           description: server error
   /users/:
@@ -109,7 +115,7 @@ paths:
     post:
       tags:
       - users
-      description: get user
+      description: auth user
       operationId: UsersController.AuthUser
       parameters:
       - in: path

@@ -22,7 +22,7 @@ type UsersController struct {
 
 // AuthUser check user is exists.
 // @Title AuthUser
-// @Description get user
+// @Description auth user
 // @Tags users
 // @Param	id	path string	true	"name of user"
 // @Param	body	body models.User	true	"json user body"
