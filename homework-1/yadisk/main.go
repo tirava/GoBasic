@@ -25,6 +25,7 @@ type yandexFile struct {
 	Templated bool
 }
 
+// CCN = 4
 func main() {
 
 	// get user's url or use examples
@@ -50,6 +51,7 @@ func main() {
 	}
 }
 
+// CCN = 9
 func getFileFromURL(URL string) (fileName string, err error) {
 
 	// get file metadata
